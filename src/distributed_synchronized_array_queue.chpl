@@ -2,13 +2,13 @@ use CyclicDist;
 use Barrier;
 use Time;
 
-record QueueNode {
+record SyncDistrQueueNode {
   type t;
   var element : t;
   var busy : atomic bool;
 }
 
-class Queue {
+class SyncDistrQueue {
   type t;
   var size: int = 1024;
   var domainMapping = {1..size};
