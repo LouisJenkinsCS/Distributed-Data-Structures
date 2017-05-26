@@ -14,12 +14,15 @@ proc bfs() {
 
   // For each of the vertices, construct a new queue...
   var q = new Distributed_FIFO(int);
+  var t = new Timer();
+  t.start();
   [v in g.vertices] q.enqueue(v);
-
+  t.stop();
+  writeln("Added all vertices in ", t.elapsed(), " seconds...");
   // Keep track of all vertices visited...
   var visited : [1 .. g.vertices.size] bool;
 
-  var t = new Timer();
+  t = new Timer();
   t.start();
   // Perform a breadth-first search...
   var pass = 1;
@@ -35,6 +38,7 @@ proc bfs() {
     [(ingoingEdge, outEdge) in g.edges.domain] if ingoingEdge == elem && !visited(outEdge) then q.enqueue(outEdge);
 
     pass = pass + 1;
+    writeln("Pass: ", pass);
   }
 
   writeln("BFS in #", pass, " of passes in ", t.elapsed(), " seconds...");

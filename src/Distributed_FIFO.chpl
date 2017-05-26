@@ -25,7 +25,7 @@ class Distributed_FIFO {
     var idx : uint(64);
 
     // Position is queried on the locale that owns the queue
-    on position {
+    on position do {
       var pos : uint(64);
       var head, tail : uint(64);
 
