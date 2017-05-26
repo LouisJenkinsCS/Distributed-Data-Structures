@@ -1,8 +1,9 @@
-use local_lock_free_queue;
+use Distributed_FIFO;
 use graph;
 use Time;
 
 proc main() {
+
   bfs();
 }
 
@@ -12,8 +13,7 @@ proc bfs() {
   g.completeGraphInit();
 
   // For each of the vertices, construct a new queue...
-  var q = new queue(int);
-  q.initialize();
+  var q = new Distributed_FIFO(int);
   [v in g.vertices] q.enqueue(v);
 
   // Keep track of all vertices visited...
