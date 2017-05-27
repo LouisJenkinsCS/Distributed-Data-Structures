@@ -1,6 +1,45 @@
 use CyclicDist;
 use local_lock_free_queue;
 
+/*
+  A distributed FIFO queue.
+
+  The queue makes use of a counter to cycle through all locales evenly
+  to maintain a proper load-balance across all registered locales, where
+  each locale has a per-locale queue. The per-locale queue further ensures a
+  FIFO ordering, ensuring that any extra items enqueued after cycling through
+  can be dequeued in the same order.
+
+  The position can be obtained and updated in a non-blocking fashion, using the
+  available atomic primitives such as Compare-And-Swap, of which is the only global
+  synchronization actually needed. Since the only global synchronization also wait-free,
+  this ensures scalability. To reduce communication as well, we perform the atomic update
+  on the locale owning the queue, which is unavoidable.
+
+  As each per-locale queue is updated on the locale it belongs to, meaning majority
+  of the computation can be performed remotely, it ensures that the workload is balanced
+  very evenly. In the cases of overlapping operations on a local queue, a non-blocking
+  queue is the most optimal, as this would allow enqueues to be fully non-blocking and
+  lock-free. While enqueues can be non-blocking, dequeues cannot be as it is possible
+  for an enqueue to be scheduled but not finished before another dequeue on that node
+  occurs. Due to this, a dequeue would need to spin as the index assigned to it is by
+  right theirs and a promise was made by other updaters that an item will be there
+  for them eventually.
+
+  Non-Blocking Per-Locale Queue:
+    + Allows enqueues to be entirely lock-free
+      - Dequeues may need to spin if an enqueue has not completed
+    + Possibly the 'optimal' solution
+    - Difficult to implement
+      - Hazard Pointers for memory reclamation
+      - (Very Rare) ABA problem for memory allocation
+        - Could require MCAS algorithm to correctly implement
+  Two-Locked Per-Locale Queue:
+    + Allows for a single enqueue and dequeue concurrent operation
+    + Practical for majority of use-cases
+    + Very straight-forward to implement
+      + Memory reclamation is simple, correctness easy to prove
+*/
 class Distributed_FIFO {
   type eltType;
 
@@ -63,7 +102,7 @@ class Distributed_FIFO {
     var hasElem : bool = true;
 
     // Position is queried on the locale that owns the queue
-    on position {
+    on position do {
       var pos : uint(64);
       var head, tail : uint(64);
       var localHasElem : bool = true;
