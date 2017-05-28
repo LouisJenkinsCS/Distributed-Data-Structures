@@ -72,19 +72,37 @@ use local_lock_free_queue;
   to obtain the lock before t1 in cases of unexpected delays. Therefore, the non-deterministic
   nature of the per-locale queues are nothing special, and if anything increase overall concurrency.
 
-  Non-Blocking Per-Locale Queue:
-    + Allows enqueues to be entirely lock-free
-      - Dequeues may need to spin if an enqueue has not completed
-    + Possibly the 'optimal' solution
-    - Difficult to implement
-      - Hazard Pointers for memory reclamation
-      - (Very Rare) ABA problem for memory allocation
-        - Could require MCAS algorithm to correctly implement
-  Two-Locked Per-Locale Queue:
-    + Allows for a single enqueue and dequeue concurrent operation
-    + Practical for majority of use-cases
-    + Very straight-forward to implement
-      + Memory reclamation is simple, correctness easy to prove
+  Per-locale buffering, which allows the user to maintain a collection of items to be added later,
+  can significantly reduce the overall number of communication calls. For example, given N locales,
+  and M elements to be buffered, normally we would have O(M) calls, as each item would need to be
+  individually added to each of the per-locale queues, while buffering allows for only O(N) calls
+  given that we add at most M/N elements for each locale. As well, buffering and adding in bulk
+  bypasses the need for contesting for the counter O(M) times to just O(1) as we make a 'promise'
+  to add 'M' elements. Furthermore, we can make quite a few optimizations, such as the per-locale queues
+  using bulk operations.
+
+  Per-locale buffering would require a second set of per-locale queues, of which can be enqueued to
+  maintain the same FIFO ordering, and with a non-blocking queue it becomes non-blocking and scalable
+  among multiple tasks. To empty the buffer, we can repeatedly dequeue until we run out, assigning
+  each value to some container, maintaining its insertion order; this ensures the FIFO ordering remains
+  and that it allows other concurrent last-minute enqueuers to submit their own without needing to block.
+  When it is time to drain the buffer (concurrently) and add to each queue, we make a promise based on the
+  number of elements removed, and the elements are added in FIFO order. We also utilize a local 'flush lock'
+  to ensure the buffer is only flushed by one local writer, as otherwise it can violate the overall FIFO ordering.
+  When elements are added in parallel, it ensures that all PGAS communications begin and become deferred to the other
+  locales that own them.
+
+  Per-locale buffering does not come without potential issues. In the case where we 'promise' more than one element,
+  it is possible for a task to receive an item later in the queue than it should. For example, if we have
+  8 locales, 32 elements promised, we would have 4 elements being added in bulk each. A task that is waiting
+  on the the 32nd element can return earlier than a task waiting for the 1st element based on which operation finishes
+  first. This non-deterministic behavior may seem alarming at first, but it should be noted that this can only occur
+  on overlapping operations. The only way to obtain the 32nd item is to have 32 consumers concurrently, for example.
+  This non-deterministic behavior is inherent in any queue that releases their lock before returning
+  an item, as it is possible, again, for all other threads to be preempted before 32nd. Again, this non-deterministic
+  behavior is inherent in all concurrent data structures, and is used to promote further scalability by allowing
+  concurrent operations even for bulk insertion.
+
 */
 class Distributed_FIFO {
   type eltType;
