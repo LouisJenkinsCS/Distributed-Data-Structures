@@ -102,24 +102,40 @@ use local_lock_free_queue;
   an item, as it is possible, again, for all other threads to be preempted before 32nd. Again, this non-deterministic
   behavior is inherent in all concurrent data structures, and is used to promote further scalability by allowing
   concurrent operations even for bulk insertion.
-
 */
+
+class LocalBuffer {
+  type eltType;
+  var buffer : queue(eltType);
+
+  // Ensures we only have one flush at any given time to ensure FIFO ordering
+  var flushLock$ : sync bool;
+
+  proc LocalBuffer(type eltType) {
+    buffer = new queue(eltType);
+    buffer.initialize();
+  }
+}
+
 class Distributed_FIFO {
   type eltType;
 
   // Our position counter: Upper 32 bits = Head, Lower 32 bits = Tail
   var position : atomic uint(64);
 
-  // Our domain: We use a cyclic distribution
+  // per-locale queues
   var domainMapping = {1 .. numLocales};
   var cyclicDomain = domainMapping dmapped Cyclic(startIdx=1);
   var localQueues : [cyclicDomain] queue(eltType);
+  var localBuffers : [cyclicDomain] LocalBuffer(eltType);
+
 
   proc Distributed_FIFO(type eltType) {
     coforall i in 1..numLocales do {
       var q = new queue(eltType);
       q.initialize();
       localQueues[i] = q;
+      localBuffers[i] = new LocalBuffer(eltType);
     }
   }
 
@@ -158,6 +174,47 @@ class Distributed_FIFO {
     // Now we add our item
     ref queue = localQueues[idx : int(64)];
     on queue do queue.enqueue(elem);
+  }
+
+  proc ref get_local_buffer() : LocalBuffer(eltType) {
+    return localBuffers[localBuffers.domain.localSubdomain().first];
+  }
+
+  proc enqueue_async(elem : eltType) {
+    const ref buffer = get_local_buffer();
+    buffer.buffer.enqueue(elem);
+  }
+
+  proc flush() {
+    const ref buffer = get_local_buffer();
+
+    // Create one buffer per locale...
+    // TODO: Dynamically resize!
+    var perLocaleBuffer : [1..numLocales] [1..1024] eltType;
+    var nElems : int;
+
+    buffer.flushLock$.writeEF(true);
+    // Drain buffer (concurrently)
+    var retval : (bool, eltType) = buffer.buffer.dequeue();
+    while retval[1] {
+      var nIdx = nElems / numLocales + 1;
+      var nLocale = nElems % numLocales + 1;
+      perLocaleBuffer[nLocale][nIdx] = retval[2];
+
+      retval = buffer.buffer.dequeue();
+      nElems = nElems + 1;
+    }
+
+    for i in 1..numLocales do {
+      writeln("Locale #", i);
+      for j in perLocaleBuffer[i] do {
+        if j then write(j, ",");
+      }
+      writeln("");
+    }
+    writeln("");
+
+    // TODO: Begin to distribute...
   }
 
   proc dequeue() : (bool, eltType) {
