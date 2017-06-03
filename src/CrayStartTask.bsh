@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#PBS -e stderr
+#PBS -o stdout
+
+$PBS_O_WORKDIR/a.out -nl 44;
+
+echo "Done!";

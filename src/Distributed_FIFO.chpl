@@ -119,59 +119,40 @@ class LocalBuffer {
 
 class Distributed_FIFO {
   type eltType;
+  var nLocales : int(64) = numLocales;
 
-  // Our position counter: Upper 32 bits = Head, Lower 32 bits = Tail
-  var position : atomic uint(64);
+  // Two monotonically increasing counters used in deciding which locale to choose from
+  var head : atomic uint(64);
+  var tail : atomic uint(64);
 
   // per-locale queues
-  var domainMapping = {1 .. numLocales};
-  var cyclicDomain = domainMapping dmapped Cyclic(startIdx=1);
+  var domainMapping = {1 .. nLocales};
+  var cyclicDomain = domainMapping dmapped Cyclic(startIdx=domainMapping.low);
   var localQueues : [cyclicDomain] queue(eltType);
   var localBuffers : [cyclicDomain] LocalBuffer(eltType);
 
 
-  proc Distributed_FIFO(type eltType) {
-    coforall i in 1..numLocales do {
-      var q = new queue(eltType);
-      q.initialize();
-      localQueues[i] = q;
-      localBuffers[i] = new LocalBuffer(eltType);
+  // TODO: Need to allow user to submit their own custom locales, as currently it just
+  // uses 1 .. nLocales of the default Locales
+  proc Distributed_FIFO(type eltType, nLocales) {
+    if nLocales < 0 {
+      this.nLocales = numLocales;
+    }
+    writeln(nLocales);
+    writeln(localQueues.domain.low, ", ", localQueues.domain.high);
+    coforall i in 0..numLocales - 1 do {
+      on Locales[i] {
+        writeln("Initializing queue for ", here);
+        var q = new queue(eltType);
+        q.initialize();
+        localQueues[localQueues.domain.localSubdomain().first] = q;
+        localBuffers[localBuffers.domain.localSubdomain().first] = new LocalBuffer(eltType);
+      }
     }
   }
 
   proc enqueue(elem : eltType) {
-    // The index we are going to be working on...
-    var idx : uint(64);
-
-    // Position is queried on the locale that owns the queue
-    on position do {
-      var pos : uint(64);
-      var head, tail : uint(64);
-
-      // Obtain our desired position
-      while (true) {
-        pos = position.read();
-        head = pos & 0xFFFFFFFF00000000;
-        tail = pos & 0x00000000FFFFFFFF;
-
-        // Some platforms yield higher performance due to reduced memory contention
-        // under concurrent writes to the same cache line. We update the position
-        // atomically.
-        if (position.compareExchangeWeak(pos, head | (tail + 1))) {
-          break;
-        }
-      }
-
-      // Translates to a single network call to write to the orginal locale's index
-      var nLocales : uint(64) = numLocales : uint(64);
-      idx = max(1, tail % nLocales);
-
-      /*writeln("Head: ", head, "; Tail: ", tail);*/
-    }
-
-    /*writeln(here, ": Assigned index: ", idx);*/
-
-    // Now we add our item
+    var idx : uint(64) = max(1, tail.fetchAdd(1) % (nLocales : uint(64)));
     ref queue = localQueues[idx : int(64)];
     on queue do queue.enqueue(elem);
   }
@@ -190,22 +171,22 @@ class Distributed_FIFO {
 
     // Create one buffer per locale...
     // TODO: Dynamically resize!
-    var perLocaleBuffer : [1..numLocales] [1..1024] eltType;
+    var perLocaleBuffer : [1..nLocales] [1..1024] eltType;
     var nElems : int;
 
     buffer.flushLock$.writeEF(true);
     // Drain buffer (concurrently)
     var retval : (bool, eltType) = buffer.buffer.dequeue();
     while retval[1] {
-      var nIdx = nElems / numLocales + 1;
-      var nLocale = nElems % numLocales + 1;
+      var nIdx = nElems / nLocales + 1;
+      var nLocale = nElems % nLocales + 1;
       perLocaleBuffer[nLocale][nIdx] = retval[2];
 
       retval = buffer.buffer.dequeue();
       nElems = nElems + 1;
     }
 
-    for i in 1..numLocales do {
+    for i in 1..nLocales do {
       writeln("Locale #", i);
       for j in perLocaleBuffer[i] do {
         if j then write(j, ",");
@@ -223,18 +204,16 @@ class Distributed_FIFO {
     var hasElem : bool = true;
 
     // Position is queried on the locale that owns the queue
-    on position do {
-      var pos : uint(64);
-      var head, tail : uint(64);
+    on tail do {
+      var _head, _tail : uint(64);
       var localHasElem : bool = true;
 
       // Obtain our desired position
       while (true) {
-        pos = position.read();
-        head = pos & 0xFFFFFFFF00000000;
-        tail = pos & 0x00000000FFFFFFFF;
+        _head = head.read();
+        _tail = tail.read();
 
-        if ((head >> 32) == tail) {
+        if (_head == _tail) {
           /*writeln("Queue is empty... Pos: ", pos);*/
           localHasElem = false;
           break;
@@ -242,29 +221,24 @@ class Distributed_FIFO {
 
         // Some platforms yield higher performance due to reduced memory contention
         // under concurrent writes to the same cache line. We update the position
-        // atomically.
-        if (position.compareExchangeWeak(pos, (head + (1 << 32)) | (tail))) {
+        // atomically. We use a CAS here over a fetchAdd because we *only* want to
+        // increment the head if and only if the head != tail.
+        if (head.compareExchangeWeak(_head, _head + 1)) {
           break;
         }
       }
 
       if localHasElem {
-        var nLocales : uint(64) = numLocales : uint(64);
         // Translates to a single network call to write to the orginal locale's index
-        idx = max(1, head % nLocales);
-
-        /*writeln("Head: ", head >> 32, "; Tail: ", tail);*/
+        idx = max(1, _head % (nLocales : uint(64)));
       }
 
       hasElem = localHasElem;
     }
 
     if !hasElem {
-      var dummy : eltType;
-      return (false, dummy);
+      return (false, _defaultOf(eltType));
     }
-
-    /*writeln(here, ": Assigned index: ", idx);*/
 
     // Now we get our item from the queue
     // Note that at the index given, its possible that an enqueueing task has not
@@ -279,6 +253,7 @@ class Distributed_FIFO {
 
         if (!retval[1]) {
           writeln(here, ": Spinning... HasElem: ", hasElem, ";");
+          chpl_task_yield();
         }
       }
 
