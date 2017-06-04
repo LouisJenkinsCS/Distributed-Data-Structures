@@ -31,7 +31,6 @@ class queue {
     var local_next_addr : uint;
     var local_next : queueNode(eltType);
     while (true) {
-      if (this == nil) then writeln(here, " is null...");
       // Get the current tail
       local_tail_addr = tail_addr.read();
       local_tail = __primitive("cast", queueNode(eltType), local_tail_addr);

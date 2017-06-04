@@ -104,14 +104,15 @@ use local_lock_free_queue;
   concurrent operations even for bulk insertion.
 */
 
-class LocalBuffer {
+class LocaleDescriptor {
   type eltType;
+  var nDeferred : uint;
   var buffer : queue(eltType);
 
   // Ensures we only have one flush at any given time to ensure FIFO ordering
   var flushLock$ : sync bool;
 
-  proc LocalBuffer(type eltType) {
+  proc LocaleDescriptor(type eltType) {
     buffer = new queue(eltType);
     buffer.initialize();
   }
@@ -129,24 +130,18 @@ class Distributed_FIFO {
   var domainMapping = {1 .. nLocales};
   var cyclicDomain = domainMapping dmapped Cyclic(startIdx=domainMapping.low);
   var localQueues : [cyclicDomain] queue(eltType);
-  var localBuffers : [cyclicDomain] LocalBuffer(eltType);
+  var LocaleDescriptors : [cyclicDomain] LocaleDescriptor(eltType);
 
 
   // TODO: Need to allow user to submit their own custom locales, as currently it just
   // uses 1 .. nLocales of the default Locales
-  proc Distributed_FIFO(type eltType, nLocales) {
-    if nLocales < 0 {
-      this.nLocales = numLocales;
-    }
-    writeln(nLocales);
-    writeln(localQueues.domain.low, ", ", localQueues.domain.high);
+  proc Distributed_FIFO(type eltType) {
     coforall i in 0..numLocales - 1 do {
       on Locales[i] {
-        writeln("Initializing queue for ", here);
         var q = new queue(eltType);
         q.initialize();
         localQueues[localQueues.domain.localSubdomain().first] = q;
-        localBuffers[localBuffers.domain.localSubdomain().first] = new LocalBuffer(eltType);
+        LocaleDescriptors[LocaleDescriptors.domain.localSubdomain().first] = new LocaleDescriptor(eltType);
       }
     }
   }
@@ -157,17 +152,17 @@ class Distributed_FIFO {
     on queue do queue.enqueue(elem);
   }
 
-  proc ref get_local_buffer() : LocalBuffer(eltType) {
-    return localBuffers[localBuffers.domain.localSubdomain().first];
+  inline proc ref get_local_descriptor() : LocaleDescriptor(eltType) {
+    return LocaleDescriptors[LocaleDescriptors.domain.localSubdomain().first];
   }
 
   proc enqueue_async(elem : eltType) {
-    const ref buffer = get_local_buffer();
+    const ref buffer = get_local_descriptor();
     buffer.buffer.enqueue(elem);
   }
 
   proc flush() {
-    const ref buffer = get_local_buffer();
+    const ref buffer = get_local_descriptor();
 
     // Create one buffer per locale...
     // TODO: Dynamically resize!
@@ -195,7 +190,11 @@ class Distributed_FIFO {
     }
     writeln("");
 
-    // TODO: Begin to distribute...
+    // Make a promise to enqueue all elements pulled from the local queue.
+    // The value fetched is used in determining which queue we begin our
+    // distribution.
+    var startIdx = tail.fetchAdd(nElems) % nLocales + 1;
+
   }
 
   proc dequeue() : (bool, eltType) {
