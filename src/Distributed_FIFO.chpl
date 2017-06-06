@@ -147,7 +147,11 @@ class Distributed_FIFO {
   }
 
   proc enqueue(elem : eltType) {
-    var idx : uint(64) = max(1, tail.fetchAdd(1) % (nLocales : uint(64)));
+    var idx : uint(64);
+    // Ensure we do not perform any network atomics... they actually worsen performance somehow (???)
+    on tail {
+	     idx = max(1, tail.fetchAdd(1) % (nLocales : uint(64)));
+    }
     ref queue = localQueues[idx : int(64)];
     on queue do queue.enqueue(elem);
   }
