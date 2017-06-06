@@ -12,27 +12,25 @@ proc main() {
   var file = open("tmp/enqueue" + numLocales, iomode.cw);
   var writer = file.writer();
 
-  var trialTime : [1 .. numLocales, 1 .. nTrials] real;
+  var trialTime : [1 .. nTrials] real;
   // Obtain average time for enqueue...
   for i in 1 .. nTrials {
     var queue = new Distributed_FIFO(int);
+    var timer = new Timer();
+    timer.start();
+
     coforall loc in Locales {
       on loc {
-        var timer = new Timer();
-        timer.start();
         forall j in 1 .. nElements {
           queue.enqueue(j);
         }
-        timer.stop();
-        trialTime(here.id + 1, i) = nElements / timer.elapsed();
       }
     }
+
+    timer.stop();
+    trialTime[i] = (numLocales * nElements) / timer.elapsed();
   }
-  var total : uint;
-  for (i, j) in trialTime.domain {
-    total = total + (trialTime(i,j) : uint);
-  }
-  writer.write(total / (trialTime.size : uint));
+  writer.write((+ reduce trialTime) / nTrials);
   writer.close();
 /*
   // Dequeue
