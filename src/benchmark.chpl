@@ -22,8 +22,9 @@ proc main() {
     coforall loc in Locales {
       on loc {
         forall j in 1 .. nElements {
-          queue.enqueue(j);
+          queue.enqueue_async(j);
         }
+        queue.flush();
       }
     }
 

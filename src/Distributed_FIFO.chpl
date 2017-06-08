@@ -148,8 +148,8 @@ class Distributed_FIFO {
 
   proc enqueue(elem : eltType) {
     // Migrate to the owning locale...
-    on tail {
-      var idx : uint(64) = max(1, tail.fetchAdd(1) % (nLocales : uint(64)));
+    on this {
+      var idx : uint(64) = (tail.fetchAdd(1) % (nLocales : uint(64))) + 1;
       ref queue = localQueues[idx : int(64)];
       on queue do queue.enqueue(elem);
     }
@@ -169,7 +169,8 @@ class Distributed_FIFO {
 
     // Create one buffer per locale...
     // TODO: Dynamically resize!
-    var perLocaleBuffer : [1..nLocales] [1..1024] eltType;
+    var containerDom : domain(opaque);
+    var perLocaleBuffer : [1..nLocales] [containerDom] (int, eltType);
     var nElems : int;
 
     buffer.flushLock$.writeEF(true);
@@ -178,26 +179,66 @@ class Distributed_FIFO {
     while retval[1] {
       var nIdx = nElems / nLocales + 1;
       var nLocale = nElems % nLocales + 1;
-      perLocaleBuffer[nLocale][nIdx] = retval[2];
+
+      // Request a new index to assign to...
+      var containerIdx = containerDom.create();
+      perLocaleBuffer[nLocale](containerIdx) = (nLocale, retval[2]);
 
       retval = buffer.buffer.dequeue();
       nElems = nElems + 1;
     }
 
-    for i in 1..nLocales do {
-      writeln("Locale #", i);
-      for j in perLocaleBuffer[i] do {
-        if j then write(j, ",");
-      }
-      writeln("");
-    }
-    writeln("");
-
     // Make a promise to enqueue all elements pulled from the local queue.
     // The value fetched is used in determining which queue we begin our
-    // distribution.
-    var startIdx = tail.fetchAdd(nElems) % nLocales + 1;
+    // distribution. TODO: Figure out a less annoying fix for integral types...
+    var startIdx = 0;
+    on this do startIdx = ((tail.fetchAdd(nElems : uint(64)) % nLocales : uint(64)) + 1) : int(64);
 
+    // We iterate starting from startIdx and wrap around no more than the number
+    // of locales. We do *not* use a coforall here because the normal iterator will
+    // *only* spawn a new task if doing so does not exceed some threshold. The fact
+    // that these tasks are mainly blocking means that we need to take control back
+    // from the abstraction to make this optimizaiton.
+    var iterations = min(nLocales, nElems);
+    for offset in 0 .. iterations - 1 {
+      writeln("Flushing for offset: ", offset);
+      // TODO: Simplify logic... it is *really* bad!
+      var extra = 0;
+      if (startIdx + offset) >= nLocales then extra = 1;
+      var localeIdx = ((startIdx + offset) % nLocales) + extra;
+
+      // TODO: Profile this section to determine just *how many* network requests we perform...
+      begin {
+        // We need reference for locale that owns localQueue[localeIdx], as it is
+        // possible that Locales[localeIdx] != localQueue[localeIdx].locale
+        const ref localeRef = localQueues[localeIdx].locale;
+
+        // To not outright kill performance due to remote accesses to find the domain
+        // that we own, we create a rectangular array so that it can be sent wih as little
+        // network requests as possible... Due to the fact that opaque elements are a
+        // royal pain and that perLocaleBuffer shares the same 2nd dimension domain, we need
+        // to filter out any elements not meant for us. This is *really* inefficient...
+        // TODO: PLEASE FIX!
+        var elems : [1.. (nElems / nLocales)] eltType;
+        var elemIdx = 1;
+        for idx in containerDom {
+          var retval : (int, eltType) = perLocaleBuffer[offset + 1](idx);
+          if retval[1] == (offset + 1) {
+            elems[elemIdx] = retval[2];
+            elemIdx = elemIdx + 1;
+          }
+        }
+        on localeRef {
+          var localElems = elems;
+          writeln("Flushing data: ", localElems);
+          // Get the local queue
+          var queue = localQueues[localQueues.domain.localSubdomain().first];
+          // TODO: Implement 'enqueue_bulk' and use it here...
+          // Note: We do *not* use a forall as it would kill the FIFO ordering needed.
+          for e in localElems do queue.enqueue(e);
+        }
+      }
+    }
   }
 
   proc dequeue() : (bool, eltType) {
@@ -232,7 +273,7 @@ class Distributed_FIFO {
 
       if localHasElem {
         // Translates to a single network call to write to the orginal locale's index
-        idx = max(1, _head % (nLocales : uint(64)));
+        idx = (_head % (nLocales : uint(64))) + 1;
       }
 
       hasElem = localHasElem;
