@@ -103,66 +103,70 @@ class cclock {
 }
 
 config var nOps = 1024 * 1024;
+config var nMaxRequests = 32;
 
-var expected : bigint = new bigint(nOps + 1);
-writeln("Expected Value: ", expected);
+proc test() {
 
-// Simple test: Atomic Counter
-class counter {
-  var x : bigint;
-}
+  var expected : bigint = new bigint(nOps + 1);
+  writeln("Expected Value: ", expected);
 
-var ccCounter = new counter(new bigint(1));
-var adder = lambda (c : object, n : object) {
-  var count = c : counter;
-  var add = n : counter;
-  var retval : object = nil;
-
-  count.x = count.x + add.x;
-  return retval;
-};
-
-// Test CCLock
-var lock = new cclock(ccCounter, adder);
-lock.initializer(ccCounter, adder);
-
-var t = new Timer();
-
-t.start();
-forall i in 1 .. nOps {
-  var n = new counter(new bigint(1));
-  lock.ccsync(n);
-}
-t.stop();
-
-if ccCounter.x != expected {
-  writeln("BAD VALUE FOR CCLOCK: EXPECTED ", expected, " BUT RECEIVED ", ccCounter.x);
-  return;
-}
-writeln("CCLock - ", t.elapsed());
-delete lock;
-
-class synccounter {
-  var x : bigint = new bigint(1);
-  var lock$ : sync bool;
-
-  proc adder(n : bigint) {
-    lock$.writeEF(true);
-    x = x + n;
-    lock$.reset();
+  // Simple test: Atomic Counter
+  class counter {
+    var x : bigint;
   }
-}
 
-// Test sync variable
-var syncCounter = new synccounter();
-t = new Timer();
-t.start();
-forall i in 1 .. nOps {
-  syncCounter.adder(new bigint(1));
+  var ccCounter = new counter(new bigint(1));
+  var adder = lambda (c : object, n : object) {
+    var count = c : counter;
+    var add = n : counter;
+    var retval : object = nil;
+
+    count.x = count.x + add.x;
+    return retval;
+  };
+
+  // Test CCLock
+  var lock = new cclock(ccCounter, adder);
+  lock.initializer(ccCounter, adder, nMaxRequests);
+
+  var t = new Timer();
+
+  t.start();
+  forall i in 1 .. nOps {
+    var n = new counter(new bigint(1));
+    lock.ccsync(n);
+  }
+  t.stop();
+
+  if ccCounter.x != expected {
+    writeln("BAD VALUE FOR CCLOCK: EXPECTED ", expected, " BUT RECEIVED ", ccCounter.x);
+    return;
+  }
+  writeln("CCLock - ", t.elapsed());
+  delete lock;
+
+  class synccounter {
+    var x : bigint = new bigint(1);
+    var lock$ : sync bool;
+
+    proc adder(n : bigint) {
+      lock$.writeEF(true);
+      x = x + n;
+      lock$.reset();
+    }
+  }
+
+  // Test sync variable
+  var syncCounter = new synccounter();
+  t = new Timer();
+  t.start();
+  forall i in 1 .. nOps {
+    syncCounter.adder(new bigint(1));
+  }
+  t.stop();
+  if syncCounter.x != expected {
+    writeln("BAD VALUE FOR SYNCLOCK: EXPECTED ", expected, " BUT RECEIVED ", syncCounter.x);
+    return;
+  }
+  writeln("SyncLock - ", t.elapsed());
 }
-t.stop();
-if syncCounter.x != expected {
-  writeln("BAD VALUE FOR SYNCLOCK: EXPECTED ", expected, " BUT RECEIVED ", syncCounter.x);
-  return;
-}
-writeln("SyncLock - ", t.elapsed());
