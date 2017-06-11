@@ -114,7 +114,7 @@ class tail_response {
 }
 
 class queue_request {
-  type eltType;
+  var nItems : uint(64);
 }
 
 class LocaleDescriptor {
@@ -152,8 +152,8 @@ class Distributed_FIFO {
   proc Distributed_FIFO(type eltType) {
     // Register our CCLocks
     var head_dispatch = lambda (thiz : object, request : object) {
-      var thizRequest = request : queue_request(eltType);
-      var thizQueue = thiz : Distributed_FIFO(thizRequest.eltType);
+      var thizRequest = request : queue_request;
+      var thizQueue = thiz : Distributed_FIFO(eltType);
       if thizQueue.head == thizQueue.tail {
         return new head_response(false) : object;
       } else {
@@ -163,10 +163,10 @@ class Distributed_FIFO {
       }
     };
     var tail_dispatch = lambda (thiz : object, request : object) {
-      var thizRequest = request : queue_request(eltType);
-      var thizQueue = thiz : Distributed_FIFO(thizRequest.eltType);
+      var thizRequest = request : queue_request;
+      var thizQueue = thiz : Distributed_FIFO(eltType);
       var resp = new tail_response(thizQueue.tail) : object;
-      thizQueue.tail = thizQueue.tail + 1;
+      thizQueue.tail = thizQueue.tail + thizRequest.nItems;
       return resp;
     };
 
@@ -188,7 +188,7 @@ class Distributed_FIFO {
   proc enqueue(elem : eltType) {
     // Migrate to the owning locale...
     on this {
-      var idx : uint(64) = ((tlock.ccsync(new queue_request(eltType) : object) : tail_response).idx % (nLocales : uint(64))) + 1;
+      var idx : uint(64) = ((tlock.ccsync(new queue_request(1) : object) : tail_response).idx % (nLocales : uint(64))) + 1;
       ref queue = localQueues[idx : int(64)];
       on queue do queue.enqueue(elem);
     }
@@ -204,7 +204,7 @@ class Distributed_FIFO {
   }
 
   proc flush() {
-    /*const ref buffer = get_local_descriptor();
+    const ref buffer = get_local_descriptor();
 
     // Create one buffer per locale...
     // TODO: Dynamically resize!
@@ -230,8 +230,8 @@ class Distributed_FIFO {
     // Make a promise to enqueue all elements pulled from the local queue.
     // The value fetched is used in determining which queue we begin our
     // distribution. TODO: Figure out a less annoying fix for integral types...
-    var startIdx = 0;
-    on this do startIdx = ((tail.fetchAdd(nElems : uint(64)) % nLocales : uint(64)) + 1) : int(64);
+    var startIdx : uint(64) = 0;
+    on this do startIdx = ((tlock.ccsync(new queue_request(nElems : uint(64)) : object) : tail_response).idx % (nLocales : uint(64))) + 1;
 
     // We iterate starting from startIdx and wrap around no more than the number
     // of locales. We do *not* use a coforall here because the normal iterator will
@@ -243,8 +243,8 @@ class Distributed_FIFO {
       writeln("Flushing for offset: ", offset);
       // TODO: Simplify logic... it is *really* bad!
       var extra = 0;
-      if (startIdx + offset) >= nLocales then extra = 1;
-      var localeIdx = ((startIdx + offset) % nLocales) + extra;
+      if (startIdx + offset : uint(64)) >= nLocales then extra = 1;
+      var localeIdx = (((startIdx + offset : uint(64)) % nLocales : uint(64)) + extra : uint(64)) : int;
 
       // TODO: Profile this section to determine just *how many* network requests we perform...
       begin {
@@ -263,10 +263,12 @@ class Distributed_FIFO {
         for idx in containerDom {
           var retval : (int, eltType) = perLocaleBuffer[offset + 1](idx);
           if retval[1] == (offset + 1) {
-            elems[elemIdx] = retval[2];
+            var tmpElemIdx = elemIdx;
+            elems[tmpElemIdx] = retval[2];
             elemIdx = elemIdx + 1;
           }
         }
+
         on localeRef {
           var localElems = elems;
           writeln("Flushing data: ", localElems);
@@ -277,7 +279,7 @@ class Distributed_FIFO {
           for e in localElems do queue.enqueue(e);
         }
       }
-    }*/
+    }
   }
 
   proc dequeue() : (bool, eltType) {
@@ -287,7 +289,7 @@ class Distributed_FIFO {
 
     // Position is queried on the locale that owns the queue
     on tail do {
-      var resp = hlock.ccsync(new queue_request(eltType) : object) : tail_response;
+      var resp = hlock.ccsync(new queue_request() : object) : tail_response;
 
       if resp.hasElement {
         idx = (resp.idx % (nLocales : uint(64))) + 1;
