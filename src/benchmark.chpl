@@ -1,6 +1,7 @@
 config var nElements = 128 * 1024;
 config var nTrials = 10;
 config var step = 1;
+config var localeDistributed = 0;
 
 use IO;
 use Distributed_FIFO;
@@ -19,12 +20,17 @@ proc main() {
     var timer = new Timer();
     timer.start();
 
-    coforall loc in Locales {
-      on loc {
-        forall j in 1 .. nElements {
-          queue.enqueue_async(j);
+    if localeDistributed {
+      coforall loc in Locales {
+        on loc {
+          forall j in 1 .. nElements {
+            queue.enqueue(j);
+          }
         }
-        queue.flush();
+      }
+    } else {
+      forall j in 1 .. nElements * numLocales {
+        queue.enqueue(j);
       }
     }
 

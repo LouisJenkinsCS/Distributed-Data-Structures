@@ -1,5 +1,5 @@
 use CyclicDist;
-use local_lock_free_queue;
+use ccqueue;
 
 /*
   A distributed FIFO queue.
@@ -104,17 +104,29 @@ use local_lock_free_queue;
   concurrent operations even for bulk insertion.
 */
 
+class head_response {
+  var hasElement : bool;
+  var idx : uint(64);
+}
+
+class tail_response {
+  var idx : uint(64);
+}
+
+class queue_request {
+  type eltType;
+}
+
 class LocaleDescriptor {
   type eltType;
   var nDeferred : uint;
-  var buffer : queue(eltType);
+  var buffer : ccqueue(eltType);
 
   // Ensures we only have one flush at any given time to ensure FIFO ordering
   var flushLock$ : sync bool;
 
   proc LocaleDescriptor(type eltType) {
-    buffer = new queue(eltType);
-    buffer.initialize();
+    buffer = new ccqueue(eltType);
   }
 }
 
@@ -123,23 +135,50 @@ class Distributed_FIFO {
   var nLocales : int(64) = numLocales;
 
   // Two monotonically increasing counters used in deciding which locale to choose from
-  var head : atomic uint(64);
-  var tail : atomic uint(64);
+  var head : uint(64);
+  var hlock : cclock;
+  var tail : uint(64);
+  var tlock : cclock;
 
   // per-locale queues
   var domainMapping = {1 .. nLocales};
   var cyclicDomain = domainMapping dmapped Cyclic(startIdx=domainMapping.low);
-  var localQueues : [cyclicDomain] queue(eltType);
+  var localQueues : [cyclicDomain] ccqueue(eltType);
   var LocaleDescriptors : [cyclicDomain] LocaleDescriptor(eltType);
 
 
   // TODO: Need to allow user to submit their own custom locales, as currently it just
   // uses 1 .. nLocales of the default Locales
   proc Distributed_FIFO(type eltType) {
+    // Register our CCLocks
+    var head_dispatch = lambda (thiz : object, request : object) {
+      var thizRequest = request : queue_request(eltType);
+      var thizQueue = thiz : Distributed_FIFO(thizRequest.eltType);
+      if thizQueue.head == thizQueue.tail {
+        return new head_response(false) : object;
+      } else {
+        var resp = new head_response(true, thizQueue.head) : object;
+        thizQueue.head = thizQueue.head + 1;
+        return resp;
+      }
+    };
+    var tail_dispatch = lambda (thiz : object, request : object) {
+      var thizRequest = request : queue_request(eltType);
+      var thizQueue = thiz : Distributed_FIFO(thizRequest.eltType);
+      var resp = new tail_response(thizQueue.tail) : object;
+      thizQueue.tail = thizQueue.tail + 1;
+      return resp;
+    };
+
+    // Register dispatches
+    hlock = new cclock(this, head_dispatch);
+    hlock.initializer(this, head_dispatch);
+    tlock = new cclock(this, tail_dispatch);
+    tlock.initializer(this, tail_dispatch);
+
     coforall i in 0..numLocales - 1 do {
       on Locales[i] {
-        var q = new queue(eltType);
-        q.initialize();
+        var q = new ccqueue(eltType);
         localQueues[localQueues.domain.localSubdomain().first] = q;
         LocaleDescriptors[LocaleDescriptors.domain.localSubdomain().first] = new LocaleDescriptor(eltType);
       }
@@ -149,7 +188,7 @@ class Distributed_FIFO {
   proc enqueue(elem : eltType) {
     // Migrate to the owning locale...
     on this {
-      var idx : uint(64) = (tail.fetchAdd(1) % (nLocales : uint(64))) + 1;
+      var idx : uint(64) = ((tlock.ccsync(new queue_request(eltType) : object) : tail_response).idx % (nLocales : uint(64))) + 1;
       ref queue = localQueues[idx : int(64)];
       on queue do queue.enqueue(elem);
     }
@@ -165,7 +204,7 @@ class Distributed_FIFO {
   }
 
   proc flush() {
-    const ref buffer = get_local_descriptor();
+    /*const ref buffer = get_local_descriptor();
 
     // Create one buffer per locale...
     // TODO: Dynamically resize!
@@ -238,7 +277,7 @@ class Distributed_FIFO {
           for e in localElems do queue.enqueue(e);
         }
       }
-    }
+    }*/
   }
 
   proc dequeue() : (bool, eltType) {
@@ -248,35 +287,13 @@ class Distributed_FIFO {
 
     // Position is queried on the locale that owns the queue
     on tail do {
-      var _head, _tail : uint(64);
-      var localHasElem : bool = true;
+      var resp = hlock.ccsync(new queue_request(eltType) : object) : tail_response;
 
-      // Obtain our desired position
-      while (true) {
-        _head = head.read();
-        _tail = tail.read();
-
-        if (_head == _tail) {
-          /*writeln("Queue is empty... Pos: ", pos);*/
-          localHasElem = false;
-          break;
-        }
-
-        // Some platforms yield higher performance due to reduced memory contention
-        // under concurrent writes to the same cache line. We update the position
-        // atomically. We use a CAS here over a fetchAdd because we *only* want to
-        // increment the head if and only if the head != tail.
-        if (head.compareExchangeWeak(_head, _head + 1)) {
-          break;
-        }
+      if resp.hasElement {
+        idx = (resp.idx % (nLocales : uint(64))) + 1;
+      } else {
+        hasElem = resp.hasElement;
       }
-
-      if localHasElem {
-        // Translates to a single network call to write to the orginal locale's index
-        idx = (_head % (nLocales : uint(64))) + 1;
-      }
-
-      hasElem = localHasElem;
     }
 
     if !hasElem {
