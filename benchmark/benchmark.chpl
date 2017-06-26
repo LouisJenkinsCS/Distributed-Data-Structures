@@ -20,6 +20,7 @@ config var isFIFO = 0;
 config var isMPMC = 0;
 config var isSync = 0;
 config var isCCSynch = 0;
+config var isList = 0;
 // Whether or not we log communications and per-locale information.
 config var logLocaleInfo = 0;
 config var verboseLog = 0;
@@ -29,21 +30,24 @@ use CommDiagnostics;
 use CCQueue;
 use DistributedFIFOQueue;
 use DistributedQueue;
+use SyncList;
 
 use Time;
 use Random;
 
-inline proc getQueue() : Queue(int) {
+inline proc getQueue(type eltType) : Queue(eltType) {
   if isFIFO {
-    return new DistributedFIFOQueue(int);
+    return new DistributedFIFOQueue(eltType);
   } else if isMPMC {
-    return new DistributedQueue(int);
+    return new DistributedQueue(eltType);
   } else if isSync {
-    return new SyncQueue(int);
+    return new SyncQueue(eltType);
   } else if isCCSynch {
-    return new CCQueue(int);
+    return new CCQueue(eltType);
+  } else if isList {
+    return new SyncList(eltType);
   } else {
-    halt("Requires one of the flags to be set: '--isFIFO', '--isMPMC', '--isSync', or '--isCCSynch'");
+    halt("Requires one of the flags to be set: '--isFIFO', '--isMPMC', '--isSync', '--isList', or '--isCCSynch'");
   }
 }
 
@@ -60,7 +64,7 @@ proc main() {
   for i in 1 .. nTrials {
     // We only use one or the other, but we must declare both.
     // TODO: Have both implement some parent 'Queue' class/interface?
-    var queue = getQueue();
+    var queue = getQueue(int);
     var timer = new Timer();
     timer.start();
 
@@ -119,7 +123,7 @@ proc main() {
         var x : atomic int;
         var randStr = makeRandomStream(int);
         for j in 1 .. iterations / here.maxTaskPar {
-          queue.dequeue();
+          var retval = queue.dequeue();
           var nComps = nComputations + (if nJitter then (randStr.getNext() % nJitter) else 0);
           for i in 1 .. nComps {
             // Hopefully compiler doesn't throw away?
@@ -129,7 +133,6 @@ proc main() {
       }
 
       if logLocaleInfo then writeln(here, " has finished Dequeue...");
-
     }
 
     if logLocaleInfo {
@@ -143,7 +146,6 @@ proc main() {
     writeln(i, "/", nTrials, ": ", (+ reduce dequeueTrialTime) / i);
 
     delete queue;
-    /*delete MPMC;*/
   }
   enqueueWriter.write((+ reduce enqueueTrialTime) / nTrials);
   dequeueWriter.write((+ reduce dequeueTrialTime) / nTrials);
