@@ -49,16 +49,22 @@ class SyncQueue : Queue {
 }
 
 
+config const nElementForSyncQueue = 1000000;
 proc main() {
-  var queue : Queue(int) = new SyncQueue(int);
-  for i in 1 .. 100 {
+  writeln("Starting SyncQueue Proof-Of-Correctness Test ~ nElementForSyncQueue=", nElementForSyncQueue);
+  var queue = new SyncQueue(int);
+
+  for i in 1 .. nElementForSyncQueue {
     queue.enqueue(i);
   }
 
-  for i in 1 .. 100 {
-    var (exists, elt) = queue.dequeue();
-    if !exists || elt != i {
-      halt("Expected: ", i, " but was returned: ", elt, "; Exists: ", exists);
+  for i in 1 .. nElementForSyncQueue {
+    var retval = queue.dequeue();
+    if retval[2] != i {
+      writeln("BAD RESULT! Expected ", i, ", Received ", retval);
+      return;
     }
   }
+
+  writeln("PASSED!");
 }

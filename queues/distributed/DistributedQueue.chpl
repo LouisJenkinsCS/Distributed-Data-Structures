@@ -12,13 +12,11 @@ class LocalDistQueue {
 
   // Counter is for outside readers
   var head : LocalDistQueueNode(eltType);
-  var headLock$ : sync bool;
-  var headCounter : atomic uint;
+  var headCounter$ : sync int = _defaultOf(int);
 
   // Counter is for outside readers
   var tail : LocalDistQueueNode(eltType);
-  var tailCounter : atomic uint;
-  var tailLock$ : sync bool;
+  var tailCounter$ : sync int = _defaultOf(int);
 
   proc LocalDistQueue(type eltType) {
     var dummy = new LocalDistQueueNode(eltType);
@@ -29,12 +27,12 @@ class LocalDistQueue {
 
 class DistributedQueue : Queue {
   // per-locale descriptors
-  var perLocaleDomain = {0 .. numLocales-1};
-  var perLocaleDomainMapping = perLocaleDomain dmapped Cyclic(startIdx=perLocaleDomain.low);
-  var descriptors : [perLocaleDomainMapping] LocalDistQueue(eltType);
+  var localQueueSpace = {0 .. numLocales-1};
+  var localQueueDom = localQueueSpace dmapped Cyclic(startIdx=localQueueSpace.low);
+  var localQueues : [localQueueDom] LocalDistQueue(eltType);
 
-  inline proc getLocaleDescriptorIndex() {
-    return descriptors.domain.localSubdomain().first;
+  inline proc getLocalQueueIndex() {
+    return localQueues.domain.localSubdomain().first;
   }
 
   // TODO: Need to accept custom locales...
@@ -43,136 +41,151 @@ class DistributedQueue : Queue {
     // forall
     coforall loc in Locales do
       on loc {
-        writeln("Locale #", here.id, ": Assigned index: ", getLocaleDescriptorIndex());
-        descriptors[getLocaleDescriptorIndex()] = new LocalDistQueue(eltType);
+        writeln("Locale #", here.id, ": Assigned index: ", getLocalQueueIndex());
+        localQueues[getLocalQueueIndex()] = new LocalDistQueue(eltType);
       }
   }
 
   proc enqueue(elt : eltType) {
-    var queue = descriptors[getLocaleDescriptorIndex()];
+    var queue = localQueues[getLocalQueueIndex()];
     var node = new LocalDistQueueNode(eltType, elt);
-    queue.tailLock$ = true;
+    var _tailCount = queue.tailCounter$;
     queue.tail.next = node;
     queue.tail = node;
-    queue.tailCounter.add(1);
-    queue.tailLock$;
+    queue.tailCounter$ = _tailCount + 1;
   }
 
   proc dequeue() : (bool, eltType) {
-    var queue = descriptors[getLocaleDescriptorIndex()];
+    var queue = localQueues[getLocalQueueIndex()];
     var elt : eltType;
-    queue.headLock$ = true;
+    var _headCount = queue.headCounter$;
     var node = queue.head;
     var newHead = queue.head.next;
 
     // Empty
     if newHead == nil {
+      writeln(here, ": Empty... Head: ", queue.headCounter$.readXX(), ", Tail: ", queue.tailCounter$.readXX());
       // Steal work... Allocate some space to store work we steal..
-      // TODO: I believe we need to use something like c_malloc & c_memcpy like Engin does
-      // in his distributed_list repo? Currently, its so inefficient, and I have no idea
-      // how else to approach this without incurring communication cost on every item taken...
-      var work : [{0 .. numLocales-1}] (bool, eltType);
+      var workStolenSpace = {0..0};
+      workStolenSpace.clear();
+      var workSteal$ : sync bool;
+      var workStolen : [workStolenSpace] eltType;
 
       // This is a coforall because it is imperative that we spawn a task for each
       // as it is mainly blocking.
       coforall loc in Locales {
+        var dom = {0..0};
+        dom.clear();
+        var work : [dom] eltType;
+        if loc != here then
         on loc {
-          var theirQueue = descriptors[getLocaleDescriptorIndex()];
-          var nElems = theirQueue.tailCounter.read() - theirQueue.headCounter.read();
+          var theirQueue = localQueues[getLocalQueueIndex()];
+          var nElems = theirQueue.tailCounter$.readXX() - theirQueue.headCounter$.readXX();
 
           // They have some elements at this time. It should be noted that even if
           // the queue is empty after our read of both counters, then by the time they
           // attempt to steal from us, they will see we are empty and skip us, avoiding deadlock.
           if nElems {
-            // TODO: Recalculate nElems once we have lock...
-            var toSteal = 1;
-            theirQueue.headLock$ = true;
+            // Get the actual number of elements...
+            var _theirHeadCount = theirQueue.headCounter$;
+            nElems = theirQueue.tailCounter$.readXX() - _theirHeadCount;
+            if nElems {
+              const toSteal = max(1, nElems * 0.25) : int;
+              var amountStolen = 0;
+              var theirHead = theirQueue.head;
+              var localDom = { 1 .. toSteal };
+              var localWork : [localDom] eltType;
 
-            // Steal a fair amount...
-            for 1 .. toSteal {
-              var theirNode = theirQueue.head;
-              var theirNewHead = theirQueue.head.next;
-
-              // Their queue is empty...
-              if theirNewHead == nil {
-                theirQueue.headLock$;
-                break;
+              // Steal elements...
+              for idx in localDom {
+                var theirNewHead = theirQueue.head.next;
+                localWork[idx] = theirNewHead.elt;
+                delete theirQueue.head;
+                theirQueue.head = theirNewHead;
               }
 
-              // Grab and clean up
-              var theirElt = theirNewHead.elt;
-              theirQueue.head = theirNewHead;
-              delete theirNode;
-              theirQueue.headCounter.add(1);
-              theirQueue.headLock$;
-
-              // Add to our work buffer...
-              work[here.id] = (true, elt);
+              // Release lock and writeback number of elements stolen...
+              theirQueue.headCounter$ = _theirHeadCount + toSteal;
+              writeln("(", here, ":", nElems - toSteal, " -> ", dom.locale, ":", toSteal, ")");
+              dom = localDom;
+              work = localWork;
+            } else {
+              theirQueue.headCounter$ = _theirHeadCount;
             }
           }
         }
+
+        // Merge our work...
+        workSteal$ = true;
+        for w in work do workStolen.push_back(w);
+        workSteal$;
       }
 
       // We have the work we need... take the first one and add the rest...
-      // TODO: Implement enqueue_bulk... need to settle on a decent bulk transfer
-      // protocol...
-      var first = false;
-      for (present, elem) in work {
-        if present {
-          if !first {
-            elt = elem;
-            present = false;
-            first = true;
-          } else {
-            enqueue(elem);
-          }
-        }
+      var hasElt : bool;
+      if !workStolen.isEmpty() {
+        elt = workStolen[workStolen.domain.first];
+        workStolen.pop_front();
+        hasElt = true;
       }
 
-      queue.headLock$;
+      if !workStolen.isEmpty() {
+        var _tailCount = queue.tailCounter$;
+        while !workStolen.isEmpty() {
+          var node = new LocalDistQueueNode(eltType, workStolen[workStolen.domain.first]);
+          workStolen.pop_front();
+          queue.tail.next = node;
+          queue.tail = node;
+          _tailCount = _tailCount + 1;
+        }
+        queue.tailCounter$ = _tailCount;
+      }
+
+      queue.headCounter$ = _headCount;
 
       // Is Empty?
-      if !first {
-        return (false, _defaultOf(eltType));
-      } else {
-        return (true, elt);
-      }
+      return (hasElt, elt);
     }
 
     // Grab and clean up
     elt = newHead.elt;
     queue.head = newHead;
     delete node;
-    queue.headCounter.add(1);
-    queue.headLock$;
+    queue.headCounter$ = _headCount + 1;
     return (true, elt);
   }
 }
 
+config const nElementsForMPMC = 1000000;
+
 // Simple proof of correctness test - Self Contained
 proc main() {
-  var nElems = 100000;
-  writeln("Starting MPMCQueue Proof of Correctness Test ~ nElems: ", nElems);
+  writeln("Starting MPMCQueue Proof of Correctness (Work Depletion) Test ~ nElementsForMPMC: ", nElementsForMPMC);
 
   var queue = new DistributedQueue(int);
   var counter : atomic int;
-  var expected = (nElems * (nElems + 1)) / 2;
+  var expected = (nElementsForMPMC * (nElementsForMPMC + 1)) / 2;
 
-  forall i in 1 .. nElems {
+  forall i in 1 .. nElementsForMPMC {
     queue.enqueue(i);
   }
 
-  coforall loc in Locales {
+  coforall loc in Locales do on loc {
+    var localeLocalCounter : atomic int;
     coforall tid in 0 .. #here.maxTaskPar {
+      var taskLocalCounter : int;
       while true {
         var (present, elem) = queue.dequeue();
         if !present {
           break;
         }
 
-        counter.add(elem);
+        taskLocalCounter = taskLocalCounter + elem;
       }
+      localeLocalCounter.add(taskLocalCounter);
     }
+    writeln(here, ": Counter=", localeLocalCounter.read());
+    counter.add(localeLocalCounter.read());
   }
 
   if counter.read() == expected {

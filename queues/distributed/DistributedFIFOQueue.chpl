@@ -101,23 +101,6 @@ record WaitList {
   }
 }
 
-var privatizedQueues$ : sync bool;
-var privatizedSpace = { 0 .. 0 };
-var privatizedDomain = privatizedSpace dmapped ReplicatedDist();
-var privatizedWaitList : [privatizedDomain] WaitList;
-var privatizedQueues : [privatizedDomain] Queue(int);
-config param privatizeFIFO = 1;
-
-// TODO: Expand...
-proc createPrivatizedQueue() {
-  forall loc in Locales {
-    on loc {
-      privatizedQueues[0] = new SyncQueue(int);
-      privatizedWaitList[0] = new WaitList();
-    }
-  }
-}
-
 class DistributedFIFOQueue : Queue {
   // TODO: Let user specify their own background queue...
 
@@ -127,7 +110,7 @@ class DistributedFIFOQueue : Queue {
 
   // per-locale data
   var perLocaleSpace = { 0 .. 0 };
-  var perLocaleDomain = perLocaleSpace dmapped ReplicatedDist();
+  var perLocaleDomain = perLocaleSpace dmapped Replicated();
   var localQueues : [perLocaleDomain] Queue(eltType);
   var localWaitList : [perLocaleDomain] WaitList;
 
@@ -137,10 +120,6 @@ class DistributedFIFOQueue : Queue {
       on loc {
         localQueues[0] = new SyncQueue(eltType);
       }
-    }
-
-    if privatizeFIFO {
-      createPrivatizedQueue();
     }
   }
 
@@ -157,7 +136,7 @@ class DistributedFIFOQueue : Queue {
     nextNode.completed = false;
 
     // Register our dummy node...
-    var currNode = (if privatizeFIFO then privatizedWaitList[0] else localWaitList[0]).headWaitList.exchange(nextNode);
+    var currNode = localWaitList[0].headWaitList.exchange(nextNode);
     currNode.next = nextNode;
 
     // Spin until we are alerted...
@@ -198,6 +177,7 @@ class DistributedFIFOQueue : Queue {
         // Contest...
         if globalHead.compareExchangeStrong(_head, _head + 1) {
             tmpNode.idx = (_head % numLocales : uint) : int;
+            break;
         }
       }
 
@@ -219,7 +199,7 @@ class DistributedFIFOQueue : Queue {
   proc enqueue(elt : eltType) {
     var idx : int = (globalTail.fetchAdd(1) % numLocales : uint) : int;
     on Locales[idx] {
-      (if privatizeFIFO then privatizedQueues[0] else localQueues[0]).enqueue(elt);
+      localQueues[0].enqueue(elt);
     }
   }
 
@@ -237,7 +217,7 @@ class DistributedFIFOQueue : Queue {
     on Locales[idx] do {
       var retval : (bool, eltType);
       while !retval[1] {
-        retval = (if privatizeFIFO then privatizedQueues[0] else localQueues[0]).dequeue();
+        retval = localQueues[0].dequeue();
 
         if (!retval[1]) {
           writeln(here, ": Spinning... HasElem: ", hasElem, ";", "head: ", globalHead.peek(), ", tail: ", globalTail.peek());
@@ -251,18 +231,16 @@ class DistributedFIFOQueue : Queue {
   }
 }
 
+config const nElementsForFIFO = 1000000;
 proc main() {
-  var nElems = 100000;
-  writeln("Starting MPMCQueue Proof of Correctness Test ~ nElems: ", nElems);
-
+  writeln("Starting FIFOQueue Proof of Correctness Test ~ nElementsForFIFO: ", nElementsForFIFO);
   var queue = new DistributedFIFOQueue(int);
-  var randStr = Random.makeRandomStream(int);
-  for i in 1 .. nElems {
-    on Locales[randStr.getNext() % numLocales] do queue.enqueue(i);
+  for i in 1 .. nElementsForFIFO {
+    on Locales[i % numLocales] do queue.enqueue(i);
   }
 
-  for i in 1 .. nElems {
-    on Locales[randStr.getNext() % numLocales] {
+  for i in 1 .. nElementsForFIFO {
+    on Locales[i % numLocales] {
       var (hasElem, elem) = queue.dequeue();
       if !hasElem || elem != i {
         halt("FAILED TEST! Expected: ", i, ", Received: ", elem, "; HasElem: ", hasElem);
@@ -270,5 +248,5 @@ proc main() {
     }
   }
 
-  writeln("PASSED TEST!");
+  writeln("PASSED!");
 }
