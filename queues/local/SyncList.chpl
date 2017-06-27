@@ -26,3 +26,23 @@ class SyncList : Queue {
     return (hasElem, elem);
   }
 }
+
+config const nElementForSyncList = 1000000;
+proc main() {
+  writeln("Starting SyncList Proof-Of-Correctness Test ~ nElementForSyncList=", nElementForSyncList);
+  var queue = new SyncList(int);
+
+  for i in 1 .. nElementForSyncList {
+    queue.enqueue(i);
+  }
+
+  for i in 1 .. nElementForSyncList {
+    var retval = queue.dequeue();
+    if retval[2] != i {
+      writeln("BAD RESULT! Expected ", i, ", Received ", retval);
+      return;
+    }
+  }
+
+  writeln("PASSED!");
+}

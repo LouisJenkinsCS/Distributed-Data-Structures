@@ -1,5 +1,9 @@
-use DistributedFIFOQueue;
 use Time;
+use CCQueue;
+use SyncQueue;
+use DistributedFIFOQueue;
+use DistributedQueue;
+use SyncList;
 
 /*
 Precomputed number of solutions...
@@ -35,6 +39,27 @@ N x N | Total | Unique
 
 config const nQueens = 8;
 config const logBoard = 0;
+config var isFIFO = 0;
+config var isMPMC = 0;
+config var isSync = 0;
+config var isCCSynch = 0;
+config var isList = 0;
+
+inline proc getQueue(type eltType) : Queue(eltType) {
+  if isFIFO {
+    return new DistributedFIFOQueue(eltType);
+  } else if isMPMC {
+    return new DistributedQueue(eltType);
+  } else if isSync {
+    return new SyncQueue(eltType);
+  } else if isCCSynch {
+    return new CCQueue(eltType);
+  } else if isList {
+    return new SyncList(eltType);
+  } else {
+    halt("Requires one of the flags to be set: '--isFIFO', '--isMPMC', '--isSync', '--isList', or '--isCCSynch'");
+  }
+}
 
 inline proc getTotalSolutions() {
   var retval = 0;
@@ -136,7 +161,7 @@ proc main() {
   var foundDmap = foundDom dmapped Cyclic(startIdx=foundDom.low);
   var foundDist : [foundDmap] atomic int;
 
-  var boardQueue : Queue(26 * int) = new DistributedFIFOQueue(26 * int);
+  var boardQueue : Queue(26 * int) = getQueue(26 * int);
   boardQueue.enqueue(_defaultOf(boardQueue.eltType));
   const N = nQueens;
   const totalSolutions = getTotalSolutions();

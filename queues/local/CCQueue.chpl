@@ -1,21 +1,24 @@
 module CCQueue {
 
-  use cclock;
   use Queue;
+  use LocalAtomicObject;
 
-  class enqueue_request {
+  class CCSynchNode {
     type eltType;
-    var data : eltType;
-  }
 
-  class dequeue_request {
-    type eltType;
-  }
-
-  class dequeue_response {
-    type eltType;
-    var success : bool;
+    // Used for return value if dequeue, or element to be added if enqueue
     var elt : eltType;
+    // For dequeue only, indicates return status: 0 -> empty, 1 -> found...
+    var status : int;
+
+    // If wait is false, we spin
+    // If wait is true, but completed is false, we are the new combiner thread
+    // If wait is true and completed is true, we are done and can exit
+    var wait : atomic bool;
+    var completed : bool;
+
+    // Next in the waitlist
+    var next : CCSynchNode(eltType);
   }
 
   class QueueNode {
@@ -25,79 +28,166 @@ module CCQueue {
   }
 
   class CCQueue : Queue {
-    var maxRequests = 8;
+    var maxRequests = here.maxTaskPar;
 
     var head : QueueNode(eltType);
-    var hlock : cclock;
+    var headWaitList : LocalAtomicObject(CCSynchNode(eltType));
     var tail : QueueNode(eltType);
-    var tlock : cclock;
+    var tailWaitList : LocalAtomicObject(CCSynchNode(eltType));
 
     proc CCQueue(type eltType) {
-      local {
-        // Create and register our locks
-        var enqueue_dispatch = lambda (thiz : object, request : object) {
-          var requestObject = request : enqueue_request(eltType);
-          type typ = requestObject.eltType;
-          var thizQueue = thiz : CCQueue(typ);
-          var n = new QueueNode(typ);
+      // Create a dummy node...
+      var n = new QueueNode(eltType);
+      head = n;
+      tail = n;
 
-          n.elt = requestObject.data : typ;
-          thizQueue.tail.next = n;
-          thizQueue.tail = n;
-          return nil : object;
-        };
-        var dequeue_dispatch = lambda (thiz : object, request : object) {
-          var requestObject = request : dequeue_request(eltType);
-          type typ = requestObject.eltType;
-          var thizQueue = thiz : CCQueue(typ);
-          var node = thizQueue.head;
-          var next = node.next;
-
-          if next == nil then return new dequeue_response(eltType, false) : object;
-          var retval = next.elt;
-          thizQueue.head = next;
-          delete node;
-          return new dequeue_response(eltType, true, retval) : object;
-        };
-        this.hlock = new cclock(this, dequeue_dispatch);
-        this.hlock.initializer(this, dequeue_dispatch);
-        this.tlock = new cclock(this, enqueue_dispatch);
-        this.tlock.initializer(this, enqueue_dispatch);
-
-        // Create a dummy node...
-        var n = new QueueNode(eltType);
-        head = n;
-        tail = n;
-      }
+      // Construct CCSynch wait list...
+      headWaitList.write(new CCSynchNode(eltType));
+      tailWaitList.write(new CCSynchNode(eltType));
     }
 
     proc enqueue(elt : eltType) {
-      var request = new enqueue_request(eltType, elt);
-      tlock.ccsync(request);
-      delete request;
+      on this do doEnqueue(elt);
+    }
+
+    proc doEnqueue(elt : eltType) {
+      var counter = 0;
+      var nextNode = new CCSynchNode(eltType);
+      nextNode.wait.write(true);
+      nextNode.completed = false;
+
+      // Register our dummy node so that the next task can add theirs safely,
+      // then fill out the node we assigned to use
+      var currNode = tailWaitList.exchange(nextNode);
+      currNode.elt = elt;
+      currNode.next = nextNode;
+
+      // Spin until we are finished...
+      currNode.wait.waitFor(false);
+
+      // If our operation is marked complete, we may safely reclaim it, as it is no
+      // longer being touched by the combiner thread
+      if currNode.completed {
+        delete currNode;
+        return;
+      }
+
+      // If we are not marked as complete, we *are* the combiner thread
+      var tmpNode = currNode;
+      var tmpNodeNext : CCSynchNode(eltType);
+
+      while (tmpNode.next != nil && counter < maxRequests) {
+        counter = counter + 1;
+        // Note: Ensures that we do not touch the current node after it is freed
+        // by the owning thread...
+        tmpNodeNext = tmpNode.next;
+
+        // Process...
+        var node = new QueueNode(eltType, elt);
+        tail.next = node;
+        tail = node;
+
+        // We are done with this one... Note that this uses an acquire barrier so
+        // that the owning task sees it as completed before wait is no longer true.
+        tmpNode.completed = true;
+        tmpNode.wait.write(false);
+
+        tmpNode = tmpNodeNext;
+      }
+
+      // At this point, it means one thing: Either we are on the dummy node, on which
+      // case nothing happens, or we exceeded the number of requests we can do at once,
+      // meaning we wake up the next thread as the combiner.
+      tmpNode.wait.write(false);
+      delete currNode;
     }
 
     proc dequeue () : (bool, eltType) {
-      var request = new dequeue_request(eltType);
-      var retval = hlock.ccsync(request) : dequeue_response(eltType);
-      delete request;
-      return (retval.success, retval.elt);
+      var retval : (bool, eltType);
+      on this do retval = doDequeue();
+      return retval;
+    }
+
+    proc doDequeue () : (bool, eltType) {
+      var counter = 0;
+      var nextNode = new CCSynchNode(eltType);
+      nextNode.wait.write(true);
+      nextNode.completed = false;
+
+      // Register our dummy node so that the next task can add theirs safely,
+      // then fill out the node we assigned to use
+      var currNode = headWaitList.exchange(nextNode);
+      currNode.next = nextNode;
+
+      // Spin until we are finished...
+      currNode.wait.waitFor(false);
+
+      // If our operation is marked complete, we may safely reclaim it, as it is no
+      // longer being touched by the combiner thread
+      if currNode.completed {
+        var (present, elt) = (currNode.status == 1, currNode.elt);
+        delete currNode;
+        return (present, elt);
+      }
+
+      // If we are not marked as complete, we *are* the combiner thread
+      var tmpNode = currNode;
+      var tmpNodeNext : CCSynchNode(eltType);
+
+      while (tmpNode.next != nil && counter < maxRequests) {
+        counter = counter + 1;
+        // Note: Ensures that we do not touch the current node after it is freed
+        // by the owning thread...
+        tmpNodeNext = tmpNode.next;
+
+        // Process...
+        var node = head;
+        var newHead = head.next;
+
+        // Has some item
+        if newHead != nil {
+          // Grab and clean up
+          tmpNode.elt = newHead.elt;
+          tmpNode.status = 1;
+          head = newHead;
+          delete node;
+        }
+
+        // We are done with this one... Note that this uses an acquire barrier so
+        // that the owning task sees it as completed before wait is no longer true.
+        tmpNode.completed = true;
+        tmpNode.wait.write(false);
+
+        tmpNode = tmpNodeNext;
+      }
+
+      // At this point, it means one thing: Either we are on the dummy node, on which
+      // case nothing happens, or we exceeded the number of requests we can do at once,
+      // meaning we wake up the next thread as the combiner.
+      tmpNode.wait.write(false);
+      var (present, elt) = (currNode.status == 1, currNode.elt);
+      delete currNode;
+      return (present, elt);
     }
   }
 
+  config const nElementForCCQueue = 1000000;
   proc main() {
+    writeln("Starting CCQueue Proof-Of-Correctness Test ~ nElementForCCQueue=", nElementForCCQueue);
     var queue = new CCQueue(int);
 
-    for i in 1 .. 100 {
+    for i in 1 .. nElementForCCQueue {
       queue.enqueue(i);
     }
 
-    for i in 1 .. 100 {
+    for i in 1 .. nElementForCCQueue {
       var retval = queue.dequeue();
       if retval[2] != i {
         writeln("BAD RESULT! Expected ", i, ", Received ", retval);
         return;
       }
     }
+
+    writeln("PASSED!");
   }
 }

@@ -15,7 +15,7 @@ config var nJitter = 0;
 // it as we increase in the number of locales, or 'strong' in that we keep the number
 // of elements per locale the same.
 config var weak = 1;
-// Determines if we test strictly FIFO or work stealing MPMC queue.
+// Below are flags to determine which queue to test for...
 config var isFIFO = 0;
 config var isMPMC = 0;
 config var isSync = 0;
