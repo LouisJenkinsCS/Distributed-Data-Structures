@@ -91,6 +91,9 @@ inline proc getTotalSolutions() {
 proc findFirstEmptyRow(board) {
   var idx = 1;
   for row in board {
+    if idx > nQueens {
+      return nQueens + 1;
+    }
     if row == 0 {
       return idx;
     }
@@ -159,7 +162,8 @@ proc main() {
   writeln("Starting...");
   var foundDom = { 1 .. numLocales };
   var foundDmap = foundDom dmapped Cyclic(startIdx=foundDom.low);
-  var foundDist : [foundDmap] atomic int;
+  var found : atomic int;
+  var total : atomic uint;
 
   var boardQueue : Queue(26 * int) = getQueue(26 * int);
   boardQueue.enqueue(_defaultOf(boardQueue.eltType));
@@ -168,24 +172,24 @@ proc main() {
   var timer = new Timer();
   timer.start();
 
-  coforall loc in Locales do on loc do
+  coforall loc in Locales do on loc {
     coforall tid in 0 .. #here.maxTaskPar {
-      var ourIdx = foundDist.domain.localSubdomain().first;
       // We spin on our local index, no communication cost needed, and its not
       // a class instance field so no cost on access.
-      while foundDist[ourIdx].read() < totalSolutions {
+      while found.read() < totalSolutions {
         var (exists, myBoard) = boardQueue.dequeue();
         // Spin: We haven't found solution yet...
         if !exists {
-          writeln("Found: ", foundDist[ourIdx].read(), ", spinning...");
+          writeln(here, " Found: ", found.read(), ", spinning...");
           continue;
         }
+
+        if logBoard then write("\rSolutions: ", found.read(), "/", totalSolutions, "; Total Boards: ", total.fetchAdd(1));
 
         const firstEmptyRow = findFirstEmptyRow(myBoard);
         if firstEmptyRow == N+1 {  //no empty row
           // We are done: Alert everyone that it is done (including ourselves...)
-          for found in foundDist do found.add(1);
-          if logBoard then writeln(myBoard);
+          found.add(1);
           continue;
         }
         for j in 1..N {
@@ -196,7 +200,10 @@ proc main() {
           }
         }
       }
+      writeln(here, "-", tid, ": Exited...");
     }
+    writeln(here, ": Exited...");
+  }
 
   timer.stop();
   writeln("NQueens: ", timer.elapsed());

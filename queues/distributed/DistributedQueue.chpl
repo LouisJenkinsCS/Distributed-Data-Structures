@@ -1,6 +1,9 @@
 use CyclicDist;
 use Queue;
 
+config const maxElemsToSteal = 4 * 1024;
+config const logWorkStealing = 0;
+
 class LocalDistQueueNode {
   type eltType;
   var elt : eltType;
@@ -17,6 +20,9 @@ class LocalDistQueue {
   // Counter is for outside readers
   var tail : LocalDistQueueNode(eltType);
   var tailCounter$ : sync int = _defaultOf(int);
+
+  // Ensures we do not deadlock while trying to steal work...
+  var isWorkStealing : atomic bool;
 
   proc LocalDistQueue(type eltType) {
     var dummy = new LocalDistQueueNode(eltType);
@@ -41,7 +47,7 @@ class DistributedQueue : Queue {
     // forall
     coforall loc in Locales do
       on loc {
-        writeln("Locale #", here.id, ": Assigned index: ", getLocalQueueIndex());
+        /*writeln("Locale #", here.id, ": Assigned index: ", getLocalQueueIndex());*/
         localQueues[getLocalQueueIndex()] = new LocalDistQueue(eltType);
       }
   }
@@ -64,7 +70,9 @@ class DistributedQueue : Queue {
 
     // Empty
     if newHead == nil {
-      writeln(here, ": Empty... Head: ", queue.headCounter$.readXX(), ", Tail: ", queue.tailCounter$.readXX());
+      if logWorkStealing then writeln(here, ": Empty... Head: ", queue.headCounter$.readXX(), ", Tail: ", queue.tailCounter$.readXX());
+      queue.isWorkStealing.write(true);
+
       // Steal work... Allocate some space to store work we steal..
       var workStolenSpace = {0..0};
       workStolenSpace.clear();
@@ -85,12 +93,12 @@ class DistributedQueue : Queue {
           // They have some elements at this time. It should be noted that even if
           // the queue is empty after our read of both counters, then by the time they
           // attempt to steal from us, they will see we are empty and skip us, avoiding deadlock.
-          if nElems {
+          if nElems > 0 && !theirQueue.isWorkStealing.read() {
             // Get the actual number of elements...
             var _theirHeadCount = theirQueue.headCounter$;
             nElems = theirQueue.tailCounter$.readXX() - _theirHeadCount;
             if nElems {
-              const toSteal = max(1, nElems * 0.25) : int;
+              const toSteal = min(4 * 1024, max(1, nElems * 0.25) : int);
               var amountStolen = 0;
               var theirHead = theirQueue.head;
               var localDom = { 1 .. toSteal };
@@ -106,7 +114,7 @@ class DistributedQueue : Queue {
 
               // Release lock and writeback number of elements stolen...
               theirQueue.headCounter$ = _theirHeadCount + toSteal;
-              writeln("(", here, ":", nElems - toSteal, " -> ", dom.locale, ":", toSteal, ")");
+              if logWorkStealing then writeln("(", here, ":", nElems - toSteal, " -> ", dom.locale, ":", toSteal, ")");
               dom = localDom;
               work = localWork;
             } else {
@@ -120,6 +128,8 @@ class DistributedQueue : Queue {
         for w in work do workStolen.push_back(w);
         workSteal$;
       }
+
+      queue.isWorkStealing.write(false);
 
       // We have the work we need... take the first one and add the rest...
       var hasElt : bool;
