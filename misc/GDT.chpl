@@ -123,7 +123,7 @@ proc gdtTest() {
     var curr = tail.read();
     while curr != 0 {
       var currNode = _gdt.read(curr);
-      writeln(currNode.idx);
+      writeln(currNode);
       curr = currNode.nextIdx;
     }
   }

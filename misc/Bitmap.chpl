@@ -1,6 +1,6 @@
 record Bitmap {
   var nBits$ : sync uint = 4096;
-  var bitmapSpace = {1 .. 4096 / 64};
+  var bitmapSpace = {0 .. 4095 / 64};
   var bitmap : [bitmapSpace] uint(64);
 
   proc clear(idx) {
