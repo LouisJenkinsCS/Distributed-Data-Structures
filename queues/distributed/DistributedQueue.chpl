@@ -2,7 +2,6 @@ use CyclicDist;
 use Queue;
 
 config const maxElemsToSteal = 4 * 1024;
-config const logWorkStealing = 0;
 
 class LocalDistQueueNode {
   type eltType;
@@ -32,6 +31,8 @@ class LocalDistQueue {
 }
 
 class DistributedQueue : Queue {
+  var logWorkStealing : bool;
+
   // per-locale descriptors
   var localQueueSpace = {0 .. numLocales-1};
   var localQueueDom = localQueueSpace dmapped Cyclic(startIdx=localQueueSpace.low);
@@ -93,7 +94,9 @@ class DistributedQueue : Queue {
           // They have some elements at this time. It should be noted that even if
           // the queue is empty after our read of both counters, then by the time they
           // attempt to steal from us, they will see we are empty and skip us, avoiding deadlock.
-          if nElems > 0 && !theirQueue.isWorkStealing.read() {
+          var isBusy = theirQueue.isWorkStealing.read();
+          if isBusy then writeln(here, " -> ", dom.locale, ": isBusy with", nElems);
+          if nElems > 0 && !isBusy {
             // Get the actual number of elements...
             var _theirHeadCount = theirQueue.headCounter$;
             nElems = theirQueue.tailCounter$.readXX() - _theirHeadCount;
@@ -129,8 +132,6 @@ class DistributedQueue : Queue {
         workSteal$;
       }
 
-      queue.isWorkStealing.write(false);
-
       // We have the work we need... take the first one and add the rest...
       var hasElt : bool;
       if !workStolen.isEmpty() {
@@ -151,7 +152,10 @@ class DistributedQueue : Queue {
         queue.tailCounter$ = _tailCount;
       }
 
+      queue.isWorkStealing.write(false);
       queue.headCounter$ = _headCount;
+
+
 
       // Is Empty?
       return (hasElt, elt);

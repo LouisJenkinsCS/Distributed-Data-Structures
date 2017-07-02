@@ -174,16 +174,22 @@ proc main() {
 
   coforall loc in Locales do on loc {
     coforall tid in 0 .. #here.maxTaskPar {
+      var nSpins : uint;
       // We spin on our local index, no communication cost needed, and its not
       // a class instance field so no cost on access.
       while found.read() < totalSolutions {
         var (exists, myBoard) = boardQueue.dequeue();
         // Spin: We haven't found solution yet...
         if !exists {
-          writeln(here, " Found: ", found.read(), ", spinning...");
+          nSpins = nSpins + 1;
+          if nSpins == 10000000000 {
+            (boardQueue : DistributedQueue(26 * int)).logWorkStealing = true;
+          }
+          writeln(here, " Found: ", found.read(), ", Spins: ", nSpins);
           continue;
         }
 
+        nSpins = 0;
         if logBoard then write("\rSolutions: ", found.read(), "/", totalSolutions, "; Total Boards: ", total.fetchAdd(1));
 
         const firstEmptyRow = findFirstEmptyRow(myBoard);
