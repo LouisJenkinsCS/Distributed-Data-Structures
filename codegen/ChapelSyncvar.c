@@ -31,11 +31,11 @@ static void _construct__syncvar(_qthreads_synccls_uint64_t wrapped,
                                 _ref__syncvar_uint64_t _retArg) {
   _syncvar_uint64_t this12;
   chpl____wide__qthreads_synccls_uint64_t T = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__qthreads_synccls_uint64_t chpl_macro_tmp_644;
+  chpl____wide__qthreads_synccls_uint64_t chpl_macro_tmp_646;
   this12 = *(meme);
-  chpl_macro_tmp_644.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_644.addr = wrapped;
-  T = chpl_macro_tmp_644;
+  chpl_macro_tmp_646.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_646.addr = wrapped;
+  T = chpl_macro_tmp_646;
   (&this12)->wrapped = T;
   (&this12)->isOwned = isOwned;
   *(_retArg) = this12;
@@ -53,21 +53,21 @@ static void _syncvar(_ref__syncvar_uint64_t _retArg) {
   _ref__syncvar_uint64_t ret_to_arg_ref_tmp_ = NULL;
   _qthreads_synccls_uint64_t call_tmp3 = NULL;
   chpl____wide__qthreads_synccls_uint64_t T3 = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__nilType chpl_macro_tmp_645;
-  chpl____wide__qthreads_synccls_uint64_t chpl_macro_tmp_646;
-  chpl____wide__qthreads_synccls_uint64_t chpl_macro_tmp_647;
+  chpl____wide__nilType chpl_macro_tmp_647;
   chpl____wide__qthreads_synccls_uint64_t chpl_macro_tmp_648;
-  chpl_macro_tmp_645.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_645.addr = nil;
-  chpl_macro_tmp_646.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_646.addr = NULL;
-  T = chpl_macro_tmp_646;
+  chpl____wide__qthreads_synccls_uint64_t chpl_macro_tmp_649;
+  chpl____wide__qthreads_synccls_uint64_t chpl_macro_tmp_650;
+  chpl_macro_tmp_647.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_647.addr = nil;
+  chpl_macro_tmp_648.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_648.addr = NULL;
+  T = chpl_macro_tmp_648;
   (&this13)->wrapped = T;
   (&this13)->isOwned = UINT8(false);
   call_tmp2 = ((_qthreads_synccls_uint64_t)(nil));
-  chpl_macro_tmp_647.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_647.addr = call_tmp2;
-  T2 = chpl_macro_tmp_647;
+  chpl_macro_tmp_649.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_649.addr = call_tmp2;
+  T2 = chpl_macro_tmp_649;
   (&this13)->wrapped = T2;
   (&this13)->isOwned = UINT8(true);
   ret_to_arg_ref_tmp_ = &ret_tmp;
@@ -75,9 +75,9 @@ static void _syncvar(_ref__syncvar_uint64_t _retArg) {
   this12 = ret_tmp;
   ensureFEType();
   call_tmp3 = _qthreads_synccls();
-  chpl_macro_tmp_648.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_648.addr = call_tmp3;
-  T3 = chpl_macro_tmp_648;
+  chpl_macro_tmp_650.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_650.addr = call_tmp3;
+  T3 = chpl_macro_tmp_650;
   (&this12)->wrapped = T3;
   (&this12)->isOwned = UINT8(true);
   *(_retArg) = this12;
@@ -94,7 +94,7 @@ static void deinit41(_ref__syncvar_uint64_t this12) {
   chpl_bool isdirect;
   _class_localson_fn137 _args_foron_fn = NULL;
   c_void_ptr _args_vforon_fn;
-  chpl__class_localson_fn137_object chpl_macro_tmp_649;
+  chpl__class_localson_fn137_object chpl_macro_tmp_651;
   coerce_tmp = (this12)->isOwned;
   call_tmp2 = (coerce_tmp == UINT8(true));
   if (call_tmp2) {
@@ -106,7 +106,7 @@ static void deinit41(_ref__syncvar_uint64_t this12) {
     if (isdirect) {
       on_fn134(rvfDerefTmp);
     } else {
-      _args_foron_fn = ((_class_localson_fn137)(&chpl_macro_tmp_649));
+      _args_foron_fn = ((_class_localson_fn137)(&chpl_macro_tmp_651));
       (_args_foron_fn)->_0_rvfDerefTmp = call_tmp3;
       (_args_foron_fn)->_1_rvfDerefTmp = rvfDerefTmp;
       _args_vforon_fn = ((void*)(_args_foron_fn));
@@ -120,10 +120,10 @@ static void deinit41(_ref__syncvar_uint64_t this12) {
 static uint64_t readFE(chpl____wide__ref__syncvar_uint64_t this12) {
   uint64_t call_tmp2;
   chpl____wide__qthreads_synccls_uint64_t coerce_tmp = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref__wide__qthreads_synccls_uint64_t chpl_macro_tmp_650;
-  chpl_macro_tmp_650.locale = (this12).locale;
-  chpl_macro_tmp_650.addr = &(((this12).addr)->wrapped);
-  chpl_gen_comm_get(((void*)(&coerce_tmp)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_650).locale), INT64(0), INT32(0)), (chpl_macro_tmp_650).addr, sizeof(chpl____wide__qthreads_synccls_uint64_t), -1, COMMID(0), INT64(168), INT64(23));
+  chpl____wide__ref__wide__qthreads_synccls_uint64_t chpl_macro_tmp_652;
+  chpl_macro_tmp_652.locale = (this12).locale;
+  chpl_macro_tmp_652.addr = &(((this12).addr)->wrapped);
+  chpl_gen_comm_get(((void*)(&coerce_tmp)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_652).locale), INT64(0), INT32(0)), (chpl_macro_tmp_652).addr, sizeof(chpl____wide__qthreads_synccls_uint64_t), -1, COMMID(0), INT64(168), INT64(23));
   call_tmp2 = readFE2(coerce_tmp);
   return call_tmp2;
 }
@@ -132,10 +132,10 @@ static uint64_t readFE(chpl____wide__ref__syncvar_uint64_t this12) {
 static void chpl___ASSIGN_7(chpl____wide__ref__syncvar_uint64_t lhs,
                             uint64_t rhs) {
   chpl____wide__qthreads_synccls_uint64_t coerce_tmp = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref__wide__qthreads_synccls_uint64_t chpl_macro_tmp_651;
-  chpl_macro_tmp_651.locale = (lhs).locale;
-  chpl_macro_tmp_651.addr = &(((lhs).addr)->wrapped);
-  chpl_gen_comm_get(((void*)(&coerce_tmp)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_651).locale), INT64(0), INT32(0)), (chpl_macro_tmp_651).addr, sizeof(chpl____wide__qthreads_synccls_uint64_t), -1, COMMID(1), INT64(240), INT64(23));
+  chpl____wide__ref__wide__qthreads_synccls_uint64_t chpl_macro_tmp_653;
+  chpl_macro_tmp_653.locale = (lhs).locale;
+  chpl_macro_tmp_653.addr = &(((lhs).addr)->wrapped);
+  chpl_gen_comm_get(((void*)(&coerce_tmp)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_653).locale), INT64(0), INT32(0)), (chpl_macro_tmp_653).addr, sizeof(chpl____wide__qthreads_synccls_uint64_t), -1, COMMID(1), INT64(240), INT64(23));
   writeEF(coerce_tmp, rhs);
   return;
 }
@@ -153,8 +153,10 @@ static uint64_t chpl__initCopy12(chpl____wide__ref__syncvar_uint64_t sv) {
 static _qthreads_synccls_uint64_t _construct__qthreads_synccls(aligned_t alignedValue,
                                                                _qthreads_synccls_uint64_t meme) {
   _qthreads_synccls_uint64_t this12 = NULL;
+  object T = NULL;
   this12 = meme;
-  _construct_object(&((this12)->super));
+  T = &((this12)->super);
+  _construct_object(T);
   (this12)->alignedValue = alignedValue;
   return this12;
 }
@@ -186,16 +188,16 @@ static _qthreads_synccls_uint64_t _qthreads_synccls(void) {
 static void deinit42(chpl____wide__qthreads_synccls_uint64_t this12) {
   chpl____wide__ref_aligned_t call_tmp2 = {CHPL_LOCALEID_T_INIT, NULL};
   _ref_aligned_t T = NULL;
-  chpl____wide__ref_aligned_t chpl_macro_tmp_652;
-  chpl____wide__ref_aligned_t chpl_macro_tmp_653;
-  chpl_macro_tmp_652.locale = (&this12)->locale;
-  chpl_macro_tmp_652.addr = &(((&this12)->addr)->alignedValue);
-  call_tmp2 = chpl_macro_tmp_652;
+  chpl____wide__ref_aligned_t chpl_macro_tmp_654;
+  chpl____wide__ref_aligned_t chpl_macro_tmp_655;
+  chpl_macro_tmp_654.locale = (&this12)->locale;
+  chpl_macro_tmp_654.addr = &(((&this12)->addr)->alignedValue);
+  call_tmp2 = chpl_macro_tmp_654;
   T = (&call_tmp2)->addr;
   qthread_fill(T);
-  chpl_macro_tmp_653.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_653.addr = T;
-  call_tmp2 = chpl_macro_tmp_653;
+  chpl_macro_tmp_655.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_655.addr = T;
+  call_tmp2 = chpl_macro_tmp_655;
   return;
 }
 
@@ -211,27 +213,27 @@ static uint64_t readFE2(chpl____wide__qthreads_synccls_uint64_t this12) {
   _ref_uint64_t T3 = NULL;
   chpl____wide__ref_uint64_t T4 = {CHPL_LOCALEID_T_INIT, NULL};
   c_void_ptr _args_vforon_fn;
-  chpl____wide__ref_uint64_t chpl_macro_tmp_654;
-  chpl__class_localson_fn162_object chpl_macro_tmp_655;
   chpl____wide__ref_uint64_t chpl_macro_tmp_656;
+  chpl__class_localson_fn162_object chpl_macro_tmp_657;
+  chpl____wide__ref_uint64_t chpl_macro_tmp_658;
   ret = UINT64(0);
   call_tmp2 = (&this12)->locale;
   T = &ret;
   rvfDerefTmp = this12;
   isdirect = chpl_doDirectExecuteOn(&call_tmp2);
   if (isdirect) {
-    chpl_macro_tmp_654.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_654.addr = T;
-    T2 = chpl_macro_tmp_654;
+    chpl_macro_tmp_656.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_656.addr = T;
+    T2 = chpl_macro_tmp_656;
     on_fn162(rvfDerefTmp, T2);
   } else {
-    _args_foron_fn = ((_class_localson_fn162)(&chpl_macro_tmp_655));
+    _args_foron_fn = ((_class_localson_fn162)(&chpl_macro_tmp_657));
     (_args_foron_fn)->_0_rvfDerefTmp = call_tmp2;
     (_args_foron_fn)->_1_rvfDerefTmp = rvfDerefTmp;
     T3 = &ret;
-    chpl_macro_tmp_656.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_656.addr = T3;
-    T4 = chpl_macro_tmp_656;
+    chpl_macro_tmp_658.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_658.addr = T3;
+    T4 = chpl_macro_tmp_658;
     (_args_foron_fn)->_2_tmp = T4;
     _args_vforon_fn = ((void*)(_args_foron_fn));
     /*** wrapon_fn162 ***/ chpl_executeOn(&call_tmp2, INT32(227), ((chpl_comm_on_bundle_p)(_args_vforon_fn)), sizeof(chpl__class_localson_fn162_object), INT64(498), INT32(23));
@@ -248,24 +250,24 @@ static void on_fn162(chpl____wide__qthreads_synccls_uint64_t this12,
   chpl____wide__ref_aligned_t call_tmp2 = {CHPL_LOCALEID_T_INIT, NULL};
   _ref_aligned_t _ref_tmp_ = NULL;
   _ref_aligned_t T = NULL;
-  chpl____wide__ref_aligned_t chpl_macro_tmp_657;
-  chpl____wide__ref_aligned_t chpl_macro_tmp_658;
-  uint64_t chpl_macro_tmp_659;
+  chpl____wide__ref_aligned_t chpl_macro_tmp_659;
+  chpl____wide__ref_aligned_t chpl_macro_tmp_660;
+  uint64_t chpl_macro_tmp_661;
   alignedLocalRet = type_tmp;
   chpl_rmem_consist_release(INT64(501), INT32(23));
   rvfRerefTmp = this12;
-  chpl_macro_tmp_657.locale = (&rvfRerefTmp)->locale;
-  chpl_macro_tmp_657.addr = &(((&rvfRerefTmp)->addr)->alignedValue);
-  call_tmp2 = chpl_macro_tmp_657;
+  chpl_macro_tmp_659.locale = (&rvfRerefTmp)->locale;
+  chpl_macro_tmp_659.addr = &(((&rvfRerefTmp)->addr)->alignedValue);
+  call_tmp2 = chpl_macro_tmp_659;
   _ref_tmp_ = &alignedLocalRet;
   T = (&call_tmp2)->addr;
   qthread_readFE(_ref_tmp_, T);
-  chpl_macro_tmp_658.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_658.addr = T;
-  call_tmp2 = chpl_macro_tmp_658;
+  chpl_macro_tmp_660.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_660.addr = T;
+  call_tmp2 = chpl_macro_tmp_660;
   chpl_rmem_consist_acquire(INT64(503), INT32(23));
-  chpl_macro_tmp_659 = ((uint64_t)(alignedLocalRet));
-  chpl_gen_comm_put(((void*)(&chpl_macro_tmp_659)), chpl_nodeFromLocaleID(&((ret).locale), INT64(0), INT32(0)), (ret).addr, sizeof(uint64_t), -1, COMMID(2), INT64(505), INT64(23));
+  chpl_macro_tmp_661 = ((uint64_t)(alignedLocalRet));
+  chpl_gen_comm_put(((void*)(&chpl_macro_tmp_661)), chpl_nodeFromLocaleID(&((ret).locale), INT64(0), INT32(0)), (ret).addr, sizeof(uint64_t), -1, COMMID(2), INT64(505), INT64(23));
   return;
 }
 
@@ -287,14 +289,14 @@ static void writeEF(chpl____wide__qthreads_synccls_uint64_t this12,
   chpl_bool isdirect;
   _class_localson_fn163 _args_foron_fn = NULL;
   c_void_ptr _args_vforon_fn;
-  chpl__class_localson_fn163_object chpl_macro_tmp_660;
+  chpl__class_localson_fn163_object chpl_macro_tmp_662;
   call_tmp2 = (&this12)->locale;
   rvfDerefTmp = this12;
   isdirect = chpl_doDirectExecuteOn(&call_tmp2);
   if (isdirect) {
     on_fn163(rvfDerefTmp, val);
   } else {
-    _args_foron_fn = ((_class_localson_fn163)(&chpl_macro_tmp_660));
+    _args_foron_fn = ((_class_localson_fn163)(&chpl_macro_tmp_662));
     (_args_foron_fn)->_0_rvfDerefTmp = call_tmp2;
     (_args_foron_fn)->_1_rvfDerefTmp = rvfDerefTmp;
     (_args_foron_fn)->_2_rvfDerefTmp = val;
@@ -312,20 +314,20 @@ static void on_fn163(chpl____wide__qthreads_synccls_uint64_t this12,
   aligned_t call_tmp3;
   aligned_t call_tmp4;
   _ref_aligned_t T = NULL;
-  chpl____wide__ref_aligned_t chpl_macro_tmp_661;
-  chpl____wide__ref_aligned_t chpl_macro_tmp_662;
+  chpl____wide__ref_aligned_t chpl_macro_tmp_663;
+  chpl____wide__ref_aligned_t chpl_macro_tmp_664;
   chpl_rmem_consist_release(INT64(548), INT32(23));
   rvfRerefTmp = this12;
-  chpl_macro_tmp_661.locale = (&rvfRerefTmp)->locale;
-  chpl_macro_tmp_661.addr = &(((&rvfRerefTmp)->addr)->alignedValue);
-  call_tmp2 = chpl_macro_tmp_661;
+  chpl_macro_tmp_663.locale = (&rvfRerefTmp)->locale;
+  chpl_macro_tmp_663.addr = &(((&rvfRerefTmp)->addr)->alignedValue);
+  call_tmp2 = chpl_macro_tmp_663;
   call_tmp4 = ((aligned_t)(val));
   call_tmp3 = call_tmp4;
   T = (&call_tmp2)->addr;
   qthread_writeEF(T, &call_tmp3);
-  chpl_macro_tmp_662.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_662.addr = T;
-  call_tmp2 = chpl_macro_tmp_662;
+  chpl_macro_tmp_664.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_664.addr = T;
+  call_tmp2 = chpl_macro_tmp_664;
   chpl_rmem_consist_acquire(INT64(550), INT32(23));
   return;
 }

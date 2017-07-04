@@ -37,10 +37,8 @@ static void chpl__init_FCHQueue(int64_t _ln_chpl,
 static EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl _construct_EnqueueFunctor_chpl(int64_t elem_chpl,
                                                                                    EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl meme_chpl) {
   EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl this_chpl6 = NULL;
-  FCHFunctor_FCHQueue_int64_t_chpl tmp_chpl = NULL;
   this_chpl6 = meme_chpl;
-  tmp_chpl = &((this_chpl6)->super_chpl);
-  _construct_FCHFunctor_chpl(tmp_chpl);
+  _construct_FCHFunctor_chpl(&((this_chpl6)->super_chpl));
   (this_chpl6)->elem_chpl = elem_chpl;
   return this_chpl6;
 }
@@ -50,26 +48,24 @@ static void chpl__auto_destroy_EnqueueFunctor(chpl____wide_EnqueueFunctor_FCHQue
   return;
 }
 
-/* FCHQueue.chpl:8 */
+/* FCHQueue.chpl:9 */
 static void this_chpl4(chpl____wide_EnqueueFunctor_FCHQueue_int64_t_int64_t this_chpl6,
-                       chpl____wide__ref__wide_FCHQueue_int64_t data_chpl) {
-  chpl____wide_FCHQueue_int64_t coerce_tmp_chpl = {CHPL_LOCALEID_T_INIT, NULL};
+                       chpl____wide_FCHQueue_int64_t data_chpl) {
   chpl____wide__ref_list_int64_t call_tmp_chpl = {CHPL_LOCALEID_T_INIT, NULL};
   int64_t tmp_chpl;
-  chpl____wide__ref_list_int64_t chpl_macro_tmp_5447;
-  chpl____wide__ref_int64_t chpl_macro_tmp_5448;
-  chpl_gen_comm_get(((void*)(&coerce_tmp_chpl)), chpl_nodeFromLocaleID(&((data_chpl).locale), INT64(0), INT32(0)), (data_chpl).addr, sizeof(chpl____wide_FCHQueue_int64_t), -1, COMMID(0), INT64(9), INT64(51));
-  chpl_macro_tmp_5447.locale = (&coerce_tmp_chpl)->locale;
-  chpl_macro_tmp_5447.addr = &(((&coerce_tmp_chpl)->addr)->_list_chpl);
-  call_tmp_chpl = chpl_macro_tmp_5447;
-  chpl_macro_tmp_5448.locale = (&this_chpl6)->locale;
-  chpl_macro_tmp_5448.addr = &(((&this_chpl6)->addr)->elem_chpl);
-  chpl_gen_comm_get(((void*)(&tmp_chpl)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5448).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5448).addr, sizeof(int64_t), -1, COMMID(1), INT64(9), INT64(51));
+  chpl____wide__ref_list_int64_t chpl_macro_tmp_5449;
+  chpl____wide__ref_int64_t chpl_macro_tmp_5450;
+  chpl_macro_tmp_5449.locale = (&data_chpl)->locale;
+  chpl_macro_tmp_5449.addr = &(((&data_chpl)->addr)->_list_chpl);
+  call_tmp_chpl = chpl_macro_tmp_5449;
+  chpl_macro_tmp_5450.locale = (&this_chpl6)->locale;
+  chpl_macro_tmp_5450.addr = &(((&this_chpl6)->addr)->elem_chpl);
+  chpl_gen_comm_get(((void*)(&tmp_chpl)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5450).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5450).addr, sizeof(int64_t), -1, COMMID(0), INT64(10), INT64(51));
   append_chpl2(call_tmp_chpl, tmp_chpl);
   return;
 }
 
-/* FCHQueue.chpl:13 */
+/* FCHQueue.chpl:14 */
 static DequeueFunctor_FCHQueue_int64_t_int64_t_chpl _construct_DequeueFunctor_chpl(int64_t retval_chpl,
                                                                                    chpl_bool hasElem_chpl,
                                                                                    DequeueFunctor_FCHQueue_int64_t_int64_t_chpl meme_chpl) {
@@ -83,53 +79,49 @@ static DequeueFunctor_FCHQueue_int64_t_int64_t_chpl _construct_DequeueFunctor_ch
   return this_chpl6;
 }
 
-/* FCHQueue.chpl:13 */
+/* FCHQueue.chpl:14 */
 static void chpl__auto_destroy_DequeueFunctor(chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t this_chpl6) {
   return;
 }
 
-/* FCHQueue.chpl:18 */
+/* FCHQueue.chpl:19 */
 static void this_chpl5(chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t this_chpl6,
-                       chpl____wide__ref__wide_FCHQueue_int64_t data_chpl) {
-  chpl____wide_FCHQueue_int64_t coerce_tmp_chpl = {CHPL_LOCALEID_T_INIT, NULL};
+                       chpl____wide_FCHQueue_int64_t data_chpl) {
   chpl____wide__ref_list_int64_t call_tmp_chpl = {CHPL_LOCALEID_T_INIT, NULL};
   int64_t tmp_chpl;
   chpl_bool call_tmp_chpl2;
-  chpl____wide_FCHQueue_int64_t coerce_tmp_chpl2 = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__ref_list_int64_t call_tmp_chpl3 = {CHPL_LOCALEID_T_INIT, NULL};
   int64_t call_tmp_chpl4;
-  chpl____wide__ref_list_int64_t chpl_macro_tmp_5449;
-  chpl____wide__ref_int64_t chpl_macro_tmp_5450;
-  chpl____wide__ref_chpl_bool chpl_macro_tmp_5451;
-  chpl_bool chpl_macro_tmp_5452;
-  chpl____wide__ref_list_int64_t chpl_macro_tmp_5453;
-  chpl____wide__ref_int64_t chpl_macro_tmp_5454;
-  chpl_gen_comm_get(((void*)(&coerce_tmp_chpl)), chpl_nodeFromLocaleID(&((data_chpl).locale), INT64(0), INT32(0)), (data_chpl).addr, sizeof(chpl____wide_FCHQueue_int64_t), -1, COMMID(2), INT64(19), INT64(51));
-  chpl_macro_tmp_5449.locale = (&coerce_tmp_chpl)->locale;
-  chpl_macro_tmp_5449.addr = &(((&coerce_tmp_chpl)->addr)->_list_chpl);
-  call_tmp_chpl = chpl_macro_tmp_5449;
-  chpl_macro_tmp_5450.locale = (call_tmp_chpl).locale;
-  chpl_macro_tmp_5450.addr = &(((call_tmp_chpl).addr)->length_chpl);
-  chpl_gen_comm_get(((void*)(&tmp_chpl)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5450).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5450).addr, sizeof(int64_t), -1, COMMID(3), INT64(19), INT64(51));
+  chpl____wide__ref_list_int64_t chpl_macro_tmp_5451;
+  chpl____wide__ref_int64_t chpl_macro_tmp_5452;
+  chpl____wide__ref_chpl_bool chpl_macro_tmp_5453;
+  chpl_bool chpl_macro_tmp_5454;
+  chpl____wide__ref_list_int64_t chpl_macro_tmp_5455;
+  chpl____wide__ref_int64_t chpl_macro_tmp_5456;
+  chpl_macro_tmp_5451.locale = (&data_chpl)->locale;
+  chpl_macro_tmp_5451.addr = &(((&data_chpl)->addr)->_list_chpl);
+  call_tmp_chpl = chpl_macro_tmp_5451;
+  chpl_macro_tmp_5452.locale = (call_tmp_chpl).locale;
+  chpl_macro_tmp_5452.addr = &(((call_tmp_chpl).addr)->length_chpl);
+  chpl_gen_comm_get(((void*)(&tmp_chpl)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5452).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5452).addr, sizeof(int64_t), -1, COMMID(1), INT64(20), INT64(51));
   call_tmp_chpl2 = (tmp_chpl != INT64(0));
   if (call_tmp_chpl2) {
-    chpl_macro_tmp_5451.locale = (&this_chpl6)->locale;
-    chpl_macro_tmp_5451.addr = &(((&this_chpl6)->addr)->hasElem_chpl);
-    chpl_macro_tmp_5452 = UINT8(true);
-    chpl_gen_comm_put(((void*)(&chpl_macro_tmp_5452)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5451).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5451).addr, sizeof(chpl_bool), -1, COMMID(4), INT64(20), INT64(51));
-    chpl_gen_comm_get(((void*)(&coerce_tmp_chpl2)), chpl_nodeFromLocaleID(&((data_chpl).locale), INT64(0), INT32(0)), (data_chpl).addr, sizeof(chpl____wide_FCHQueue_int64_t), -1, COMMID(5), INT64(21), INT64(51));
-    chpl_macro_tmp_5453.locale = (&coerce_tmp_chpl2)->locale;
-    chpl_macro_tmp_5453.addr = &(((&coerce_tmp_chpl2)->addr)->_list_chpl);
-    call_tmp_chpl3 = chpl_macro_tmp_5453;
+    chpl_macro_tmp_5453.locale = (&this_chpl6)->locale;
+    chpl_macro_tmp_5453.addr = &(((&this_chpl6)->addr)->hasElem_chpl);
+    chpl_macro_tmp_5454 = UINT8(true);
+    chpl_gen_comm_put(((void*)(&chpl_macro_tmp_5454)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5453).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5453).addr, sizeof(chpl_bool), -1, COMMID(2), INT64(21), INT64(51));
+    chpl_macro_tmp_5455.locale = (&data_chpl)->locale;
+    chpl_macro_tmp_5455.addr = &(((&data_chpl)->addr)->_list_chpl);
+    call_tmp_chpl3 = chpl_macro_tmp_5455;
     call_tmp_chpl4 = pop_front_chpl(call_tmp_chpl3);
-    chpl_macro_tmp_5454.locale = (&this_chpl6)->locale;
-    chpl_macro_tmp_5454.addr = &(((&this_chpl6)->addr)->retval_chpl);
-    chpl_gen_comm_put(((void*)(&call_tmp_chpl4)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5454).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5454).addr, sizeof(int64_t), -1, COMMID(6), INT64(21), INT64(51));
+    chpl_macro_tmp_5456.locale = (&this_chpl6)->locale;
+    chpl_macro_tmp_5456.addr = &(((&this_chpl6)->addr)->retval_chpl);
+    chpl_gen_comm_put(((void*)(&call_tmp_chpl4)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5456).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5456).addr, sizeof(int64_t), -1, COMMID(3), INT64(22), INT64(51));
   }
   return;
 }
 
-/* FCHQueue.chpl:26 */
+/* FCHQueue.chpl:27 */
 static FCHQueue_int64_t_chpl _construct_FCHQueue_chpl(_ref_list_int64_t _list_chpl,
                                                       FCHLock_FCHQueue_int64_t_chpl fchLock_chpl,
                                                       FCHQueue_int64_t_chpl meme_chpl) {
@@ -141,18 +133,18 @@ static FCHQueue_int64_t_chpl _construct_FCHQueue_chpl(_ref_list_int64_t _list_ch
   return this_chpl6;
 }
 
-/* FCHQueue.chpl:26 */
+/* FCHQueue.chpl:27 */
 static void chpl__auto_destroy_FCHQueue(chpl____wide_FCHQueue_int64_t this_chpl6) {
   chpl____wide__ref_list_int64_t _field_destructor_tmp__chpl = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref_list_int64_t chpl_macro_tmp_5455;
-  chpl_macro_tmp_5455.locale = (&this_chpl6)->locale;
-  chpl_macro_tmp_5455.addr = &(((&this_chpl6)->addr)->_list_chpl);
-  _field_destructor_tmp__chpl = chpl_macro_tmp_5455;
+  chpl____wide__ref_list_int64_t chpl_macro_tmp_5457;
+  chpl_macro_tmp_5457.locale = (&this_chpl6)->locale;
+  chpl_macro_tmp_5457.addr = &(((&this_chpl6)->addr)->_list_chpl);
+  _field_destructor_tmp__chpl = chpl_macro_tmp_5457;
   deinit_chpl7(_field_destructor_tmp__chpl);
   return;
 }
 
-/* FCHQueue.chpl:30 */
+/* FCHQueue.chpl:31 */
 static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   _domain_DefaultRectangularDom_1_int64_t_F local_LocaleSpace_chpl;
   chpl____wide__ref__wide__array_DefaultRectangularArr_locale_1_int64_t_F_int64_t local_Locales_chpl = {CHPL_LOCALEID_T_INIT, NULL};
@@ -293,35 +285,35 @@ static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   _ref__array_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F ret_to_arg_ref_tmp__chpl14 = NULL;
   _array_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F retarg_tmp_chpl4;
   FCHLock_FCHQueue_int64_t_chpl wrap_call_tmp_chpl5 = NULL;
-  chpl____wide__nilType chpl_macro_tmp_5456;
-  chpl____wide_listNode_int64_t chpl_macro_tmp_5457;
   chpl____wide__nilType chpl_macro_tmp_5458;
   chpl____wide_listNode_int64_t chpl_macro_tmp_5459;
   chpl____wide__nilType chpl_macro_tmp_5460;
   chpl____wide_listNode_int64_t chpl_macro_tmp_5461;
   chpl____wide__nilType chpl_macro_tmp_5462;
   chpl____wide_listNode_int64_t chpl_macro_tmp_5463;
-  chpl____wide_listNode_int64_t chpl_macro_tmp_5464;
+  chpl____wide__nilType chpl_macro_tmp_5464;
   chpl____wide_listNode_int64_t chpl_macro_tmp_5465;
-  chpl____wide__nilType chpl_macro_tmp_5466;
-  chpl____wide_DefaultRectangularDom_1_int64_t_F chpl_macro_tmp_5467;
+  chpl____wide_listNode_int64_t chpl_macro_tmp_5466;
+  chpl____wide_listNode_int64_t chpl_macro_tmp_5467;
   chpl____wide__nilType chpl_macro_tmp_5468;
-  chpl____wide_ReplicatedDom_1_int64_t_F chpl_macro_tmp_5469;
+  chpl____wide_DefaultRectangularDom_1_int64_t_F chpl_macro_tmp_5469;
   chpl____wide__nilType chpl_macro_tmp_5470;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F chpl_macro_tmp_5471;
+  chpl____wide_ReplicatedDom_1_int64_t_F chpl_macro_tmp_5471;
   chpl____wide__nilType chpl_macro_tmp_5472;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F chpl_macro_tmp_5473;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F chpl_macro_tmp_5473;
   chpl____wide__nilType chpl_macro_tmp_5474;
-  chpl____wide_DefaultRectangularDom_1_int64_t_F chpl_macro_tmp_5475;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F chpl_macro_tmp_5475;
   chpl____wide__nilType chpl_macro_tmp_5476;
-  chpl____wide_CyclicDom_1_int64_t_F chpl_macro_tmp_5477;
+  chpl____wide_DefaultRectangularDom_1_int64_t_F chpl_macro_tmp_5477;
   chpl____wide__nilType chpl_macro_tmp_5478;
-  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F chpl_macro_tmp_5479;
+  chpl____wide_CyclicDom_1_int64_t_F chpl_macro_tmp_5479;
   chpl____wide__nilType chpl_macro_tmp_5480;
-  chpl____wide_CyclicArr_Bitmap_1_int64_t_F chpl_macro_tmp_5481;
-  chpl____wide__ref__domain_DefaultRectangularDom_1_int64_t_F chpl_macro_tmp_5482;
-  chpl____wide__ref__domain_DefaultRectangularDom_1_int64_t_F chpl_macro_tmp_5483;
+  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F chpl_macro_tmp_5481;
+  chpl____wide__nilType chpl_macro_tmp_5482;
+  chpl____wide_CyclicArr_Bitmap_1_int64_t_F chpl_macro_tmp_5483;
   chpl____wide__ref__domain_DefaultRectangularDom_1_int64_t_F chpl_macro_tmp_5484;
+  chpl____wide__ref__domain_DefaultRectangularDom_1_int64_t_F chpl_macro_tmp_5485;
+  chpl____wide__ref__domain_DefaultRectangularDom_1_int64_t_F chpl_macro_tmp_5486;
   local_LocaleSpace_chpl = LocaleSpace;
   local_Locales_chpl = Locales;
   local_dataParMinGranularity_chpl = dataParMinGranularity;
@@ -331,43 +323,43 @@ static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   cast_tmp_chpl = chpl_here_alloc(sizeof(chpl_FCHQueue_int64_t_chpl_object), INT16(169));
   this_chpl7 = ((FCHQueue_int64_t_chpl)(cast_tmp_chpl));
   ((object)(this_chpl7))->chpl__cid = chpl__cid_FCHQueue_int64_t_chpl;
-  chpl_macro_tmp_5456.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5456.addr = nil;
-  chpl_macro_tmp_5457.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5457.addr = NULL;
-  tmp_chpl = chpl_macro_tmp_5457;
-  (&_init_class_tmp__chpl)->first_chpl = tmp_chpl;
   chpl_macro_tmp_5458.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5458.addr = nil;
   chpl_macro_tmp_5459.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5459.addr = NULL;
-  tmp_chpl2 = chpl_macro_tmp_5459;
-  (&_init_class_tmp__chpl)->last_chpl = tmp_chpl2;
-  (&_init_class_tmp__chpl)->length_chpl = INT64(0);
-  (this_chpl7)->_list_chpl = _init_class_tmp__chpl;
-  (this_chpl7)->fchLock_chpl = nil;
+  tmp_chpl = chpl_macro_tmp_5459;
+  (&_init_class_tmp__chpl)->first_chpl = tmp_chpl;
   chpl_macro_tmp_5460.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5460.addr = nil;
   chpl_macro_tmp_5461.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5461.addr = NULL;
-  tmp_chpl3 = chpl_macro_tmp_5461;
-  (&this_chpl8)->first_chpl = tmp_chpl3;
+  tmp_chpl2 = chpl_macro_tmp_5461;
+  (&_init_class_tmp__chpl)->last_chpl = tmp_chpl2;
+  (&_init_class_tmp__chpl)->length_chpl = INT64(0);
+  (this_chpl7)->_list_chpl = _init_class_tmp__chpl;
+  (this_chpl7)->fchLock_chpl = nil;
   chpl_macro_tmp_5462.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5462.addr = nil;
   chpl_macro_tmp_5463.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5463.addr = NULL;
-  tmp_chpl4 = chpl_macro_tmp_5463;
+  tmp_chpl3 = chpl_macro_tmp_5463;
+  (&this_chpl8)->first_chpl = tmp_chpl3;
+  chpl_macro_tmp_5464.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5464.addr = nil;
+  chpl_macro_tmp_5465.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5465.addr = NULL;
+  tmp_chpl4 = chpl_macro_tmp_5465;
   (&this_chpl8)->last_chpl = tmp_chpl4;
   (&this_chpl8)->length_chpl = INT64(0);
   call_tmp_chpl = ((listNode_int64_t_chpl)(nil));
-  chpl_macro_tmp_5464.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5464.addr = call_tmp_chpl;
-  tmp_chpl5 = chpl_macro_tmp_5464;
+  chpl_macro_tmp_5466.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5466.addr = call_tmp_chpl;
+  tmp_chpl5 = chpl_macro_tmp_5466;
   (&this_chpl8)->first_chpl = tmp_chpl5;
   call_tmp_chpl2 = ((listNode_int64_t_chpl)(nil));
-  chpl_macro_tmp_5465.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5465.addr = call_tmp_chpl2;
-  tmp_chpl6 = chpl_macro_tmp_5465;
+  chpl_macro_tmp_5467.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5467.addr = call_tmp_chpl2;
+  tmp_chpl6 = chpl_macro_tmp_5467;
   (&this_chpl8)->last_chpl = tmp_chpl6;
   (&this_chpl8)->length_chpl = INT64(0);
   ret_to_arg_ref_tmp__chpl = &ret_tmp_chpl;
@@ -384,38 +376,38 @@ static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   (this_chpl9)->nodeGDT_chpl = nil;
   (this_chpl9)->combinerList_chpl = _init_class_tmp__chpl2;
   (&_init_class_tmp__chpl3)->_pid = INT64(0);
-  chpl_macro_tmp_5466.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5466.addr = nil;
-  chpl_macro_tmp_5467.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5467.addr = NULL;
-  tmp_chpl7 = chpl_macro_tmp_5467;
-  (&_init_class_tmp__chpl3)->_instance = tmp_chpl7;
-  (&_init_class_tmp__chpl3)->_unowned = UINT8(false);
-  (this_chpl9)->perLocaleSpace_chpl = _init_class_tmp__chpl3;
-  (&_init_class_tmp__chpl4)->_pid = INT64(0);
   chpl_macro_tmp_5468.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5468.addr = nil;
   chpl_macro_tmp_5469.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5469.addr = NULL;
-  tmp_chpl8 = chpl_macro_tmp_5469;
-  (&_init_class_tmp__chpl4)->_instance = tmp_chpl8;
-  (&_init_class_tmp__chpl4)->_unowned = UINT8(false);
-  (this_chpl9)->perLocaleDomain_chpl = _init_class_tmp__chpl4;
-  (&_init_class_tmp__chpl5)->_pid = INT64(0);
+  tmp_chpl7 = chpl_macro_tmp_5469;
+  (&_init_class_tmp__chpl3)->_instance = tmp_chpl7;
+  (&_init_class_tmp__chpl3)->_unowned = UINT8(false);
+  (this_chpl9)->perLocaleSpace_chpl = _init_class_tmp__chpl3;
+  (&_init_class_tmp__chpl4)->_pid = INT64(0);
   chpl_macro_tmp_5470.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5470.addr = nil;
   chpl_macro_tmp_5471.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5471.addr = NULL;
-  tmp_chpl9 = chpl_macro_tmp_5471;
-  (&_init_class_tmp__chpl5)->_instance = tmp_chpl9;
-  (&_init_class_tmp__chpl5)->_unowned = UINT8(false);
-  (this_chpl9)->publicationList_chpl = _init_class_tmp__chpl5;
-  (&_init_class_tmp__chpl6)->_pid = INT64(0);
+  tmp_chpl8 = chpl_macro_tmp_5471;
+  (&_init_class_tmp__chpl4)->_instance = tmp_chpl8;
+  (&_init_class_tmp__chpl4)->_unowned = UINT8(false);
+  (this_chpl9)->perLocaleDomain_chpl = _init_class_tmp__chpl4;
+  (&_init_class_tmp__chpl5)->_pid = INT64(0);
   chpl_macro_tmp_5472.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5472.addr = nil;
   chpl_macro_tmp_5473.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5473.addr = NULL;
-  tmp_chpl10 = chpl_macro_tmp_5473;
+  tmp_chpl9 = chpl_macro_tmp_5473;
+  (&_init_class_tmp__chpl5)->_instance = tmp_chpl9;
+  (&_init_class_tmp__chpl5)->_unowned = UINT8(false);
+  (this_chpl9)->publicationList_chpl = _init_class_tmp__chpl5;
+  (&_init_class_tmp__chpl6)->_pid = INT64(0);
+  chpl_macro_tmp_5474.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5474.addr = nil;
+  chpl_macro_tmp_5475.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5475.addr = NULL;
+  tmp_chpl10 = chpl_macro_tmp_5475;
   (&_init_class_tmp__chpl6)->_instance = tmp_chpl10;
   (&_init_class_tmp__chpl6)->_unowned = UINT8(false);
   (this_chpl9)->recycledCombinerNode_chpl = _init_class_tmp__chpl6;
@@ -424,38 +416,38 @@ static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   this_chpl10 = ((GDT_FCHGlobalNode_chpl)(cast_tmp_chpl3));
   ((object)(this_chpl10))->chpl__cid = chpl__cid_GDT_FCHGlobalNode_chpl;
   (&_init_class_tmp__chpl7)->_pid = INT64(0);
-  chpl_macro_tmp_5474.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5474.addr = nil;
-  chpl_macro_tmp_5475.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5475.addr = NULL;
-  tmp_chpl11 = chpl_macro_tmp_5475;
-  (&_init_class_tmp__chpl7)->_instance = tmp_chpl11;
-  (&_init_class_tmp__chpl7)->_unowned = UINT8(false);
-  (this_chpl10)->gdtSpace_chpl = _init_class_tmp__chpl7;
-  (&_init_class_tmp__chpl8)->_pid = INT64(0);
   chpl_macro_tmp_5476.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5476.addr = nil;
   chpl_macro_tmp_5477.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5477.addr = NULL;
-  tmp_chpl12 = chpl_macro_tmp_5477;
-  (&_init_class_tmp__chpl8)->_instance = tmp_chpl12;
-  (&_init_class_tmp__chpl8)->_unowned = UINT8(false);
-  (this_chpl10)->locDom_chpl = _init_class_tmp__chpl8;
-  (&_init_class_tmp__chpl9)->_pid = INT64(0);
+  tmp_chpl11 = chpl_macro_tmp_5477;
+  (&_init_class_tmp__chpl7)->_instance = tmp_chpl11;
+  (&_init_class_tmp__chpl7)->_unowned = UINT8(false);
+  (this_chpl10)->gdtSpace_chpl = _init_class_tmp__chpl7;
+  (&_init_class_tmp__chpl8)->_pid = INT64(0);
   chpl_macro_tmp_5478.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5478.addr = nil;
   chpl_macro_tmp_5479.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5479.addr = NULL;
-  tmp_chpl13 = chpl_macro_tmp_5479;
-  (&_init_class_tmp__chpl9)->_instance = tmp_chpl13;
-  (&_init_class_tmp__chpl9)->_unowned = UINT8(false);
-  (this_chpl10)->gdtEntries_chpl = _init_class_tmp__chpl9;
-  (&_init_class_tmp__chpl10)->_pid = INT64(0);
+  tmp_chpl12 = chpl_macro_tmp_5479;
+  (&_init_class_tmp__chpl8)->_instance = tmp_chpl12;
+  (&_init_class_tmp__chpl8)->_unowned = UINT8(false);
+  (this_chpl10)->locDom_chpl = _init_class_tmp__chpl8;
+  (&_init_class_tmp__chpl9)->_pid = INT64(0);
   chpl_macro_tmp_5480.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5480.addr = nil;
   chpl_macro_tmp_5481.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_5481.addr = NULL;
-  tmp_chpl14 = chpl_macro_tmp_5481;
+  tmp_chpl13 = chpl_macro_tmp_5481;
+  (&_init_class_tmp__chpl9)->_instance = tmp_chpl13;
+  (&_init_class_tmp__chpl9)->_unowned = UINT8(false);
+  (this_chpl10)->gdtEntries_chpl = _init_class_tmp__chpl9;
+  (&_init_class_tmp__chpl10)->_pid = INT64(0);
+  chpl_macro_tmp_5482.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5482.addr = nil;
+  chpl_macro_tmp_5483.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5483.addr = NULL;
+  tmp_chpl14 = chpl_macro_tmp_5483;
   (&_init_class_tmp__chpl10)->_instance = tmp_chpl14;
   (&_init_class_tmp__chpl10)->_unowned = UINT8(false);
   (this_chpl10)->gdtBitmap_chpl = _init_class_tmp__chpl10;
@@ -467,9 +459,9 @@ static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   coerce_tmp_chpl = (i_x_chpl)->_unowned;
   if (coerce_tmp_chpl) {
     _ref_tmp__chpl = i_x_chpl;
-    chpl_macro_tmp_5482.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_5482.addr = _ref_tmp__chpl;
-    tmp_chpl15 = chpl_macro_tmp_5482;
+    chpl_macro_tmp_5484.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_5484.addr = _ref_tmp__chpl;
+    tmp_chpl15 = chpl_macro_tmp_5484;
     ret_chpl2 = chpl__initCopy2(tmp_chpl15);
     ret_chpl = ret_chpl2;
     goto _end_chpl__unalias_chpl;
@@ -503,9 +495,9 @@ static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   (this_chpl10)->locDom_chpl = ret_chpl3;
   call_tmp_chpl6 = chpl__ensureDomainExpr3(&default_arglocDom_chpl);
   _ref_tmp__chpl2 = &default_arggdtSpace_chpl;
-  chpl_macro_tmp_5483.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5483.addr = _ref_tmp__chpl2;
-  tmp_chpl16 = chpl_macro_tmp_5483;
+  chpl_macro_tmp_5485.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5485.addr = _ref_tmp__chpl2;
+  tmp_chpl16 = chpl_macro_tmp_5485;
   call_tmp_chpl7 = chpl__ensureDomainExpr5(tmp_chpl16);
   i_dom_chpl = call_tmp_chpl7;
   call_tmp_chpl8 = chpl__buildArrayRuntimeType19(i_dom_chpl);
@@ -546,9 +538,9 @@ static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   coerce_tmp_chpl3 = (i_x_chpl3)->_unowned;
   if (coerce_tmp_chpl3) {
     _ref_tmp__chpl4 = i_x_chpl3;
-    chpl_macro_tmp_5484.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_5484.addr = _ref_tmp__chpl4;
-    tmp_chpl20 = chpl_macro_tmp_5484;
+    chpl_macro_tmp_5486.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_5486.addr = _ref_tmp__chpl4;
+    tmp_chpl20 = chpl_macro_tmp_5486;
     ret_chpl7 = chpl__initCopy2(tmp_chpl20);
     ret_chpl6 = ret_chpl7;
     goto _end_chpl__unalias_chpl3;
@@ -560,7 +552,7 @@ static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   default_argperLocaleSpace_chpl = ret_chpl6;
   (this_chpl9)->perLocaleSpace_chpl = ret_chpl6;
   i_targetLocales_chpl2 = local_Locales_chpl;
-  i_purposeMessage_chpl = &_str_literal_2011 /* "used to create a Replicated" */;
+  i_purposeMessage_chpl = &_str_literal_2013 /* "used to create a Replicated" */;
   wrap_call_tmp_chpl4 = Replicated_chpl3(i_targetLocales_chpl2, i_purposeMessage_chpl);
   ret_to_arg_ref_tmp__chpl11 = &ret_tmp_chpl11;
   chpl__buildDistValue2(wrap_call_tmp_chpl4, ret_to_arg_ref_tmp__chpl11);
@@ -604,12 +596,13 @@ static FCHQueue_int64_t_chpl FCHQueue_chpl(void) {
   return this_chpl6;
 }
 
-/* FCHQueue.chpl:34 */
+/* FCHQueue.chpl:35 */
 static void enqueue_chpl(FCHQueue_int64_t_chpl this_chpl6,
                          int64_t elt_chpl) {
   EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl this_chpl7 = NULL;
   c_void_ptr cast_tmp_chpl;
   EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl wrap_call_tmp_chpl = NULL;
+  FCHLock_FCHQueue_int64_t_chpl coerce_tmp_chpl = NULL;
   chpl_localeID_t call_tmp_chpl;
   EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl rvfDerefTmp_chpl = NULL;
   chpl_bool isdirect_chpl;
@@ -617,30 +610,31 @@ static void enqueue_chpl(FCHQueue_int64_t_chpl this_chpl6,
   _class_localson_fn113 _args_foron_fn_chpl = NULL;
   chpl____wide_EnqueueFunctor_FCHQueue_int64_t_int64_t tmp_chpl2 = {CHPL_LOCALEID_T_INIT, NULL};
   c_void_ptr _args_vforon_fn_chpl;
-  chpl____wide_EnqueueFunctor_FCHQueue_int64_t_int64_t chpl_macro_tmp_5485;
-  chpl__class_localson_fn113_object chpl_macro_tmp_5486;
   chpl____wide_EnqueueFunctor_FCHQueue_int64_t_int64_t chpl_macro_tmp_5487;
+  chpl__class_localson_fn113_object chpl_macro_tmp_5488;
+  chpl____wide_EnqueueFunctor_FCHQueue_int64_t_int64_t chpl_macro_tmp_5489;
   cast_tmp_chpl = chpl_here_alloc(sizeof(chpl_EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl_object), INT16(170));
   this_chpl7 = ((EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl)(cast_tmp_chpl));
   ((object)(this_chpl7))->chpl__cid = chpl__cid_EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl;
   (this_chpl7)->elem_chpl = INT64(0);
   (this_chpl7)->elem_chpl = elt_chpl;
   wrap_call_tmp_chpl = _construct_EnqueueFunctor_chpl(elt_chpl, this_chpl7);
-  synchronize_chpl((this_chpl6)->fchLock_chpl, ((FCHFunctor_FCHQueue_int64_t_chpl)(wrap_call_tmp_chpl)));
+  coerce_tmp_chpl = (this_chpl6)->fchLock_chpl;
+  synchronize_chpl(coerce_tmp_chpl, ((FCHFunctor_FCHQueue_int64_t_chpl)(wrap_call_tmp_chpl)));
   call_tmp_chpl = chpl_gen_getLocaleID();
   rvfDerefTmp_chpl = wrap_call_tmp_chpl;
   isdirect_chpl = chpl_doDirectExecuteOn(&call_tmp_chpl);
   if (isdirect_chpl) {
-    chpl_macro_tmp_5485.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_5485.addr = rvfDerefTmp_chpl;
-    tmp_chpl = chpl_macro_tmp_5485;
-    on_fn148(tmp_chpl);
-  } else {
-    _args_foron_fn_chpl = ((_class_localson_fn113)(&chpl_macro_tmp_5486));
-    (_args_foron_fn_chpl)->_0_rvfDerefTmp = call_tmp_chpl;
     chpl_macro_tmp_5487.locale = chpl_gen_getLocaleID();
     chpl_macro_tmp_5487.addr = rvfDerefTmp_chpl;
-    tmp_chpl2 = chpl_macro_tmp_5487;
+    tmp_chpl = chpl_macro_tmp_5487;
+    on_fn148(tmp_chpl);
+  } else {
+    _args_foron_fn_chpl = ((_class_localson_fn113)(&chpl_macro_tmp_5488));
+    (_args_foron_fn_chpl)->_0_rvfDerefTmp = call_tmp_chpl;
+    chpl_macro_tmp_5489.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_5489.addr = rvfDerefTmp_chpl;
+    tmp_chpl2 = chpl_macro_tmp_5489;
     (_args_foron_fn_chpl)->_1_rvfDerefTmp = tmp_chpl2;
     _args_vforon_fn_chpl = ((void*)(_args_foron_fn_chpl));
     /*** wrapon_fn150 ***/ chpl_executeOn(&call_tmp_chpl, INT32(215), ((chpl_comm_on_bundle_p)(_args_vforon_fn_chpl)), sizeof(chpl__class_localson_fn113_object), INT64(1227), INT32(2));
@@ -648,7 +642,7 @@ static void enqueue_chpl(FCHQueue_int64_t_chpl this_chpl6,
   return;
 }
 
-/* FCHQueue.chpl:40 */
+/* FCHQueue.chpl:41 */
 static void dequeue_chpl(FCHQueue_int64_t_chpl this_chpl6,
                          _ref__tuple_2_chpl_bool_int64_t _retArg_chpl) {
   DequeueFunctor_FCHQueue_int64_t_int64_t_chpl f_chpl = NULL;
@@ -665,9 +659,9 @@ static void dequeue_chpl(FCHQueue_int64_t_chpl this_chpl6,
   _class_localson_fn115 _args_foron_fn_chpl = NULL;
   chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t tmp_chpl2 = {CHPL_LOCALEID_T_INIT, NULL};
   c_void_ptr _args_vforon_fn_chpl;
-  chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t chpl_macro_tmp_5488;
-  chpl__class_localson_fn115_object chpl_macro_tmp_5489;
   chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t chpl_macro_tmp_5490;
+  chpl__class_localson_fn115_object chpl_macro_tmp_5491;
+  chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t chpl_macro_tmp_5492;
   cast_tmp_chpl = chpl_here_alloc(sizeof(chpl_DequeueFunctor_FCHQueue_int64_t_int64_t_chpl_object), INT16(184));
   this_chpl7 = ((DequeueFunctor_FCHQueue_int64_t_int64_t_chpl)(cast_tmp_chpl));
   ((object)(this_chpl7))->chpl__cid = chpl__cid_DequeueFunctor_FCHQueue_int64_t_int64_t_chpl;
@@ -685,16 +679,16 @@ static void dequeue_chpl(FCHQueue_int64_t_chpl this_chpl6,
   rvfDerefTmp_chpl = f_chpl;
   isdirect_chpl = chpl_doDirectExecuteOn(&call_tmp_chpl);
   if (isdirect_chpl) {
-    chpl_macro_tmp_5488.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_5488.addr = rvfDerefTmp_chpl;
-    tmp_chpl = chpl_macro_tmp_5488;
-    on_fn151(tmp_chpl);
-  } else {
-    _args_foron_fn_chpl = ((_class_localson_fn115)(&chpl_macro_tmp_5489));
-    (_args_foron_fn_chpl)->_0_rvfDerefTmp = call_tmp_chpl;
     chpl_macro_tmp_5490.locale = chpl_gen_getLocaleID();
     chpl_macro_tmp_5490.addr = rvfDerefTmp_chpl;
-    tmp_chpl2 = chpl_macro_tmp_5490;
+    tmp_chpl = chpl_macro_tmp_5490;
+    on_fn151(tmp_chpl);
+  } else {
+    _args_foron_fn_chpl = ((_class_localson_fn115)(&chpl_macro_tmp_5491));
+    (_args_foron_fn_chpl)->_0_rvfDerefTmp = call_tmp_chpl;
+    chpl_macro_tmp_5492.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_5492.addr = rvfDerefTmp_chpl;
+    tmp_chpl2 = chpl_macro_tmp_5492;
     (_args_foron_fn_chpl)->_1_rvfDerefTmp = tmp_chpl2;
     _args_vforon_fn_chpl = ((void*)(_args_foron_fn_chpl));
     /*** wrapon_fn149 ***/ chpl_executeOn(&call_tmp_chpl, INT32(214), ((chpl_comm_on_bundle_p)(_args_vforon_fn_chpl)), sizeof(chpl__class_localson_fn115_object), INT64(1227), INT32(2));
@@ -704,7 +698,7 @@ static void dequeue_chpl(FCHQueue_int64_t_chpl this_chpl6,
   return;
 }
 
-/* FCHQueue.chpl:51 */
+/* FCHQueue.chpl:52 */
 static void chpl_user_main(void) {
   string local__str_literal_1944_chpl;
   string local__str_literal_1942_chpl;
@@ -721,7 +715,6 @@ static void chpl_user_main(void) {
   int64_t call_tmp_x2_chpl;
   _tuple_2_chpl_bool_int64_t ret_tmp_chpl;
   _ref__tuple_2_chpl_bool_int64_t ret_to_arg_ref_tmp__chpl = NULL;
-  int64_t coerce_tmp_chpl;
   chpl_bool call_tmp_chpl;
   local__str_literal_1944_chpl /* "PASSED!" */ = _str_literal_1944 /* "PASSED!" */;
   local__str_literal_1942_chpl /* ", Received " */ = _str_literal_1942 /* ", Received " */;
@@ -742,8 +735,7 @@ static void chpl_user_main(void) {
     call_tmp_x2_chpl = (&ret_tmp_chpl)->x2;
     (&retval_chpl)->x1 = call_tmp_x1_chpl;
     (&retval_chpl)->x2 = call_tmp_x2_chpl;
-    coerce_tmp_chpl = (&retval_chpl)->x2;
-    call_tmp_chpl = (coerce_tmp_chpl != i_chpl2);
+    call_tmp_chpl = ((&retval_chpl)->x2 != i_chpl2);
     if (call_tmp_chpl) {
       writeln_chpl6(&local__str_literal_1940_chpl /* "BAD RESULT! Expected " */, i_chpl2, &local__str_literal_1942_chpl /* ", Received " */, &retval_chpl);
       goto _end_main_chpl;
@@ -754,7 +746,7 @@ static void chpl_user_main(void) {
   return;
 }
 
-/* FCHQueue.chpl:51 */
+/* FCHQueue.chpl:52 */
 int64_t chpl_gen_main(_ref_chpl_main_argument _arg) {
   chpl___EndCount_atomic_int64_int64_t this_chpl6 = NULL;
   c_void_ptr cast_tmp_chpl;
@@ -785,7 +777,7 @@ int64_t chpl_gen_main(_ref_chpl_main_argument _arg) {
   (this_chpl6)->taskList = call_tmp_chpl;
   wrap_call_tmp_chpl = _construct__EndCount(&ret_tmp_chpl, INT64(0), call_tmp_chpl, this_chpl6);
   chpl_rt_preUserCodeHook();
-  chpl__init_FCHQueue(INT64(51), INT32(51));
+  chpl__init_FCHQueue(INT64(52), INT32(51));
   chpl_user_main();
   chpl_rt_postUserCodeHook();
   _waitEndCount5(wrap_call_tmp_chpl);

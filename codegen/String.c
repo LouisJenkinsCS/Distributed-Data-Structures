@@ -98,10 +98,9 @@ static void string2(chpl____wide__ref_string s,
   chpl_bool coerce_tmp2;
   int64_t call_tmp6;
   c_void_ptr cast_tmp;
-  c_ptr_uint8_t coerce_tmp3 = NULL;
   c_ptr_uint8_t T5 = NULL;
   int64_t T6;
-  c_ptr_uint8_t coerce_tmp4 = NULL;
+  c_ptr_uint8_t coerce_tmp3 = NULL;
   _ref_uint8_t call_tmp7 = NULL;
   c_ptr_uint8_t T7 = NULL;
   int64_t T8;
@@ -158,16 +157,15 @@ static void string2(chpl____wide__ref_string s,
         call_tmp6 = chpl_here_good_alloc_size(((int64_t)((coerce_tmp + INT64(1)))));
         cast_tmp = chpl_here_alloc(call_tmp6, local_CHPL_RT_MD_STR_COPY_DATA);
         (&this12)->buff = ((c_ptr_uint8_t)(cast_tmp));
-        coerce_tmp3 = (&this12)->buff;
         chpl_macro_tmp_429.locale = (s).locale;
         chpl_macro_tmp_429.addr = &(((s).addr)->buff);
         chpl_gen_comm_get(((void*)(&T5)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_429).locale), INT64(0), INT32(0)), (chpl_macro_tmp_429).addr, sizeof(c_ptr_uint8_t), -1, COMMID(5), INT64(151), INT64(8));
         chpl_macro_tmp_430.locale = (s).locale;
         chpl_macro_tmp_430.addr = &(((s).addr)->len);
         chpl_gen_comm_get(((void*)(&T6)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_430).locale), INT64(0), INT32(0)), (chpl_macro_tmp_430).addr, sizeof(int64_t), -1, COMMID(6), INT64(151), INT64(8));
-        memcpy(((c_void_ptr)(coerce_tmp3)), ((c_void_ptr)(T5)), ((uint64_t)(T6)));
-        coerce_tmp4 = (&this12)->buff;
-        call_tmp7 = (coerce_tmp4 + coerce_tmp);
+        memcpy(((c_void_ptr)((&this12)->buff)), ((c_void_ptr)(T5)), ((uint64_t)(T6)));
+        coerce_tmp3 = (&this12)->buff;
+        call_tmp7 = (coerce_tmp3 + coerce_tmp);
         *(call_tmp7) = ((uint8_t)(INT64(0)));
         (&this12)->_size = call_tmp6;
       } else {
@@ -612,9 +610,12 @@ static void this11(_ref_string this12,
   c_void_ptr cast_tmp;
   c_ptr_uint8_t thisBuff = NULL;
   chpl_bool remoteThis;
+  int32_t coerce_tmp2;
   chpl_bool call_tmp9;
   c_ptr_uint8_t call_tmp10 = NULL;
-  c_ptr_uint8_t coerce_tmp2 = NULL;
+  int32_t coerce_tmp3;
+  int64_t coerce_tmp4;
+  c_ptr_uint8_t coerce_tmp5 = NULL;
   range_int64_t_bounded_F _ic__F0_this;
   int64_t _ic__value;
   range_int64_t_boundedLow_F ret_tmp3;
@@ -624,15 +625,15 @@ static void this11(_ref_string this12,
   int64_t ret4;
   int64_t ret5;
   int64_t ret6;
-  c_ptr_uint8_t coerce_tmp3 = NULL;
+  c_ptr_uint8_t coerce_tmp6 = NULL;
   _ref_uint8_t call_tmp11 = NULL;
   int64_t call_tmp12;
   _ref_uint8_t call_tmp13 = NULL;
   int64_t T5;
   int64_t T6;
   int64_t T7;
-  c_ptr_uint8_t coerce_tmp4 = NULL;
-  int64_t coerce_tmp5;
+  c_ptr_uint8_t coerce_tmp7 = NULL;
+  int64_t coerce_tmp8;
   _ref_uint8_t call_tmp14 = NULL;
   chpl____wide__ref_range_int64_t_bounded_F chpl_macro_tmp_465;
   chpl____wide__ref_string chpl_macro_tmp_466;
@@ -699,14 +700,17 @@ static void this11(_ref_string this12,
     (&ret2)->_size = ret3;
     cast_tmp = chpl_here_alloc((&ret2)->_size, local_CHPL_RT_MD_STR_COPY_DATA);
     (&ret2)->buff = ((c_ptr_uint8_t)(cast_tmp));
-    call_tmp9 = ((this12)->locale_id != chpl_nodeID);
+    coerce_tmp2 = (this12)->locale_id;
+    call_tmp9 = (coerce_tmp2 != chpl_nodeID);
     remoteThis = call_tmp9;
     if (call_tmp9) {
-      call_tmp10 = copyRemoteBuffer(((int64_t)((this12)->locale_id)), (this12)->buff, (this12)->len);
+      coerce_tmp3 = (this12)->locale_id;
+      coerce_tmp4 = (this12)->len;
+      call_tmp10 = copyRemoteBuffer(((int64_t)(coerce_tmp3)), (this12)->buff, coerce_tmp4);
       thisBuff = call_tmp10;
     } else {
-      coerce_tmp2 = (this12)->buff;
-      thisBuff = coerce_tmp2;
+      coerce_tmp5 = (this12)->buff;
+      thisBuff = coerce_tmp5;
     }
     _ic__F0_this = r2;
     ret_to_arg_ref_tmp_3 = &ret_tmp3;
@@ -715,16 +719,16 @@ static void this11(_ref_string this12,
     ret4 = (&_ic__F0_this)->_low;
     ret5 = (&_ic__F0_this)->_high;
     ret6 = (&_ic__F0_this2)->_low;
-    coerce_tmp3 = (&ret2)->buff;
+    coerce_tmp6 = (&ret2)->buff;
     for (_ic__value = ret4,_ic__value2 = ret6; (T5 = (_ic__value <= ret5),T5); T6 = _ic__value,T6 += INT64(1),_ic__value = T6,T7 = _ic__value2,T7 += INT64(1),_ic__value2 = T7) {
-      call_tmp11 = (coerce_tmp3 + _ic__value2);
+      call_tmp11 = (coerce_tmp6 + _ic__value2);
       call_tmp12 = (_ic__value - INT64(1));
       call_tmp13 = (thisBuff + call_tmp12);
       *(call_tmp11) = *(call_tmp13);
     }
-    coerce_tmp4 = (&ret2)->buff;
-    coerce_tmp5 = (&ret2)->len;
-    call_tmp14 = (coerce_tmp4 + coerce_tmp5);
+    coerce_tmp7 = (&ret2)->buff;
+    coerce_tmp8 = (&ret2)->len;
+    call_tmp14 = (coerce_tmp7 + coerce_tmp8);
     *(call_tmp14) = ((uint8_t)(INT64(0)));
     if (remoteThis) {
       chpl_here_free(((c_void_ptr)(thisBuff)));
@@ -744,7 +748,6 @@ static void strip(_ref_string this12,
                   _ref_string _retArg) {
   string local__str_literal_372;
   string ret;
-  int64_t coerce_tmp;
   chpl_bool call_tmp2;
   chpl____wide__ref_string T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl_bool call_tmp3;
@@ -804,22 +807,21 @@ static void strip(_ref_string this12,
   chpl____wide__ref_string T11 = {CHPL_LOCALEID_T_INIT, NULL};
   int64_t start;
   int64_t end;
-  int64_t coerce_tmp2;
-  int64_t coerce_tmp3;
+  int64_t coerce_tmp;
   int64_t _ic__F1_high;
   int64_t i;
   int64_t i2;
-  int64_t coerce_tmp4;
   int64_t _ic__F1_high2;
   int64_t i3;
-  c_ptr_uint8_t coerce_tmp5 = NULL;
+  c_ptr_uint8_t coerce_tmp2 = NULL;
   _ref_uint8_t call_tmp12 = NULL;
-  c_ptr_uint8_t coerce_tmp6 = NULL;
+  c_ptr_uint8_t coerce_tmp3 = NULL;
   _ref_uint8_t call_tmp13 = NULL;
   chpl_bool call_tmp14;
   _ref_int64_t _ref_tmp_5 = NULL;
   range_int64_t_boundedLow_F ret_tmp7;
   _ref_range_int64_t_boundedLow_F ret_to_arg_ref_tmp_7 = NULL;
+  int64_t coerce_tmp4;
   range_int64_t_bounded_F ret_tmp8;
   _ref_range_int64_t_bounded_F ret_to_arg_ref_tmp_8 = NULL;
   range_int64_t_bounded_T ret_tmp9;
@@ -830,37 +832,30 @@ static void strip(_ref_string this12,
   chpl____wide__ref_range_int64_t_bounded_T T12 = {CHPL_LOCALEID_T_INIT, NULL};
   int64_t i4;
   int64_t ret4;
-  int64_t coerce_tmp7;
   chpl_bool call_tmp16;
   int64_t ret5;
   int64_t call_tmp17;
-  int64_t coerce_tmp8;
-  int64_t coerce_tmp9;
-  int64_t coerce_tmp10;
-  int64_t ret6;
+  int64_t coerce_tmp5;
   int64_t call_tmp18;
-  int64_t coerce_tmp11;
-  int64_t coerce_tmp12;
-  int64_t coerce_tmp13;
   int64_t end2;
-  int64_t ret7;
+  int64_t ret6;
   chpl_bool call_tmp19;
+  int64_t ret7;
   int64_t ret8;
-  int64_t ret9;
   chpl_bool call_tmp20;
-  int64_t ret10;
   int64_t call_tmp21;
-  int64_t coerce_tmp14;
-  int64_t coerce_tmp15;
-  int64_t coerce_tmp16;
+  int64_t coerce_tmp6;
+  int64_t ret9;
   int64_t call_tmp22;
-  int64_t ret11;
+  int64_t coerce_tmp7;
+  int64_t ret10;
   int64_t i5;
+  int64_t coerce_tmp8;
   int64_t _ic__F1_high3;
   int64_t i6;
-  c_ptr_uint8_t coerce_tmp17 = NULL;
+  c_ptr_uint8_t coerce_tmp9 = NULL;
   _ref_uint8_t call_tmp23 = NULL;
-  c_ptr_uint8_t coerce_tmp18 = NULL;
+  c_ptr_uint8_t coerce_tmp10 = NULL;
   _ref_uint8_t call_tmp24 = NULL;
   chpl_bool call_tmp25;
   _ref_int64_t _ref_tmp_6 = NULL;
@@ -893,8 +888,7 @@ static void strip(_ref_string this12,
   chpl____wide__ref_string chpl_macro_tmp_483;
   chpl____wide__ref_string chpl_macro_tmp_484;
   local__str_literal_372 /* "" */ = _str_literal_372 /* "" */;
-  coerce_tmp = (this12)->len;
-  call_tmp2 = (coerce_tmp == INT64(0));
+  call_tmp2 = ((this12)->len == INT64(0));
   if (call_tmp2) {
     chpl_macro_tmp_469.locale = chpl_gen_getLocaleID();
     chpl_macro_tmp_469.addr = &local__str_literal_372 /* "" */;
@@ -1036,20 +1030,18 @@ static void strip(_ref_string this12,
   chpl___ASSIGN_13(T10, T11);
   localChars = type_tmp3;
   start = INT64(1);
-  coerce_tmp2 = (&localThis)->len;
-  end = coerce_tmp2;
+  coerce_tmp = (&localThis)->len;
+  end = coerce_tmp;
   if (leading) {
-    coerce_tmp3 = (&localThis)->len;
-    _ic__F1_high = ((int64_t)((((int64_t)((INT64(0) + coerce_tmp3))) - INT64(1))));
-    coerce_tmp4 = (&localChars)->len;
-    _ic__F1_high2 = ((int64_t)((((int64_t)((INT64(0) + coerce_tmp4))) - INT64(1))));
+    _ic__F1_high = ((int64_t)((((int64_t)((INT64(0) + (&localThis)->len))) - INT64(1))));
+    _ic__F1_high2 = ((int64_t)((((int64_t)((INT64(0) + (&localChars)->len))) - INT64(1))));
     for (i = INT64(0); ((i <= _ic__F1_high)); i += INT64(1)) {
       i2 = i;
-      coerce_tmp5 = (&localThis)->buff;
-      coerce_tmp6 = (&localChars)->buff;
+      coerce_tmp2 = (&localThis)->buff;
+      coerce_tmp3 = (&localChars)->buff;
       for (i3 = INT64(0); ((i3 <= _ic__F1_high2)); i3 += INT64(1)) {
-        call_tmp12 = (coerce_tmp5 + i2);
-        call_tmp13 = (coerce_tmp6 + i3);
+        call_tmp12 = (coerce_tmp2 + i2);
+        call_tmp13 = (coerce_tmp3 + i3);
         call_tmp14 = (*(call_tmp12) == *(call_tmp13));
         if (call_tmp14) {
           _ref_tmp_5 = &start;
@@ -1065,8 +1057,9 @@ static void strip(_ref_string this12,
   if (trailing) {
     ret_to_arg_ref_tmp_7 = &ret_tmp7;
     chpl_build_low_bounded_range(INT64(0), ret_to_arg_ref_tmp_7);
+    coerce_tmp4 = (&localThis)->len;
     ret_to_arg_ref_tmp_8 = &ret_tmp8;
-    chpl___POUND_(&ret_tmp7, (&localThis)->len, ret_to_arg_ref_tmp_8);
+    chpl___POUND_(&ret_tmp7, coerce_tmp4, ret_to_arg_ref_tmp_8);
     ret_to_arg_ref_tmp_9 = &ret_tmp9;
     chpl_by_help(&ret_tmp8, INT64(-1), ret_to_arg_ref_tmp_9);
     _ic__F0_this = ret_tmp9;
@@ -1078,61 +1071,54 @@ static void strip(_ref_string this12,
     if (call_tmp15) {
       chpl_error("these -- Attempt to iterate over a range with ambiguous alignment.", INT64(918), INT32(8));
     }
-    coerce_tmp7 = (&_ic__F0_this)->_stride;
-    call_tmp16 = (coerce_tmp7 > INT64(0));
+    call_tmp16 = ((&_ic__F0_this)->_stride > INT64(0));
     if (call_tmp16) {
       ret5 = (&_ic__F0_this)->_stride;
-      coerce_tmp8 = (&_ic__F0_this)->_alignment;
-      coerce_tmp9 = (&_ic__F0_this)->_low;
-      call_tmp17 = chpl__diffMod(coerce_tmp8, coerce_tmp9, ret5);
-      coerce_tmp10 = (&_ic__F0_this)->_low;
-      ret4 = ((int64_t)((coerce_tmp10 + call_tmp17)));
+      call_tmp17 = chpl__diffMod((&_ic__F0_this)->_alignment, (&_ic__F0_this)->_low, ret5);
+      coerce_tmp5 = (&_ic__F0_this)->_low;
+      ret4 = ((int64_t)((coerce_tmp5 + call_tmp17)));
       goto _end__if_fn29;
     } else {
-      ret6 = (&_ic__F0_this)->_stride;
-      coerce_tmp11 = (&_ic__F0_this)->_high;
-      coerce_tmp12 = (&_ic__F0_this)->_alignment;
-      call_tmp18 = chpl__diffMod(coerce_tmp11, coerce_tmp12, ret6);
-      coerce_tmp13 = (&_ic__F0_this)->_high;
-      ret4 = ((int64_t)((coerce_tmp13 - call_tmp18)));
+      call_tmp18 = chpl__diffMod((&_ic__F0_this)->_high, (&_ic__F0_this)->_alignment, (&_ic__F0_this)->_stride);
+      ret4 = ((int64_t)(((&_ic__F0_this)->_high - call_tmp18)));
       goto _end__if_fn29;
     }
     _end__if_fn29:;
     call_tmp19 = ((&_ic__F0_this)->_low > (&_ic__F0_this)->_high);
     if (call_tmp19) {
-      ret7 = ret4;
+      ret6 = ret4;
       goto _end__if_fn48;
     } else {
-      ret9 = (&_ic__F0_this)->_stride;
-      call_tmp20 = (ret9 > INT64(0));
+      ret8 = (&_ic__F0_this)->_stride;
+      call_tmp20 = (ret8 > INT64(0));
       if (call_tmp20) {
-        ret10 = (&_ic__F0_this)->_stride;
-        coerce_tmp14 = (&_ic__F0_this)->_high;
-        coerce_tmp15 = (&_ic__F0_this)->_alignment;
-        call_tmp21 = chpl__diffMod(coerce_tmp14, coerce_tmp15, ret10);
-        coerce_tmp16 = (&_ic__F0_this)->_high;
-        ret8 = ((int64_t)((coerce_tmp16 - call_tmp21)));
+        coerce_tmp6 = (&_ic__F0_this)->_alignment;
+        call_tmp21 = chpl__diffMod((&_ic__F0_this)->_high, coerce_tmp6, (&_ic__F0_this)->_stride);
+        ret7 = ((int64_t)(((&_ic__F0_this)->_high - call_tmp21)));
         goto _end__if_fn30;
       } else {
-        call_tmp22 = chpl__diffMod((&_ic__F0_this)->_alignment, (&_ic__F0_this)->_low, (&_ic__F0_this)->_stride);
-        ret8 = ((int64_t)(((&_ic__F0_this)->_low + call_tmp22)));
+        ret9 = (&_ic__F0_this)->_stride;
+        call_tmp22 = chpl__diffMod((&_ic__F0_this)->_alignment, (&_ic__F0_this)->_low, ret9);
+        coerce_tmp7 = (&_ic__F0_this)->_low;
+        ret7 = ((int64_t)((coerce_tmp7 + call_tmp22)));
         goto _end__if_fn30;
       }
       _end__if_fn30:;
-      ret11 = (&_ic__F0_this)->_stride;
-      ret7 = ((int64_t)((ret8 + ret11)));
+      ret10 = (&_ic__F0_this)->_stride;
+      ret6 = ((int64_t)((ret7 + ret10)));
       goto _end__if_fn48;
     }
     _end__if_fn48:;
-    end2 = ret7;
-    _ic__F1_high3 = ((int64_t)((((int64_t)((INT64(0) + (&localChars)->len))) - INT64(1))));
+    end2 = ret6;
+    coerce_tmp8 = (&localChars)->len;
+    _ic__F1_high3 = ((int64_t)((((int64_t)((INT64(0) + coerce_tmp8))) - INT64(1))));
     for (i4 = ret4; ((i4 != end2)); i4 += (&_ic__F0_this)->_stride) {
       i5 = i4;
-      coerce_tmp17 = (&localThis)->buff;
-      coerce_tmp18 = (&localChars)->buff;
+      coerce_tmp9 = (&localThis)->buff;
+      coerce_tmp10 = (&localChars)->buff;
       for (i6 = INT64(0); ((i6 <= _ic__F1_high3)); i6 += INT64(1)) {
-        call_tmp23 = (coerce_tmp17 + i5);
-        call_tmp24 = (coerce_tmp18 + i6);
+        call_tmp23 = (coerce_tmp9 + i5);
+        call_tmp24 = (coerce_tmp10 + i6);
         call_tmp25 = (*(call_tmp23) == *(call_tmp24));
         if (call_tmp25) {
           _ref_tmp_6 = &end;
@@ -1190,11 +1176,13 @@ static string chpl__autoCopy6(_ref_string s) {
   chpl_bool coerce_tmp2;
   c_void_ptr cast_tmp;
   c_ptr_uint8_t coerce_tmp3 = NULL;
-  int64_t coerce_tmp4;
-  _ref_uint8_t call_tmp5 = NULL;
+  c_ptr_uint8_t coerce_tmp4 = NULL;
   c_ptr_uint8_t coerce_tmp5 = NULL;
+  int64_t coerce_tmp6;
+  _ref_uint8_t call_tmp5 = NULL;
+  c_ptr_uint8_t coerce_tmp7 = NULL;
   c_ptr_uint8_t call_tmp6 = NULL;
-  int32_t coerce_tmp6;
+  int32_t coerce_tmp8;
   local_CHPL_RT_MD_STR_COPY_DATA = CHPL_RT_MD_STR_COPY_DATA;
   (&this12)->len = INT64(0);
   (&this12)->_size = INT64(0);
@@ -1220,19 +1208,21 @@ static string chpl__autoCopy6(_ref_string s) {
       if (coerce_tmp2) {
         cast_tmp = chpl_here_alloc((s)->_size, local_CHPL_RT_MD_STR_COPY_DATA);
         (&ret)->buff = ((c_ptr_uint8_t)(cast_tmp));
-        memcpy(((c_void_ptr)((&ret)->buff)), ((c_void_ptr)((s)->buff)), ((uint64_t)((s)->len)));
         coerce_tmp3 = (&ret)->buff;
-        coerce_tmp4 = (s)->len;
-        call_tmp5 = (coerce_tmp3 + coerce_tmp4);
+        coerce_tmp4 = (s)->buff;
+        memcpy(((c_void_ptr)(coerce_tmp3)), ((c_void_ptr)(coerce_tmp4)), ((uint64_t)((s)->len)));
+        coerce_tmp5 = (&ret)->buff;
+        coerce_tmp6 = (s)->len;
+        call_tmp5 = (coerce_tmp5 + coerce_tmp6);
         *(call_tmp5) = ((uint8_t)(INT64(0)));
       } else {
-        coerce_tmp5 = (s)->buff;
-        (&ret)->buff = coerce_tmp5;
+        coerce_tmp7 = (s)->buff;
+        (&ret)->buff = coerce_tmp7;
       }
       (&ret)->owned = (s)->owned;
     } else {
-      coerce_tmp6 = (s)->locale_id;
-      call_tmp6 = copyRemoteBuffer(((int64_t)(coerce_tmp6)), (s)->buff, coerce_tmp);
+      coerce_tmp8 = (s)->locale_id;
+      call_tmp6 = copyRemoteBuffer(((int64_t)(coerce_tmp8)), (s)->buff, coerce_tmp);
       (&ret)->buff = call_tmp6;
       (&ret)->owned = UINT8(true);
     }
@@ -1260,10 +1250,11 @@ static string chpl__initCopy13(chpl____wide__ref_string s) {
   chpl_bool T3;
   int64_t T4;
   c_void_ptr cast_tmp;
+  c_ptr_uint8_t coerce_tmp3 = NULL;
   c_ptr_uint8_t T5 = NULL;
   int64_t T6;
-  c_ptr_uint8_t coerce_tmp3 = NULL;
-  int64_t coerce_tmp4;
+  c_ptr_uint8_t coerce_tmp4 = NULL;
+  int64_t coerce_tmp5;
   int64_t T7;
   _ref_uint8_t call_tmp5 = NULL;
   c_ptr_uint8_t T8 = NULL;
@@ -1319,19 +1310,20 @@ static string chpl__initCopy13(chpl____wide__ref_string s) {
         chpl_gen_comm_get(((void*)(&T4)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_488).locale), INT64(0), INT32(0)), (chpl_macro_tmp_488).addr, sizeof(int64_t), -1, COMMID(38), INT64(1305), INT64(8));
         cast_tmp = chpl_here_alloc(T4, local_CHPL_RT_MD_STR_COPY_DATA);
         (&ret)->buff = ((c_ptr_uint8_t)(cast_tmp));
+        coerce_tmp3 = (&ret)->buff;
         chpl_macro_tmp_489.locale = (s).locale;
         chpl_macro_tmp_489.addr = &(((s).addr)->buff);
         chpl_gen_comm_get(((void*)(&T5)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_489).locale), INT64(0), INT32(0)), (chpl_macro_tmp_489).addr, sizeof(c_ptr_uint8_t), -1, COMMID(39), INT64(1307), INT64(8));
         chpl_macro_tmp_490.locale = (s).locale;
         chpl_macro_tmp_490.addr = &(((s).addr)->len);
         chpl_gen_comm_get(((void*)(&T6)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_490).locale), INT64(0), INT32(0)), (chpl_macro_tmp_490).addr, sizeof(int64_t), -1, COMMID(40), INT64(1307), INT64(8));
-        memcpy(((c_void_ptr)((&ret)->buff)), ((c_void_ptr)(T5)), ((uint64_t)(T6)));
-        coerce_tmp3 = (&ret)->buff;
+        memcpy(((c_void_ptr)(coerce_tmp3)), ((c_void_ptr)(T5)), ((uint64_t)(T6)));
+        coerce_tmp4 = (&ret)->buff;
         chpl_macro_tmp_491.locale = (s).locale;
         chpl_macro_tmp_491.addr = &(((s).addr)->len);
         chpl_gen_comm_get(((void*)(&T7)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_491).locale), INT64(0), INT32(0)), (chpl_macro_tmp_491).addr, sizeof(int64_t), -1, COMMID(41), INT64(1308), INT64(8));
-        coerce_tmp4 = T7;
-        call_tmp5 = (coerce_tmp3 + coerce_tmp4);
+        coerce_tmp5 = T7;
+        call_tmp5 = (coerce_tmp4 + coerce_tmp5);
         *(call_tmp5) = ((uint8_t)(INT64(0)));
       } else {
         chpl_macro_tmp_492.locale = (s).locale;
@@ -1565,20 +1557,23 @@ static void chpl___PLUS_(_ref_string s0,
   int64_t coerce_tmp3;
   int64_t call_tmp5;
   c_void_ptr cast_tmp;
-  int32_t coerce_tmp4;
   chpl_bool call_tmp6;
+  int32_t coerce_tmp4;
   c_ptr_uint8_t coerce_tmp5 = NULL;
-  int32_t coerce_tmp6;
+  c_ptr_uint8_t coerce_tmp6 = NULL;
   c_ptr_uint8_t coerce_tmp7 = NULL;
-  chpl_bool call_tmp7;
-  c_ptr_uint8_t call_tmp8 = NULL;
   int32_t coerce_tmp8;
+  chpl_bool call_tmp7;
   c_ptr_uint8_t coerce_tmp9 = NULL;
-  c_ptr_uint8_t coerce_tmp10 = NULL;
-  int64_t coerce_tmp11;
-  _ref_uint8_t call_tmp9 = NULL;
+  int32_t coerce_tmp10;
+  c_ptr_uint8_t coerce_tmp11 = NULL;
+  c_ptr_uint8_t coerce_tmp12 = NULL;
+  c_ptr_uint8_t coerce_tmp13 = NULL;
+  int64_t coerce_tmp14;
+  _ref_uint8_t call_tmp8 = NULL;
   chpl____wide__ref_string chpl_macro_tmp_513;
   chpl____wide__ref_string chpl_macro_tmp_514;
+  c_ptr_uint8_t chpl_macro_tmp_515;
   local_CHPL_RT_MD_STR_COPY_DATA = CHPL_RT_MD_STR_COPY_DATA;
   coerce_tmp = (s0)->len;
   call_tmp2 = (coerce_tmp == INT64(0));
@@ -1620,29 +1615,32 @@ static void chpl___PLUS_(_ref_string s0,
   cast_tmp = chpl_here_alloc(call_tmp5, local_CHPL_RT_MD_STR_COPY_DATA);
   (&ret2)->buff = ((c_ptr_uint8_t)(cast_tmp));
   (&ret2)->owned = UINT8(true);
-  coerce_tmp4 = (s0)->locale_id;
-  call_tmp6 = (coerce_tmp4 != chpl_nodeID);
+  call_tmp6 = ((s0)->locale_id != chpl_nodeID);
   if (call_tmp6) {
-    coerce_tmp5 = (&ret2)->buff;
-    coerce_tmp6 = (s0)->locale_id;
+    coerce_tmp4 = (s0)->locale_id;
+    coerce_tmp5 = (s0)->buff;
+    chpl_gen_comm_get(((void*)((&ret2)->buff)), ((int64_t)(coerce_tmp4)), coerce_tmp5, ((uint64_t)(coerce_tmp)), -1, COMMID(62), INT64(1391), INT32(8));
+  } else {
+    coerce_tmp6 = (&ret2)->buff;
     coerce_tmp7 = (s0)->buff;
-    chpl_gen_comm_get(((void*)(coerce_tmp5)), ((int64_t)(coerce_tmp6)), coerce_tmp7, ((uint64_t)(coerce_tmp)), -1, COMMID(62), INT64(1391), INT32(8));
-  } else {
-    memcpy(((c_void_ptr)((&ret2)->buff)), ((c_void_ptr)((s0)->buff)), ((uint64_t)(coerce_tmp)));
+    memcpy(((c_void_ptr)(coerce_tmp6)), ((c_void_ptr)(coerce_tmp7)), ((uint64_t)(coerce_tmp)));
   }
-  call_tmp7 = ((s1)->locale_id != chpl_nodeID);
+  coerce_tmp8 = (s1)->locale_id;
+  call_tmp7 = (coerce_tmp8 != chpl_nodeID);
   if (call_tmp7) {
-    call_tmp8 = ((&ret2)->buff + coerce_tmp);
-    coerce_tmp8 = (s1)->locale_id;
-    coerce_tmp9 = (s1)->buff;
-    chpl_gen_comm_get(((void*)(call_tmp8)), ((int64_t)(coerce_tmp8)), coerce_tmp9, ((uint64_t)(coerce_tmp2)), -1, COMMID(63), INT64(1398), INT32(8));
+    coerce_tmp9 = (&ret2)->buff;
+    coerce_tmp10 = (s1)->locale_id;
+    chpl_macro_tmp_515 = (coerce_tmp9 + coerce_tmp);
+    chpl_gen_comm_get(((void*)(chpl_macro_tmp_515)), ((int64_t)(coerce_tmp10)), (s1)->buff, ((uint64_t)(coerce_tmp2)), -1, COMMID(63), INT64(1398), INT32(8));
   } else {
-    memcpy(((c_void_ptr)(((&ret2)->buff + coerce_tmp))), ((c_void_ptr)((s1)->buff)), ((uint64_t)(coerce_tmp2)));
+    coerce_tmp11 = (&ret2)->buff;
+    coerce_tmp12 = (s1)->buff;
+    memcpy(((c_void_ptr)((coerce_tmp11 + coerce_tmp))), ((c_void_ptr)(coerce_tmp12)), ((uint64_t)(coerce_tmp2)));
   }
-  coerce_tmp10 = (&ret2)->buff;
-  coerce_tmp11 = (&ret2)->len;
-  call_tmp9 = (coerce_tmp10 + coerce_tmp11);
-  *(call_tmp9) = ((uint8_t)(INT64(0)));
+  coerce_tmp13 = (&ret2)->buff;
+  coerce_tmp14 = (&ret2)->len;
+  call_tmp8 = (coerce_tmp13 + coerce_tmp14);
+  *(call_tmp8) = ((uint8_t)(INT64(0)));
   ret = ret2;
   _end__PLUS_:;
   *(_retArg) = ret;
@@ -1652,6 +1650,7 @@ static void chpl___PLUS_(_ref_string s0,
 /* String.chpl:1558 */
 static void chpl___PLUS__ASSIGN_(_ref_string lhs,
                                  _ref_string rhs) {
+  int64_t coerce_tmp;
   chpl_bool call_tmp2;
   chpl_localeID_t ret_tmp;
   _ref_chpl_localeID_t ret_to_arg_ref_tmp_ = NULL;
@@ -1667,12 +1666,13 @@ static void chpl___PLUS__ASSIGN_(_ref_string lhs,
   _ref_string T7 = NULL;
   chpl____wide__ref_string T8 = {CHPL_LOCALEID_T_INIT, NULL};
   c_void_ptr _args_vforon_fn;
-  chpl____wide__ref_string chpl_macro_tmp_515;
   chpl____wide__ref_string chpl_macro_tmp_516;
-  chpl__class_localson_fn191_object chpl_macro_tmp_517;
-  chpl____wide__ref_string chpl_macro_tmp_518;
+  chpl____wide__ref_string chpl_macro_tmp_517;
+  chpl__class_localson_fn191_object chpl_macro_tmp_518;
   chpl____wide__ref_string chpl_macro_tmp_519;
-  call_tmp2 = ((rhs)->len == INT64(0));
+  chpl____wide__ref_string chpl_macro_tmp_520;
+  coerce_tmp = (rhs)->len;
+  call_tmp2 = (coerce_tmp == INT64(0));
   if (call_tmp2) {
     goto _end__PLUS__ASSIGN_;
   }
@@ -1683,25 +1683,25 @@ static void chpl___PLUS__ASSIGN_(_ref_string lhs,
   T2 = lhs;
   isdirect = chpl_doDirectExecuteOn(&call_tmp3);
   if (isdirect) {
-    chpl_macro_tmp_515.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_515.addr = T;
-    T3 = chpl_macro_tmp_515;
     chpl_macro_tmp_516.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_516.addr = T2;
-    T4 = chpl_macro_tmp_516;
+    chpl_macro_tmp_516.addr = T;
+    T3 = chpl_macro_tmp_516;
+    chpl_macro_tmp_517.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_517.addr = T2;
+    T4 = chpl_macro_tmp_517;
     on_fn191(T3, T4);
   } else {
-    _args_foron_fn = ((_class_localson_fn191)(&chpl_macro_tmp_517));
+    _args_foron_fn = ((_class_localson_fn191)(&chpl_macro_tmp_518));
     (_args_foron_fn)->_0_rvfDerefTmp = call_tmp3;
     T5 = rhs;
-    chpl_macro_tmp_518.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_518.addr = T5;
-    T6 = chpl_macro_tmp_518;
+    chpl_macro_tmp_519.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_519.addr = T5;
+    T6 = chpl_macro_tmp_519;
     (_args_foron_fn)->_1_tmp = T6;
     T7 = lhs;
-    chpl_macro_tmp_519.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_519.addr = T7;
-    T8 = chpl_macro_tmp_519;
+    chpl_macro_tmp_520.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_520.addr = T7;
+    T8 = chpl_macro_tmp_520;
     (_args_foron_fn)->_2_tmp = T8;
     _args_vforon_fn = ((void*)(_args_foron_fn));
     /*** wrapon_fn191 ***/ chpl_executeOn(&call_tmp3, INT32(256), ((chpl_comm_on_bundle_p)(_args_vforon_fn)), sizeof(chpl__class_localson_fn191_object), INT64(1562), INT32(8));
@@ -1736,7 +1736,6 @@ static void on_fn191(chpl____wide__ref_string rhs,
   int64_t T8;
   int32_t T9;
   chpl_bool call_tmp10;
-  c_ptr_uint8_t call_tmp11 = NULL;
   c_ptr_uint8_t T10 = NULL;
   int64_t T11;
   int32_t T12;
@@ -1746,48 +1745,49 @@ static void on_fn191(chpl____wide__ref_string rhs,
   c_ptr_uint8_t T16 = NULL;
   c_ptr_uint8_t coerce_tmp3 = NULL;
   c_ptr_uint8_t T17 = NULL;
-  _ref_uint8_t call_tmp12 = NULL;
-  chpl____wide__ref_int64_t chpl_macro_tmp_520;
+  _ref_uint8_t call_tmp11 = NULL;
   chpl____wide__ref_int64_t chpl_macro_tmp_521;
   chpl____wide__ref_int64_t chpl_macro_tmp_522;
   chpl____wide__ref_int64_t chpl_macro_tmp_523;
-  chpl____wide__ref_chpl_bool chpl_macro_tmp_524;
-  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_525;
+  chpl____wide__ref_int64_t chpl_macro_tmp_524;
+  chpl____wide__ref_chpl_bool chpl_macro_tmp_525;
   chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_526;
-  c_ptr_uint8_t chpl_macro_tmp_527;
-  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_528;
-  chpl____wide__ref_int64_t chpl_macro_tmp_529;
-  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_530;
-  chpl____wide__ref_chpl_bool chpl_macro_tmp_531;
-  chpl_bool chpl_macro_tmp_532;
-  chpl____wide__ref_int64_t chpl_macro_tmp_533;
-  chpl____wide__ref_int32_t chpl_macro_tmp_534;
-  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_535;
-  chpl____wide__ref_int64_t chpl_macro_tmp_536;
-  chpl____wide__ref_int32_t chpl_macro_tmp_537;
-  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_538;
+  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_527;
+  c_ptr_uint8_t chpl_macro_tmp_528;
+  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_529;
+  chpl____wide__ref_int64_t chpl_macro_tmp_530;
+  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_531;
+  chpl____wide__ref_chpl_bool chpl_macro_tmp_532;
+  chpl_bool chpl_macro_tmp_533;
+  chpl____wide__ref_int64_t chpl_macro_tmp_534;
+  chpl____wide__ref_int32_t chpl_macro_tmp_535;
+  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_536;
+  chpl____wide__ref_int64_t chpl_macro_tmp_537;
+  chpl____wide__ref_int32_t chpl_macro_tmp_538;
   chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_539;
-  chpl____wide__ref_int64_t chpl_macro_tmp_540;
+  c_ptr_uint8_t chpl_macro_tmp_540;
   chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_541;
   chpl____wide__ref_int64_t chpl_macro_tmp_542;
   chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_543;
+  chpl____wide__ref_int64_t chpl_macro_tmp_544;
+  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_545;
   local_CHPL_RT_MD_STR_COPY_DATA = CHPL_RT_MD_STR_COPY_DATA;
-  chpl_macro_tmp_520.locale = (rhs).locale;
-  chpl_macro_tmp_520.addr = &(((rhs).addr)->len);
-  chpl_gen_comm_get(((void*)(&T)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_520).locale), INT64(0), INT32(0)), (chpl_macro_tmp_520).addr, sizeof(int64_t), -1, COMMID(64), INT64(1564), INT64(8));
+  chpl_macro_tmp_521.locale = (rhs).locale;
+  chpl_macro_tmp_521.addr = &(((rhs).addr)->len);
+  chpl_gen_comm_get(((void*)(&T)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_521).locale), INT64(0), INT32(0)), (chpl_macro_tmp_521).addr, sizeof(int64_t), -1, COMMID(64), INT64(1564), INT64(8));
   coerce_tmp = T;
-  chpl_macro_tmp_521.locale = (lhs).locale;
-  chpl_macro_tmp_521.addr = &(((lhs).addr)->len);
-  chpl_gen_comm_get(((void*)(&T2)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_521).locale), INT64(0), INT32(0)), (chpl_macro_tmp_521).addr, sizeof(int64_t), -1, COMMID(65), INT64(1565), INT64(8));
-  call_tmp2 = (T2 + coerce_tmp);
   chpl_macro_tmp_522.locale = (lhs).locale;
-  chpl_macro_tmp_522.addr = &(((lhs).addr)->_size);
-  chpl_gen_comm_get(((void*)(&T3)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_522).locale), INT64(0), INT32(0)), (chpl_macro_tmp_522).addr, sizeof(int64_t), -1, COMMID(66), INT64(1566), INT64(8));
+  chpl_macro_tmp_522.addr = &(((lhs).addr)->len);
+  chpl_gen_comm_get(((void*)(&T2)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_522).locale), INT64(0), INT32(0)), (chpl_macro_tmp_522).addr, sizeof(int64_t), -1, COMMID(65), INT64(1565), INT64(8));
+  call_tmp2 = (T2 + coerce_tmp);
+  chpl_macro_tmp_523.locale = (lhs).locale;
+  chpl_macro_tmp_523.addr = &(((lhs).addr)->_size);
+  chpl_gen_comm_get(((void*)(&T3)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_523).locale), INT64(0), INT32(0)), (chpl_macro_tmp_523).addr, sizeof(int64_t), -1, COMMID(66), INT64(1566), INT64(8));
   call_tmp3 = (T3 <= call_tmp2);
   if (call_tmp3) {
-    chpl_macro_tmp_523.locale = (lhs).locale;
-    chpl_macro_tmp_523.addr = &(((lhs).addr)->len);
-    chpl_gen_comm_get(((void*)(&T4)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_523).locale), INT64(0), INT32(0)), (chpl_macro_tmp_523).addr, sizeof(int64_t), -1, COMMID(67), INT64(1568), INT64(8));
+    chpl_macro_tmp_524.locale = (lhs).locale;
+    chpl_macro_tmp_524.addr = &(((lhs).addr)->len);
+    chpl_gen_comm_get(((void*)(&T4)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_524).locale), INT64(0), INT32(0)), (chpl_macro_tmp_524).addr, sizeof(int64_t), -1, COMMID(67), INT64(1568), INT64(8));
     call_tmp4 = (((_real64)(T4)) * 1.5);
     call_tmp5 = ((_real64)(((int64_t)((call_tmp2 + INT64(1))))));
     call_tmp6 = (call_tmp5 > call_tmp4);
@@ -1800,81 +1800,81 @@ static void on_fn191(chpl____wide__ref_string rhs,
     }
     _end__if_fn7:;
     call_tmp7 = chpl_here_good_alloc_size(((int64_t)(ret)));
-    chpl_macro_tmp_524.locale = (lhs).locale;
-    chpl_macro_tmp_524.addr = &(((lhs).addr)->owned);
-    chpl_gen_comm_get(((void*)(&T5)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_524).locale), INT64(0), INT32(0)), (chpl_macro_tmp_524).addr, sizeof(chpl_bool), -1, COMMID(68), INT64(1570), INT64(8));
+    chpl_macro_tmp_525.locale = (lhs).locale;
+    chpl_macro_tmp_525.addr = &(((lhs).addr)->owned);
+    chpl_gen_comm_get(((void*)(&T5)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_525).locale), INT64(0), INT32(0)), (chpl_macro_tmp_525).addr, sizeof(chpl_bool), -1, COMMID(68), INT64(1570), INT64(8));
     coerce_tmp2 = T5;
     if (coerce_tmp2) {
-      chpl_macro_tmp_525.locale = (lhs).locale;
-      chpl_macro_tmp_525.addr = &(((lhs).addr)->buff);
-      chpl_gen_comm_get(((void*)(&T6)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_525).locale), INT64(0), INT32(0)), (chpl_macro_tmp_525).addr, sizeof(c_ptr_uint8_t), -1, COMMID(69), INT64(1571), INT64(8));
-      call_tmp8 = chpl_here_realloc(((c_void_ptr)(T6)), call_tmp7, local_CHPL_RT_MD_STR_COPY_DATA);
       chpl_macro_tmp_526.locale = (lhs).locale;
       chpl_macro_tmp_526.addr = &(((lhs).addr)->buff);
-      chpl_macro_tmp_527 = ((c_ptr_uint8_t)(call_tmp8));
-      chpl_gen_comm_put(((void*)(&chpl_macro_tmp_527)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_526).locale), INT64(0), INT32(0)), (chpl_macro_tmp_526).addr, sizeof(c_ptr_uint8_t), -1, COMMID(70), INT64(1571), INT64(8));
+      chpl_gen_comm_get(((void*)(&T6)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_526).locale), INT64(0), INT32(0)), (chpl_macro_tmp_526).addr, sizeof(c_ptr_uint8_t), -1, COMMID(69), INT64(1571), INT64(8));
+      call_tmp8 = chpl_here_realloc(((c_void_ptr)(T6)), call_tmp7, local_CHPL_RT_MD_STR_COPY_DATA);
+      chpl_macro_tmp_527.locale = (lhs).locale;
+      chpl_macro_tmp_527.addr = &(((lhs).addr)->buff);
+      chpl_macro_tmp_528 = ((c_ptr_uint8_t)(call_tmp8));
+      chpl_gen_comm_put(((void*)(&chpl_macro_tmp_528)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_527).locale), INT64(0), INT32(0)), (chpl_macro_tmp_527).addr, sizeof(c_ptr_uint8_t), -1, COMMID(70), INT64(1571), INT64(8));
     } else {
       cast_tmp = chpl_here_alloc(call_tmp7, local_CHPL_RT_MD_STR_COPY_DATA);
       call_tmp9 = ((c_ptr_uint8_t)(cast_tmp));
-      chpl_macro_tmp_528.locale = (lhs).locale;
-      chpl_macro_tmp_528.addr = &(((lhs).addr)->buff);
-      chpl_gen_comm_get(((void*)(&T7)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_528).locale), INT64(0), INT32(0)), (chpl_macro_tmp_528).addr, sizeof(c_ptr_uint8_t), -1, COMMID(71), INT64(1576), INT64(8));
       chpl_macro_tmp_529.locale = (lhs).locale;
-      chpl_macro_tmp_529.addr = &(((lhs).addr)->len);
-      chpl_gen_comm_get(((void*)(&T8)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_529).locale), INT64(0), INT32(0)), (chpl_macro_tmp_529).addr, sizeof(int64_t), -1, COMMID(72), INT64(1576), INT64(8));
-      memcpy(((c_void_ptr)(call_tmp9)), ((c_void_ptr)(T7)), ((uint64_t)(T8)));
+      chpl_macro_tmp_529.addr = &(((lhs).addr)->buff);
+      chpl_gen_comm_get(((void*)(&T7)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_529).locale), INT64(0), INT32(0)), (chpl_macro_tmp_529).addr, sizeof(c_ptr_uint8_t), -1, COMMID(71), INT64(1576), INT64(8));
       chpl_macro_tmp_530.locale = (lhs).locale;
-      chpl_macro_tmp_530.addr = &(((lhs).addr)->buff);
-      chpl_gen_comm_put(((void*)(&call_tmp9)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_530).locale), INT64(0), INT32(0)), (chpl_macro_tmp_530).addr, sizeof(c_ptr_uint8_t), -1, COMMID(73), INT64(1577), INT64(8));
+      chpl_macro_tmp_530.addr = &(((lhs).addr)->len);
+      chpl_gen_comm_get(((void*)(&T8)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_530).locale), INT64(0), INT32(0)), (chpl_macro_tmp_530).addr, sizeof(int64_t), -1, COMMID(72), INT64(1576), INT64(8));
+      memcpy(((c_void_ptr)(call_tmp9)), ((c_void_ptr)(T7)), ((uint64_t)(T8)));
       chpl_macro_tmp_531.locale = (lhs).locale;
-      chpl_macro_tmp_531.addr = &(((lhs).addr)->owned);
-      chpl_macro_tmp_532 = UINT8(true);
-      chpl_gen_comm_put(((void*)(&chpl_macro_tmp_532)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_531).locale), INT64(0), INT32(0)), (chpl_macro_tmp_531).addr, sizeof(chpl_bool), -1, COMMID(74), INT64(1578), INT64(8));
+      chpl_macro_tmp_531.addr = &(((lhs).addr)->buff);
+      chpl_gen_comm_put(((void*)(&call_tmp9)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_531).locale), INT64(0), INT32(0)), (chpl_macro_tmp_531).addr, sizeof(c_ptr_uint8_t), -1, COMMID(73), INT64(1577), INT64(8));
+      chpl_macro_tmp_532.locale = (lhs).locale;
+      chpl_macro_tmp_532.addr = &(((lhs).addr)->owned);
+      chpl_macro_tmp_533 = UINT8(true);
+      chpl_gen_comm_put(((void*)(&chpl_macro_tmp_533)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_532).locale), INT64(0), INT32(0)), (chpl_macro_tmp_532).addr, sizeof(chpl_bool), -1, COMMID(74), INT64(1578), INT64(8));
     }
-    chpl_macro_tmp_533.locale = (lhs).locale;
-    chpl_macro_tmp_533.addr = &(((lhs).addr)->_size);
-    chpl_gen_comm_put(((void*)(&call_tmp7)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_533).locale), INT64(0), INT32(0)), (chpl_macro_tmp_533).addr, sizeof(int64_t), -1, COMMID(75), INT64(1581), INT64(8));
+    chpl_macro_tmp_534.locale = (lhs).locale;
+    chpl_macro_tmp_534.addr = &(((lhs).addr)->_size);
+    chpl_gen_comm_put(((void*)(&call_tmp7)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_534).locale), INT64(0), INT32(0)), (chpl_macro_tmp_534).addr, sizeof(int64_t), -1, COMMID(75), INT64(1581), INT64(8));
   }
-  chpl_macro_tmp_534.locale = (rhs).locale;
-  chpl_macro_tmp_534.addr = &(((rhs).addr)->locale_id);
-  chpl_gen_comm_get(((void*)(&T9)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_534).locale), INT64(0), INT32(0)), (chpl_macro_tmp_534).addr, sizeof(int32_t), -1, COMMID(76), INT64(1583), INT64(8));
+  chpl_macro_tmp_535.locale = (rhs).locale;
+  chpl_macro_tmp_535.addr = &(((rhs).addr)->locale_id);
+  chpl_gen_comm_get(((void*)(&T9)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_535).locale), INT64(0), INT32(0)), (chpl_macro_tmp_535).addr, sizeof(int32_t), -1, COMMID(76), INT64(1583), INT64(8));
   call_tmp10 = (T9 != chpl_nodeID);
   if (call_tmp10) {
-    chpl_macro_tmp_535.locale = (lhs).locale;
-    chpl_macro_tmp_535.addr = &(((lhs).addr)->buff);
-    chpl_gen_comm_get(((void*)(&T10)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_535).locale), INT64(0), INT32(0)), (chpl_macro_tmp_535).addr, sizeof(c_ptr_uint8_t), -1, COMMID(77), INT64(1585), INT64(8));
     chpl_macro_tmp_536.locale = (lhs).locale;
-    chpl_macro_tmp_536.addr = &(((lhs).addr)->len);
-    chpl_gen_comm_get(((void*)(&T11)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_536).locale), INT64(0), INT32(0)), (chpl_macro_tmp_536).addr, sizeof(int64_t), -1, COMMID(78), INT64(1585), INT64(8));
-    call_tmp11 = (T10 + T11);
-    chpl_macro_tmp_537.locale = (rhs).locale;
-    chpl_macro_tmp_537.addr = &(((rhs).addr)->locale_id);
-    chpl_gen_comm_get(((void*)(&T12)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_537).locale), INT64(0), INT32(0)), (chpl_macro_tmp_537).addr, sizeof(int32_t), -1, COMMID(79), INT64(1585), INT64(8));
+    chpl_macro_tmp_536.addr = &(((lhs).addr)->buff);
+    chpl_gen_comm_get(((void*)(&T10)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_536).locale), INT64(0), INT32(0)), (chpl_macro_tmp_536).addr, sizeof(c_ptr_uint8_t), -1, COMMID(77), INT64(1585), INT64(8));
+    chpl_macro_tmp_537.locale = (lhs).locale;
+    chpl_macro_tmp_537.addr = &(((lhs).addr)->len);
+    chpl_gen_comm_get(((void*)(&T11)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_537).locale), INT64(0), INT32(0)), (chpl_macro_tmp_537).addr, sizeof(int64_t), -1, COMMID(78), INT64(1585), INT64(8));
     chpl_macro_tmp_538.locale = (rhs).locale;
-    chpl_macro_tmp_538.addr = &(((rhs).addr)->buff);
-    chpl_gen_comm_get(((void*)(&T13)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_538).locale), INT64(0), INT32(0)), (chpl_macro_tmp_538).addr, sizeof(c_ptr_uint8_t), -1, COMMID(80), INT64(1585), INT64(8));
-    chpl_gen_comm_get(((void*)(call_tmp11)), ((int64_t)(T12)), T13, ((uint64_t)(coerce_tmp)), -1, COMMID(81), INT64(1585), INT32(8));
+    chpl_macro_tmp_538.addr = &(((rhs).addr)->locale_id);
+    chpl_gen_comm_get(((void*)(&T12)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_538).locale), INT64(0), INT32(0)), (chpl_macro_tmp_538).addr, sizeof(int32_t), -1, COMMID(79), INT64(1585), INT64(8));
+    chpl_macro_tmp_539.locale = (rhs).locale;
+    chpl_macro_tmp_539.addr = &(((rhs).addr)->buff);
+    chpl_gen_comm_get(((void*)(&T13)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_539).locale), INT64(0), INT32(0)), (chpl_macro_tmp_539).addr, sizeof(c_ptr_uint8_t), -1, COMMID(80), INT64(1585), INT64(8));
+    chpl_macro_tmp_540 = (T10 + T11);
+    chpl_gen_comm_get(((void*)(chpl_macro_tmp_540)), ((int64_t)(T12)), T13, ((uint64_t)(coerce_tmp)), -1, COMMID(81), INT64(1585), INT32(8));
   } else {
-    chpl_macro_tmp_539.locale = (lhs).locale;
-    chpl_macro_tmp_539.addr = &(((lhs).addr)->buff);
-    chpl_gen_comm_get(((void*)(&T14)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_539).locale), INT64(0), INT32(0)), (chpl_macro_tmp_539).addr, sizeof(c_ptr_uint8_t), -1, COMMID(82), INT64(1587), INT64(8));
-    chpl_macro_tmp_540.locale = (lhs).locale;
-    chpl_macro_tmp_540.addr = &(((lhs).addr)->len);
-    chpl_gen_comm_get(((void*)(&T15)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_540).locale), INT64(0), INT32(0)), (chpl_macro_tmp_540).addr, sizeof(int64_t), -1, COMMID(83), INT64(1587), INT64(8));
-    chpl_macro_tmp_541.locale = (rhs).locale;
-    chpl_macro_tmp_541.addr = &(((rhs).addr)->buff);
-    chpl_gen_comm_get(((void*)(&T16)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_541).locale), INT64(0), INT32(0)), (chpl_macro_tmp_541).addr, sizeof(c_ptr_uint8_t), -1, COMMID(84), INT64(1587), INT64(8));
+    chpl_macro_tmp_541.locale = (lhs).locale;
+    chpl_macro_tmp_541.addr = &(((lhs).addr)->buff);
+    chpl_gen_comm_get(((void*)(&T14)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_541).locale), INT64(0), INT32(0)), (chpl_macro_tmp_541).addr, sizeof(c_ptr_uint8_t), -1, COMMID(82), INT64(1587), INT64(8));
+    chpl_macro_tmp_542.locale = (lhs).locale;
+    chpl_macro_tmp_542.addr = &(((lhs).addr)->len);
+    chpl_gen_comm_get(((void*)(&T15)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_542).locale), INT64(0), INT32(0)), (chpl_macro_tmp_542).addr, sizeof(int64_t), -1, COMMID(83), INT64(1587), INT64(8));
+    chpl_macro_tmp_543.locale = (rhs).locale;
+    chpl_macro_tmp_543.addr = &(((rhs).addr)->buff);
+    chpl_gen_comm_get(((void*)(&T16)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_543).locale), INT64(0), INT32(0)), (chpl_macro_tmp_543).addr, sizeof(c_ptr_uint8_t), -1, COMMID(84), INT64(1587), INT64(8));
     memcpy(((c_void_ptr)((T14 + T15))), ((c_void_ptr)(T16)), ((uint64_t)(coerce_tmp)));
   }
-  chpl_macro_tmp_542.locale = (lhs).locale;
-  chpl_macro_tmp_542.addr = &(((lhs).addr)->len);
-  chpl_gen_comm_put(((void*)(&call_tmp2)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_542).locale), INT64(0), INT32(0)), (chpl_macro_tmp_542).addr, sizeof(int64_t), -1, COMMID(85), INT64(1589), INT64(8));
-  chpl_macro_tmp_543.locale = (lhs).locale;
-  chpl_macro_tmp_543.addr = &(((lhs).addr)->buff);
-  chpl_gen_comm_get(((void*)(&T17)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_543).locale), INT64(0), INT32(0)), (chpl_macro_tmp_543).addr, sizeof(c_ptr_uint8_t), -1, COMMID(86), INT64(1590), INT64(8));
+  chpl_macro_tmp_544.locale = (lhs).locale;
+  chpl_macro_tmp_544.addr = &(((lhs).addr)->len);
+  chpl_gen_comm_put(((void*)(&call_tmp2)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_544).locale), INT64(0), INT32(0)), (chpl_macro_tmp_544).addr, sizeof(int64_t), -1, COMMID(85), INT64(1589), INT64(8));
+  chpl_macro_tmp_545.locale = (lhs).locale;
+  chpl_macro_tmp_545.addr = &(((lhs).addr)->buff);
+  chpl_gen_comm_get(((void*)(&T17)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_545).locale), INT64(0), INT32(0)), (chpl_macro_tmp_545).addr, sizeof(c_ptr_uint8_t), -1, COMMID(86), INT64(1590), INT64(8));
   coerce_tmp3 = T17;
-  call_tmp12 = (coerce_tmp3 + call_tmp2);
-  *(call_tmp12) = ((uint8_t)(INT64(0)));
+  call_tmp11 = (coerce_tmp3 + call_tmp2);
+  *(call_tmp11) = ((uint8_t)(INT64(0)));
   return;
 }
 
@@ -1955,11 +1955,12 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
   int64_t coerce_tmp5;
   int64_t ret5;
   chpl_bool call_tmp11;
-  c_ptr_uint8_t coerce_tmp6 = NULL;
   int32_t call_tmp12;
   int64_t call_tmp13;
   chpl_bool call_tmp14;
+  int64_t coerce_tmp6;
   chpl_bool call_tmp15;
+  int64_t coerce_tmp7;
   chpl_bool call_tmp16;
   _ref_string _ref_tmp_5 = NULL;
   chpl____wide__ref_string T11 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -1969,8 +1970,6 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
   chpl____wide__ref_string T13 = {CHPL_LOCALEID_T_INIT, NULL};
   _ref_string _ref_tmp_8 = NULL;
   chpl____wide__ref_string T14 = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref_string chpl_macro_tmp_544;
-  chpl____wide__ref_string chpl_macro_tmp_545;
   chpl____wide__ref_string chpl_macro_tmp_546;
   chpl____wide__ref_string chpl_macro_tmp_547;
   chpl____wide__ref_string chpl_macro_tmp_548;
@@ -1983,6 +1982,8 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
   chpl____wide__ref_string chpl_macro_tmp_555;
   chpl____wide__ref_string chpl_macro_tmp_556;
   chpl____wide__ref_string chpl_macro_tmp_557;
+  chpl____wide__ref_string chpl_macro_tmp_558;
+  chpl____wide__ref_string chpl_macro_tmp_559;
   (&this12)->len = INT64(0);
   (&this12)->_size = INT64(0);
   (&this12)->buff = nil;
@@ -2003,9 +2004,9 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
   if (call_tmp4) {
     ret_to_arg_ref_tmp_2 = &ret_tmp2;
     i_s = a;
-    chpl_macro_tmp_544.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_544.addr = i_s;
-    T = chpl_macro_tmp_544;
+    chpl_macro_tmp_546.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_546.addr = i_s;
+    T = chpl_macro_tmp_546;
     string2(T, UINT8(false), ret_to_arg_ref_tmp_2);
     ret = ret_tmp2;
     goto _end_localize;
@@ -2027,12 +2028,12 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
     type_tmp2 = ret_tmp3;
     _ref_tmp_ = &type_tmp2;
     i_rhs = a;
-    chpl_macro_tmp_545.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_545.addr = _ref_tmp_;
-    T2 = chpl_macro_tmp_545;
-    chpl_macro_tmp_546.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_546.addr = i_rhs;
-    T3 = chpl_macro_tmp_546;
+    chpl_macro_tmp_547.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_547.addr = _ref_tmp_;
+    T2 = chpl_macro_tmp_547;
+    chpl_macro_tmp_548.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_548.addr = i_rhs;
+    T3 = chpl_macro_tmp_548;
     chpl___ASSIGN_13(T2, T3);
     ret = type_tmp2;
     goto _end_localize;
@@ -2040,12 +2041,12 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
   _end_localize:;
   call_tmp3 = ret;
   _ref_tmp_2 = &type_tmp;
-  chpl_macro_tmp_547.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_547.addr = _ref_tmp_2;
-  T4 = chpl_macro_tmp_547;
-  chpl_macro_tmp_548.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_548.addr = &ret;
-  T5 = chpl_macro_tmp_548;
+  chpl_macro_tmp_549.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_549.addr = _ref_tmp_2;
+  T4 = chpl_macro_tmp_549;
+  chpl_macro_tmp_550.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_550.addr = &ret;
+  T5 = chpl_macro_tmp_550;
   chpl___ASSIGN_13(T4, T5);
   localA = type_tmp;
   (&this14)->len = INT64(0);
@@ -2068,9 +2069,9 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
   if (call_tmp8) {
     ret_to_arg_ref_tmp_5 = &ret_tmp5;
     i_s2 = b;
-    chpl_macro_tmp_549.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_549.addr = i_s2;
-    T6 = chpl_macro_tmp_549;
+    chpl_macro_tmp_551.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_551.addr = i_s2;
+    T6 = chpl_macro_tmp_551;
     string2(T6, UINT8(false), ret_to_arg_ref_tmp_5);
     ret2 = ret_tmp5;
     goto _end_localize2;
@@ -2092,12 +2093,12 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
     type_tmp4 = ret_tmp6;
     _ref_tmp_3 = &type_tmp4;
     i_rhs2 = b;
-    chpl_macro_tmp_550.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_550.addr = _ref_tmp_3;
-    T7 = chpl_macro_tmp_550;
-    chpl_macro_tmp_551.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_551.addr = i_rhs2;
-    T8 = chpl_macro_tmp_551;
+    chpl_macro_tmp_552.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_552.addr = _ref_tmp_3;
+    T7 = chpl_macro_tmp_552;
+    chpl_macro_tmp_553.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_553.addr = i_rhs2;
+    T8 = chpl_macro_tmp_553;
     chpl___ASSIGN_13(T7, T8);
     ret2 = type_tmp4;
     goto _end_localize2;
@@ -2105,12 +2106,12 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
   _end_localize2:;
   call_tmp7 = ret2;
   _ref_tmp_4 = &type_tmp3;
-  chpl_macro_tmp_552.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_552.addr = _ref_tmp_4;
-  T9 = chpl_macro_tmp_552;
-  chpl_macro_tmp_553.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_553.addr = &ret2;
-  T10 = chpl_macro_tmp_553;
+  chpl_macro_tmp_554.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_554.addr = _ref_tmp_4;
+  T9 = chpl_macro_tmp_554;
+  chpl_macro_tmp_555.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_555.addr = &ret2;
+  T10 = chpl_macro_tmp_555;
   chpl___ASSIGN_13(T9, T10);
   localB = type_tmp3;
   coerce_tmp3 = (&localB)->len;
@@ -2130,17 +2131,18 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
     goto _end__if_fn2;
   }
   _end__if_fn2:;
-  coerce_tmp6 = (&localA)->buff;
-  call_tmp12 = memcmp(((c_void_ptr)(coerce_tmp6)), (&localB)->buff, ((uint64_t)(ret5)));
+  call_tmp12 = memcmp(((c_void_ptr)((&localA)->buff)), (&localB)->buff, ((uint64_t)(ret5)));
   call_tmp13 = ((int64_t)(call_tmp12));
   call_tmp14 = (call_tmp13 == INT64(0));
   if (call_tmp14) {
-    call_tmp15 = (ret5 < (&localA)->len);
+    coerce_tmp6 = (&localA)->len;
+    call_tmp15 = (ret5 < coerce_tmp6);
     if (call_tmp15) {
       ret4 = INT64(1);
       goto _end__strcmp;
     }
-    call_tmp16 = (ret5 < (&localB)->len);
+    coerce_tmp7 = (&localB)->len;
+    call_tmp16 = (ret5 < coerce_tmp7);
     if (call_tmp16) {
       ret4 = INT64(-1);
       goto _end__strcmp;
@@ -2151,24 +2153,24 @@ static chpl_bool chpl___EQUALS__(_ref_string a,
   ret3 = (ret4 == INT64(0));
   _end_doEq:;
   _ref_tmp_5 = &call_tmp7;
-  chpl_macro_tmp_554.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_554.addr = _ref_tmp_5;
-  T11 = chpl_macro_tmp_554;
+  chpl_macro_tmp_556.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_556.addr = _ref_tmp_5;
+  T11 = chpl_macro_tmp_556;
   deinit44(T11);
   _ref_tmp_6 = &localB;
-  chpl_macro_tmp_555.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_555.addr = _ref_tmp_6;
-  T12 = chpl_macro_tmp_555;
+  chpl_macro_tmp_557.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_557.addr = _ref_tmp_6;
+  T12 = chpl_macro_tmp_557;
   deinit44(T12);
   _ref_tmp_7 = &call_tmp3;
-  chpl_macro_tmp_556.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_556.addr = _ref_tmp_7;
-  T13 = chpl_macro_tmp_556;
+  chpl_macro_tmp_558.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_558.addr = _ref_tmp_7;
+  T13 = chpl_macro_tmp_558;
   deinit44(T13);
   _ref_tmp_8 = &localA;
-  chpl_macro_tmp_557.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_557.addr = _ref_tmp_8;
-  T14 = chpl_macro_tmp_557;
+  chpl_macro_tmp_559.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_559.addr = _ref_tmp_8;
+  T14 = chpl_macro_tmp_559;
   deinit44(T14);
   return ret3;
 }

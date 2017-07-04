@@ -59,9 +59,9 @@ static void chpl__init_MemTracking(int64_t _ln,
   c_string call_tmp31;
   string ret_tmp6;
   _ref_string ret_to_arg_ref_tmp_6 = NULL;
-  chpl____wide__ref_string chpl_macro_tmp_5316;
-  chpl____wide__ref_string chpl_macro_tmp_5317;
   chpl____wide__ref_string chpl_macro_tmp_5318;
+  chpl____wide__ref_string chpl_macro_tmp_5319;
+  chpl____wide__ref_string chpl_macro_tmp_5320;
   if (chpl__init_MemTracking_p) {
     goto _exit_chpl__init_MemTracking;
   }
@@ -154,9 +154,9 @@ static void chpl__init_MemTracking(int64_t _ln,
     _command_line_cast9(call_tmp23, ret_to_arg_ref_tmp_2);
     T7 = ret_tmp2;
   }
-  chpl_macro_tmp_5316.locale = (&memLog)->locale;
-  chpl_macro_tmp_5316.addr = &(((&memLog)->addr)->value);
-  chpl_gen_comm_put(((void*)(&T7)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5316).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5316).addr, sizeof(string), -1, COMMID(0), INT64(33), INT64(37));
+  chpl_macro_tmp_5318.locale = (&memLog)->locale;
+  chpl_macro_tmp_5318.addr = &(((&memLog)->addr)->value);
+  chpl_gen_comm_put(((void*)(&T7)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5318).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5318).addr, sizeof(string), -1, COMMID(0), INT64(33), INT64(37));
   call_tmp24 = chpl_config_has_value("memLeaksLog", "Built-in");
   call_tmp25 = (! call_tmp24);
   if (call_tmp25) {
@@ -181,9 +181,9 @@ static void chpl__init_MemTracking(int64_t _ln,
     _command_line_cast10(call_tmp27, ret_to_arg_ref_tmp_4);
     T8 = ret_tmp4;
   }
-  chpl_macro_tmp_5317.locale = (&memLeaksLog)->locale;
-  chpl_macro_tmp_5317.addr = &(((&memLeaksLog)->addr)->value);
-  chpl_gen_comm_put(((void*)(&T8)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5317).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5317).addr, sizeof(string), -1, COMMID(1), INT64(37), INT64(37));
+  chpl_macro_tmp_5319.locale = (&memLeaksLog)->locale;
+  chpl_macro_tmp_5319.addr = &(((&memLeaksLog)->addr)->value);
+  chpl_gen_comm_put(((void*)(&T8)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5319).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5319).addr, sizeof(string), -1, COMMID(1), INT64(37), INT64(37));
   call_tmp28 = chpl_config_has_value("memLeaksByDesc", "Built-in");
   call_tmp29 = (! call_tmp28);
   if (call_tmp29) {
@@ -208,9 +208,9 @@ static void chpl__init_MemTracking(int64_t _ln,
     _command_line_cast12(call_tmp31, ret_to_arg_ref_tmp_6);
     T9 = ret_tmp6;
   }
-  chpl_macro_tmp_5318.locale = (&memLeaksByDesc)->locale;
-  chpl_macro_tmp_5318.addr = &(((&memLeaksByDesc)->addr)->value);
-  chpl_gen_comm_put(((void*)(&T9)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5318).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5318).addr, sizeof(string), -1, COMMID(2), INT64(54), INT64(37));
+  chpl_macro_tmp_5320.locale = (&memLeaksByDesc)->locale;
+  chpl_macro_tmp_5320.addr = &(((&memLeaksByDesc)->addr)->value);
+  chpl_gen_comm_put(((void*)(&T9)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5320).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5320).addr, sizeof(string), -1, COMMID(2), INT64(54), INT64(37));
   cMemMax = memMax;
   chpl_comm_broadcast_private(INT64(29), sizeof(uint64_t), -1);
   cMemThreshold = memThreshold;
@@ -225,11 +225,11 @@ static void chpl__deinit_MemTracking(void) {
   chpl____wide_heap_string local_memLog = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__ref_string T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__ref_string _ref_tmp_ = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref_string chpl_macro_tmp_5319;
+  chpl____wide__ref_string chpl_macro_tmp_5321;
   local_memLog = memLog;
-  chpl_macro_tmp_5319.locale = (&local_memLog)->locale;
-  chpl_macro_tmp_5319.addr = &(((&local_memLog)->addr)->value);
-  T = chpl_macro_tmp_5319;
+  chpl_macro_tmp_5321.locale = (&local_memLog)->locale;
+  chpl_macro_tmp_5321.addr = &(((&local_memLog)->addr)->value);
+  T = chpl_macro_tmp_5321;
   _ref_tmp_ = T;
   deinit44(_ref_tmp_);
   return;
@@ -265,7 +265,6 @@ void chpl_memTracking_returnConfigVals(_ref_chpl_bool ret_memTrack,
   string local_memLeaksByDesc2;
   chpl____wide__ref_string T2 = {CHPL_LOCALEID_T_INIT, NULL};
   chpl_bool call_tmp6;
-  c_ptr_uint8_t coerce_tmp = NULL;
   _ref_string _ref_tmp_2 = NULL;
   chpl____wide__ref_string T3 = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__ref_string _ref_tmp_3 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -274,6 +273,7 @@ void chpl_memTracking_returnConfigVals(_ref_chpl_bool ret_memTrack,
   string local_memLog2;
   chpl____wide__ref_string T5 = {CHPL_LOCALEID_T_INIT, NULL};
   chpl_bool call_tmp8;
+  c_ptr_uint8_t coerce_tmp = NULL;
   _ref_string _ref_tmp_4 = NULL;
   chpl____wide__ref_string T6 = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__ref_string _ref_tmp_5 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -281,6 +281,7 @@ void chpl_memTracking_returnConfigVals(_ref_chpl_bool ret_memTrack,
   chpl_bool call_tmp9;
   string local_memLeaksLog2;
   chpl____wide__ref_string T8 = {CHPL_LOCALEID_T_INIT, NULL};
+  int32_t coerce_tmp2;
   chpl_bool call_tmp10;
   _ref_string _ref_tmp_6 = NULL;
   chpl____wide__ref_string T9 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -296,27 +297,27 @@ void chpl_memTracking_returnConfigVals(_ref_chpl_bool ret_memTrack,
   int32_t T14;
   chpl_bool call_tmp13;
   c_ptr_uint8_t T15 = NULL;
-  chpl____wide__ref_string chpl_macro_tmp_5320;
-  chpl____wide__ref_int64_t chpl_macro_tmp_5321;
   chpl____wide__ref_string chpl_macro_tmp_5322;
-  chpl____wide__ref_string chpl_macro_tmp_5323;
+  chpl____wide__ref_int64_t chpl_macro_tmp_5323;
   chpl____wide__ref_string chpl_macro_tmp_5324;
-  chpl____wide__ref_int64_t chpl_macro_tmp_5325;
+  chpl____wide__ref_string chpl_macro_tmp_5325;
   chpl____wide__ref_string chpl_macro_tmp_5326;
-  chpl____wide__ref_string chpl_macro_tmp_5327;
+  chpl____wide__ref_int64_t chpl_macro_tmp_5327;
   chpl____wide__ref_string chpl_macro_tmp_5328;
-  chpl____wide__ref_int64_t chpl_macro_tmp_5329;
+  chpl____wide__ref_string chpl_macro_tmp_5329;
   chpl____wide__ref_string chpl_macro_tmp_5330;
-  chpl____wide__ref_string chpl_macro_tmp_5331;
+  chpl____wide__ref_int64_t chpl_macro_tmp_5331;
   chpl____wide__ref_string chpl_macro_tmp_5332;
-  chpl____wide__ref_int32_t chpl_macro_tmp_5333;
-  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_5334;
-  chpl____wide__ref_string chpl_macro_tmp_5335;
-  chpl____wide__ref_int32_t chpl_macro_tmp_5336;
-  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_5337;
-  chpl____wide__ref_string chpl_macro_tmp_5338;
-  chpl____wide__ref_int32_t chpl_macro_tmp_5339;
-  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_5340;
+  chpl____wide__ref_string chpl_macro_tmp_5333;
+  chpl____wide__ref_string chpl_macro_tmp_5334;
+  chpl____wide__ref_int32_t chpl_macro_tmp_5335;
+  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_5336;
+  chpl____wide__ref_string chpl_macro_tmp_5337;
+  chpl____wide__ref_int32_t chpl_macro_tmp_5338;
+  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_5339;
+  chpl____wide__ref_string chpl_macro_tmp_5340;
+  chpl____wide__ref_int32_t chpl_macro_tmp_5341;
+  chpl____wide__ref_c_ptr_uint8_t chpl_macro_tmp_5342;
   local_memLeaksLog = memLeaksLog;
   local_memLog = memLog;
   local__str_literal_337 /* "Cannot call .c_str() on a remote string" */ = _str_literal_337 /* "Cannot call .c_str() on a remote string" */;
@@ -338,127 +339,128 @@ void chpl_memTracking_returnConfigVals(_ref_chpl_bool ret_memTrack,
   call_tmp3 = id(call_tmp2);
   call_tmp4 = (call_tmp3 != INT64(0));
   if (call_tmp4) {
-    chpl_macro_tmp_5320.locale = (&local_memLeaksByDesc)->locale;
-    chpl_macro_tmp_5320.addr = &(((&local_memLeaksByDesc)->addr)->value);
-    _ref_tmp_ = chpl_macro_tmp_5320;
-    chpl_macro_tmp_5321.locale = (_ref_tmp_).locale;
-    chpl_macro_tmp_5321.addr = &(((_ref_tmp_).addr)->len);
-    chpl_gen_comm_get(((void*)(&T)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5321).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5321).addr, sizeof(int64_t), -1, COMMID(3), INT64(90), INT64(37));
+    chpl_macro_tmp_5322.locale = (&local_memLeaksByDesc)->locale;
+    chpl_macro_tmp_5322.addr = &(((&local_memLeaksByDesc)->addr)->value);
+    _ref_tmp_ = chpl_macro_tmp_5322;
+    chpl_macro_tmp_5323.locale = (_ref_tmp_).locale;
+    chpl_macro_tmp_5323.addr = &(((_ref_tmp_).addr)->len);
+    chpl_gen_comm_get(((void*)(&T)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5323).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5323).addr, sizeof(int64_t), -1, COMMID(3), INT64(90), INT64(37));
     call_tmp5 = (T != INT64(0));
     if (call_tmp5) {
-      chpl_macro_tmp_5322.locale = (&local_memLeaksByDesc)->locale;
-      chpl_macro_tmp_5322.addr = &(((&local_memLeaksByDesc)->addr)->value);
-      T2 = chpl_macro_tmp_5322;
+      chpl_macro_tmp_5324.locale = (&local_memLeaksByDesc)->locale;
+      chpl_macro_tmp_5324.addr = &(((&local_memLeaksByDesc)->addr)->value);
+      T2 = chpl_macro_tmp_5324;
       local_memLeaksByDesc2 = chpl__initCopy13(T2);
       (&local_memLeaksByDesc2)->owned = UINT8(false);
       call_tmp6 = ((&local_memLeaksByDesc2)->locale_id != chpl_nodeID);
       if (call_tmp6) {
         halt(&local__str_literal_337 /* "Cannot call .c_str() on a remote string" */, INT64(94), INT32(37));
       }
-      coerce_tmp = (&local_memLeaksByDesc2)->buff;
-      *(ret_memLeaksByDesc) = ((c_string)(((c_void_ptr)(coerce_tmp))));
+      *(ret_memLeaksByDesc) = ((c_string)(((c_void_ptr)((&local_memLeaksByDesc2)->buff))));
       _ref_tmp_2 = &local_memLeaksByDesc2;
-      chpl_macro_tmp_5323.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_5323.addr = _ref_tmp_2;
-      T3 = chpl_macro_tmp_5323;
+      chpl_macro_tmp_5325.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_5325.addr = _ref_tmp_2;
+      T3 = chpl_macro_tmp_5325;
       deinit44(T3);
     } else {
       *(ret_memLeaksByDesc) = ((c_string)(NULL));
     }
-    chpl_macro_tmp_5324.locale = (&local_memLog)->locale;
-    chpl_macro_tmp_5324.addr = &(((&local_memLog)->addr)->value);
-    _ref_tmp_3 = chpl_macro_tmp_5324;
-    chpl_macro_tmp_5325.locale = (_ref_tmp_3).locale;
-    chpl_macro_tmp_5325.addr = &(((_ref_tmp_3).addr)->len);
-    chpl_gen_comm_get(((void*)(&T4)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5325).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5325).addr, sizeof(int64_t), -1, COMMID(4), INT64(99), INT64(37));
+    chpl_macro_tmp_5326.locale = (&local_memLog)->locale;
+    chpl_macro_tmp_5326.addr = &(((&local_memLog)->addr)->value);
+    _ref_tmp_3 = chpl_macro_tmp_5326;
+    chpl_macro_tmp_5327.locale = (_ref_tmp_3).locale;
+    chpl_macro_tmp_5327.addr = &(((_ref_tmp_3).addr)->len);
+    chpl_gen_comm_get(((void*)(&T4)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5327).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5327).addr, sizeof(int64_t), -1, COMMID(4), INT64(99), INT64(37));
     call_tmp7 = (T4 != INT64(0));
     if (call_tmp7) {
-      chpl_macro_tmp_5326.locale = (&local_memLog)->locale;
-      chpl_macro_tmp_5326.addr = &(((&local_memLog)->addr)->value);
-      T5 = chpl_macro_tmp_5326;
+      chpl_macro_tmp_5328.locale = (&local_memLog)->locale;
+      chpl_macro_tmp_5328.addr = &(((&local_memLog)->addr)->value);
+      T5 = chpl_macro_tmp_5328;
       local_memLog2 = chpl__initCopy13(T5);
       (&local_memLog2)->owned = UINT8(false);
       call_tmp8 = ((&local_memLog2)->locale_id != chpl_nodeID);
       if (call_tmp8) {
         halt(&local__str_literal_337 /* "Cannot call .c_str() on a remote string" */, INT64(103), INT32(37));
       }
-      *(ret_memLog) = ((c_string)(((c_void_ptr)((&local_memLog2)->buff))));
+      coerce_tmp = (&local_memLog2)->buff;
+      *(ret_memLog) = ((c_string)(((c_void_ptr)(coerce_tmp))));
       _ref_tmp_4 = &local_memLog2;
-      chpl_macro_tmp_5327.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_5327.addr = _ref_tmp_4;
-      T6 = chpl_macro_tmp_5327;
+      chpl_macro_tmp_5329.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_5329.addr = _ref_tmp_4;
+      T6 = chpl_macro_tmp_5329;
       deinit44(T6);
     } else {
       *(ret_memLog) = ((c_string)(NULL));
     }
-    chpl_macro_tmp_5328.locale = (&local_memLeaksLog)->locale;
-    chpl_macro_tmp_5328.addr = &(((&local_memLeaksLog)->addr)->value);
-    _ref_tmp_5 = chpl_macro_tmp_5328;
-    chpl_macro_tmp_5329.locale = (_ref_tmp_5).locale;
-    chpl_macro_tmp_5329.addr = &(((_ref_tmp_5).addr)->len);
-    chpl_gen_comm_get(((void*)(&T7)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5329).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5329).addr, sizeof(int64_t), -1, COMMID(5), INT64(108), INT64(37));
+    chpl_macro_tmp_5330.locale = (&local_memLeaksLog)->locale;
+    chpl_macro_tmp_5330.addr = &(((&local_memLeaksLog)->addr)->value);
+    _ref_tmp_5 = chpl_macro_tmp_5330;
+    chpl_macro_tmp_5331.locale = (_ref_tmp_5).locale;
+    chpl_macro_tmp_5331.addr = &(((_ref_tmp_5).addr)->len);
+    chpl_gen_comm_get(((void*)(&T7)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5331).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5331).addr, sizeof(int64_t), -1, COMMID(5), INT64(108), INT64(37));
     call_tmp9 = (T7 != INT64(0));
     if (call_tmp9) {
-      chpl_macro_tmp_5330.locale = (&local_memLeaksLog)->locale;
-      chpl_macro_tmp_5330.addr = &(((&local_memLeaksLog)->addr)->value);
-      T8 = chpl_macro_tmp_5330;
+      chpl_macro_tmp_5332.locale = (&local_memLeaksLog)->locale;
+      chpl_macro_tmp_5332.addr = &(((&local_memLeaksLog)->addr)->value);
+      T8 = chpl_macro_tmp_5332;
       local_memLeaksLog2 = chpl__initCopy13(T8);
       (&local_memLeaksLog2)->owned = UINT8(false);
-      call_tmp10 = ((&local_memLeaksLog2)->locale_id != chpl_nodeID);
+      coerce_tmp2 = (&local_memLeaksLog2)->locale_id;
+      call_tmp10 = (coerce_tmp2 != chpl_nodeID);
       if (call_tmp10) {
         halt(&local__str_literal_337 /* "Cannot call .c_str() on a remote string" */, INT64(112), INT32(37));
       }
       *(ret_memLeaksLog) = ((c_string)(((c_void_ptr)((&local_memLeaksLog2)->buff))));
       _ref_tmp_6 = &local_memLeaksLog2;
-      chpl_macro_tmp_5331.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_5331.addr = _ref_tmp_6;
-      T9 = chpl_macro_tmp_5331;
+      chpl_macro_tmp_5333.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_5333.addr = _ref_tmp_6;
+      T9 = chpl_macro_tmp_5333;
       deinit44(T9);
     } else {
       *(ret_memLeaksLog) = ((c_string)(NULL));
     }
   } else {
-    chpl_macro_tmp_5332.locale = (&local_memLeaksByDesc)->locale;
-    chpl_macro_tmp_5332.addr = &(((&local_memLeaksByDesc)->addr)->value);
-    _ref_tmp_7 = chpl_macro_tmp_5332;
-    chpl_macro_tmp_5333.locale = (_ref_tmp_7).locale;
-    chpl_macro_tmp_5333.addr = &(((_ref_tmp_7).addr)->locale_id);
-    chpl_gen_comm_get(((void*)(&T10)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5333).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5333).addr, sizeof(int32_t), -1, COMMID(6), INT64(118), INT64(37));
+    chpl_macro_tmp_5334.locale = (&local_memLeaksByDesc)->locale;
+    chpl_macro_tmp_5334.addr = &(((&local_memLeaksByDesc)->addr)->value);
+    _ref_tmp_7 = chpl_macro_tmp_5334;
+    chpl_macro_tmp_5335.locale = (_ref_tmp_7).locale;
+    chpl_macro_tmp_5335.addr = &(((_ref_tmp_7).addr)->locale_id);
+    chpl_gen_comm_get(((void*)(&T10)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5335).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5335).addr, sizeof(int32_t), -1, COMMID(6), INT64(118), INT64(37));
     call_tmp11 = (T10 != chpl_nodeID);
     if (call_tmp11) {
       halt(&local__str_literal_337 /* "Cannot call .c_str() on a remote string" */, INT64(118), INT32(37));
     }
-    chpl_macro_tmp_5334.locale = (_ref_tmp_7).locale;
-    chpl_macro_tmp_5334.addr = &(((_ref_tmp_7).addr)->buff);
-    chpl_gen_comm_get(((void*)(&T11)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5334).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5334).addr, sizeof(c_ptr_uint8_t), -1, COMMID(7), INT64(118), INT64(37));
+    chpl_macro_tmp_5336.locale = (_ref_tmp_7).locale;
+    chpl_macro_tmp_5336.addr = &(((_ref_tmp_7).addr)->buff);
+    chpl_gen_comm_get(((void*)(&T11)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5336).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5336).addr, sizeof(c_ptr_uint8_t), -1, COMMID(7), INT64(118), INT64(37));
     *(ret_memLeaksByDesc) = ((c_string)(((c_void_ptr)(T11))));
-    chpl_macro_tmp_5335.locale = (&local_memLog)->locale;
-    chpl_macro_tmp_5335.addr = &(((&local_memLog)->addr)->value);
-    _ref_tmp_8 = chpl_macro_tmp_5335;
-    chpl_macro_tmp_5336.locale = (_ref_tmp_8).locale;
-    chpl_macro_tmp_5336.addr = &(((_ref_tmp_8).addr)->locale_id);
-    chpl_gen_comm_get(((void*)(&T12)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5336).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5336).addr, sizeof(int32_t), -1, COMMID(8), INT64(119), INT64(37));
+    chpl_macro_tmp_5337.locale = (&local_memLog)->locale;
+    chpl_macro_tmp_5337.addr = &(((&local_memLog)->addr)->value);
+    _ref_tmp_8 = chpl_macro_tmp_5337;
+    chpl_macro_tmp_5338.locale = (_ref_tmp_8).locale;
+    chpl_macro_tmp_5338.addr = &(((_ref_tmp_8).addr)->locale_id);
+    chpl_gen_comm_get(((void*)(&T12)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5338).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5338).addr, sizeof(int32_t), -1, COMMID(8), INT64(119), INT64(37));
     call_tmp12 = (T12 != chpl_nodeID);
     if (call_tmp12) {
       halt(&local__str_literal_337 /* "Cannot call .c_str() on a remote string" */, INT64(119), INT32(37));
     }
-    chpl_macro_tmp_5337.locale = (_ref_tmp_8).locale;
-    chpl_macro_tmp_5337.addr = &(((_ref_tmp_8).addr)->buff);
-    chpl_gen_comm_get(((void*)(&T13)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5337).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5337).addr, sizeof(c_ptr_uint8_t), -1, COMMID(9), INT64(119), INT64(37));
+    chpl_macro_tmp_5339.locale = (_ref_tmp_8).locale;
+    chpl_macro_tmp_5339.addr = &(((_ref_tmp_8).addr)->buff);
+    chpl_gen_comm_get(((void*)(&T13)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5339).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5339).addr, sizeof(c_ptr_uint8_t), -1, COMMID(9), INT64(119), INT64(37));
     *(ret_memLog) = ((c_string)(((c_void_ptr)(T13))));
-    chpl_macro_tmp_5338.locale = (&local_memLeaksLog)->locale;
-    chpl_macro_tmp_5338.addr = &(((&local_memLeaksLog)->addr)->value);
-    _ref_tmp_9 = chpl_macro_tmp_5338;
-    chpl_macro_tmp_5339.locale = (_ref_tmp_9).locale;
-    chpl_macro_tmp_5339.addr = &(((_ref_tmp_9).addr)->locale_id);
-    chpl_gen_comm_get(((void*)(&T14)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5339).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5339).addr, sizeof(int32_t), -1, COMMID(10), INT64(120), INT64(37));
+    chpl_macro_tmp_5340.locale = (&local_memLeaksLog)->locale;
+    chpl_macro_tmp_5340.addr = &(((&local_memLeaksLog)->addr)->value);
+    _ref_tmp_9 = chpl_macro_tmp_5340;
+    chpl_macro_tmp_5341.locale = (_ref_tmp_9).locale;
+    chpl_macro_tmp_5341.addr = &(((_ref_tmp_9).addr)->locale_id);
+    chpl_gen_comm_get(((void*)(&T14)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5341).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5341).addr, sizeof(int32_t), -1, COMMID(10), INT64(120), INT64(37));
     call_tmp13 = (T14 != chpl_nodeID);
     if (call_tmp13) {
       halt(&local__str_literal_337 /* "Cannot call .c_str() on a remote string" */, INT64(120), INT32(37));
     }
-    chpl_macro_tmp_5340.locale = (_ref_tmp_9).locale;
-    chpl_macro_tmp_5340.addr = &(((_ref_tmp_9).addr)->buff);
-    chpl_gen_comm_get(((void*)(&T15)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5340).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5340).addr, sizeof(c_ptr_uint8_t), -1, COMMID(11), INT64(120), INT64(37));
+    chpl_macro_tmp_5342.locale = (_ref_tmp_9).locale;
+    chpl_macro_tmp_5342.addr = &(((_ref_tmp_9).addr)->buff);
+    chpl_gen_comm_get(((void*)(&T15)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_5342).locale), INT64(0), INT32(0)), (chpl_macro_tmp_5342).addr, sizeof(c_ptr_uint8_t), -1, COMMID(11), INT64(120), INT64(37));
     *(ret_memLeaksLog) = ((c_string)(((c_void_ptr)(T15))));
   }
   return;

@@ -1,7 +1,7 @@
 // Number of elements to distribute across clusters. We choose 44 million as we're
 // using Haswell currently and it has 44 HPC clusters at our disposal. For 'strong'
 // scaling, this should likely be changed.
-config var nElements = 44 * 1024 * 1024;
+config var nElements = 1 * 1024 * 1024;
 // Number of trials to run (and take the average of)
 config var nTrials = 10;
 // Number of computations per queue operation. This is used to introduce some
@@ -14,16 +14,17 @@ config var nJitter = 0;
 // Whether or not we are 'weak' scaling, as in we keep the workload the same but distribute
 // it as we increase in the number of locales, or 'strong' in that we keep the number
 // of elements per locale the same.
-config var weak = 1;
+config var weak = false;
 // Below are flags to determine which queue to test for...
-config var isFIFO = 0;
-config var isMPMC = 0;
-config var isSync = 0;
-config var isCCSynch = 0;
-config var isList = 0;
+config var isFIFO = false;
+config var isMPMC = false;
+config var isSync = false;
+config var isCCSynch = false;
+config var isList = false;
+config var isFCH = false;
 // Whether or not we log communications and per-locale information.
-config var logLocaleInfo = 0;
-config var verboseLog = 0;
+config var logLocaleInfo = false;
+config var verboseLog = false;
 
 use IO;
 use CommDiagnostics;
@@ -31,6 +32,7 @@ use CCQueue;
 use DistributedFIFOQueue;
 use DistributedQueue;
 use SyncList;
+use FCHQueue;
 
 use Time;
 use Random;
@@ -46,8 +48,10 @@ inline proc getQueue(type eltType) : Queue(eltType) {
     return new CCQueue(eltType);
   } else if isList {
     return new SyncList(eltType);
+  } else if isFCH {
+    return new FCHQueue(eltType);
   } else {
-    halt("Requires one of the flags to be set: '--isFIFO', '--isMPMC', '--isSync', '--isList', or '--isCCSynch'");
+    halt("Requires one of the flags to be set: '--isFIFO', '--isMPMC', '--isSync', '--isList', or '--isCCSynch', or '--isFCH'");
   }
 }
 

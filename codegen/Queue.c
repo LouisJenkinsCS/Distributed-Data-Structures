@@ -17,10 +17,8 @@ static void chpl__init_Queue(int64_t _ln_chpl,
 /* Queue.chpl:1 */
 static Queue_int64_t_chpl _construct_Queue_chpl(Queue_int64_t_chpl meme_chpl) {
   Queue_int64_t_chpl this_chpl6 = NULL;
-  object tmp_chpl = NULL;
   this_chpl6 = meme_chpl;
-  tmp_chpl = &((this_chpl6)->super_chpl);
-  _construct_object(tmp_chpl);
+  _construct_object(&((this_chpl6)->super_chpl));
   return meme_chpl;
 }
 

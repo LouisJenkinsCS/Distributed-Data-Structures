@@ -3,9 +3,10 @@ use Queue;
 use List;
 
 class EnqueueFunctor : FCHFunctor {
-  var elem;
+  type eltType;
+  var elem : eltType;
 
-  proc this(ref data : dataType) {
+  proc this(data : dataType) {
     data._list.push_back(elem);
   }
 }
@@ -15,7 +16,7 @@ class DequeueFunctor : FCHFunctor {
   var retval : eltType;
   var hasElem : bool;
 
-  proc this(ref data : dataType) {
+  proc this(data : dataType) {
     if data._list.length {
       hasElem = true;
       retval = data._list.pop_front();
@@ -32,7 +33,7 @@ class FCHQueue : Queue {
   }
 
   proc enqueue(elt : eltType) {
-    var f = new EnqueueFunctor(FCHQueue(eltType), elt);
+    var f = new EnqueueFunctor(FCHQueue(eltType), eltType, elt);
     fchLock.synchronize(f);
     delete f;
   }

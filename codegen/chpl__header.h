@@ -1772,15 +1772,15 @@ typedef struct chpl_chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t_s {
   DequeueFunctor_FCHQueue_int64_t_int64_t_chpl addr;
 } chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t;
 
-typedef struct chpl_chpl____wide_FCHLocalNode_FCHQueue_int64_t_s {
-  chpl_localeID_t locale;
-  FCHLocalNode_FCHQueue_int64_t_chpl addr;
-} chpl____wide_FCHLocalNode_FCHQueue_int64_t;
-
 typedef struct chpl_chpl____wide_GDT_FCHGlobalNode_s {
   chpl_localeID_t locale;
   GDT_FCHGlobalNode_chpl addr;
 } chpl____wide_GDT_FCHGlobalNode;
+
+typedef struct chpl_chpl____wide_FCHLocalNode_FCHQueue_int64_t_s {
+  chpl_localeID_t locale;
+  FCHLocalNode_FCHQueue_int64_t_chpl addr;
+} chpl____wide_FCHLocalNode_FCHQueue_int64_t;
 
 typedef struct chpl_chpl____wide_Error_s {
   chpl_localeID_t locale;
@@ -1792,11 +1792,6 @@ typedef struct chpl_chpl____wide_FCHQueue_int64_t_s {
   FCHQueue_int64_t_chpl addr;
 } chpl____wide_FCHQueue_int64_t;
 
-typedef struct chpl_chpl____wide_FCHLock_FCHQueue_int64_t_s {
-  chpl_localeID_t locale;
-  FCHLock_FCHQueue_int64_t_chpl addr;
-} chpl____wide_FCHLock_FCHQueue_int64_t;
-
 typedef struct chpl_chpl____wide_ArrayViewSliceArr_Bitmap_int64_t_DefaultRectangularDom_1_int64_t_T_int64_t_DefaultRectangularArr_Bitmap_1_int64_t_T_int64_t_s {
   chpl_localeID_t locale;
   ArrayViewSliceArr_Bitmap_int64_t_DefaultRectangularDom_1_int64_t_T_int64_t_DefaultRectangularArr_Bitmap_1_int64_t_T_int64_t addr;
@@ -1806,6 +1801,11 @@ typedef struct chpl_chpl____wide_ArrayViewSliceArr__array_DefaultRectangularArr_
   chpl_localeID_t locale;
   ArrayViewSliceArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_int64_t_DefaultRectangularDom_1_int64_t_T_int64_t_DefaultRectangularArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_T_int64_t addr;
 } chpl____wide_ArrayViewSliceArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_int64_t_DefaultRectangularDom_1_int64_t_T_int64_t_DefaultRectangularArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_T_int64_t;
+
+typedef struct chpl_chpl____wide_FCHLock_FCHQueue_int64_t_s {
+  chpl_localeID_t locale;
+  FCHLock_FCHQueue_int64_t_chpl addr;
+} chpl____wide_FCHLock_FCHQueue_int64_t;
 
 typedef struct chpl_chpl____wide_heap__tuple_6_star_string_s {
   chpl_localeID_t locale;
@@ -3851,120 +3851,120 @@ typedef struct chpl__class_localson_fn23_s {
 
 typedef struct chpl__class_localscobegin_fn_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn_object;
 
 typedef struct chpl__class_localscobegin_fn2_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn2_object;
 
 typedef struct chpl__class_localscobegin_fn3_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_CyclicDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_CyclicDom_1_int64_t_F _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_CyclicDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_CyclicDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn3_object;
 
 typedef struct chpl__class_localscobegin_fn4_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn4_object;
 
 typedef struct chpl__class_localscobegin_fn5_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_Replicated _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_Replicated _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_Replicated _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_Replicated _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn5_object;
 
 typedef struct chpl__class_localscobegin_fn6_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn6_object;
 
 typedef struct chpl__class_localscobegin_fn7_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_Cyclic_1_int64_t _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_Cyclic_1_int64_t _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_Cyclic_1_int64_t _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_Cyclic_1_int64_t _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn7_object;
 
 typedef struct chpl__class_localscobegin_fn8_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn8_object;
 
 typedef struct chpl__class_localscobegin_fn9_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn9_object;
 
 typedef struct chpl__class_localscobegin_fn10_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn10_object;
 
 typedef struct chpl__class_localscobegin_fn11_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn11_object;
 
 typedef struct chpl__class_localson_fn24_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  chpl____wide_Cyclic_1_int64_t _1_rvfDerefTmp;
+  int64_t _1_rvfDerefTmp;
   chpl____wide_Cyclic_1_int64_t _2_rvfDerefTmp;
-  int64_t _3_rvfDerefTmp;
+  chpl____wide_Cyclic_1_int64_t _3_rvfDerefTmp;
   int64_t _4_rvfDerefTmp;
   int64_t _5_rvfDerefTmp;
 } chpl__class_localson_fn24_object;
@@ -3972,10 +3972,10 @@ typedef struct chpl__class_localson_fn24_s {
 typedef struct chpl__class_localson_fn25_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
+  int64_t _1_rvfDerefTmp;
   int64_t _2_rvfDerefTmp;
-  int64_t _3_rvfDerefTmp;
-  _tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _4_rvfDerefTmp;
+  _tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _3_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
   chpl____wide_ReplicatedDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn25_object;
 
@@ -3983,10 +3983,10 @@ typedef struct chpl__class_localson_fn26_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
   int64_t _1_rvfDerefTmp;
-  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _2_rvfDerefTmp;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _3_rvfDerefTmp;
+  int64_t _2_rvfDerefTmp;
+  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _3_rvfDerefTmp;
   chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn26_object;
 
 typedef struct chpl__class_localson_fn27_s {
@@ -3994,29 +3994,29 @@ typedef struct chpl__class_localson_fn27_s {
   chpl_localeID_t _0_rvfDerefTmp;
   int64_t _1_rvfDerefTmp;
   int64_t _2_rvfDerefTmp;
-  chpl____wide_CyclicDom_1_int64_t_F _3_rvfDerefTmp;
+  int64_t _3_rvfDerefTmp;
   chpl____wide_CyclicDom_1_int64_t_F _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  chpl____wide_CyclicDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn27_object;
 
 typedef struct chpl__class_localson_fn28_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
-  _tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _2_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _3_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _2_rvfDerefTmp;
+  int64_t _3_rvfDerefTmp;
+  int64_t _4_rvfDerefTmp;
+  _tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _5_rvfDerefTmp;
 } chpl__class_localson_fn28_object;
 
 typedef struct chpl__class_localson_fn29_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
-  int64_t _2_rvfDerefTmp;
-  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _3_rvfDerefTmp;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _5_rvfDerefTmp;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _2_rvfDerefTmp;
+  int64_t _3_rvfDerefTmp;
+  int64_t _4_rvfDerefTmp;
+  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _5_rvfDerefTmp;
 } chpl__class_localson_fn29_object;
 
 typedef struct chpl__class_localson_fn30_s {
@@ -4032,24 +4032,34 @@ typedef struct chpl__class_localson_fn30_s {
 typedef struct chpl__class_localson_fn31_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
+  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _1_rvfDerefTmp;
   int64_t _2_rvfDerefTmp;
-  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _3_rvfDerefTmp;
-  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  int64_t _3_rvfDerefTmp;
+  int64_t _4_rvfDerefTmp;
+  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn31_object;
 
 typedef struct chpl__class_localson_fn32_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
-  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _2_rvfDerefTmp;
-  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _3_rvfDerefTmp;
+  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _1_rvfDerefTmp;
+  int64_t _2_rvfDerefTmp;
+  int64_t _3_rvfDerefTmp;
   int64_t _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn32_object;
 
 typedef struct chpl__class_localson_fn33_s {
+  chpl_comm_on_bundle_t _runtime_hdr;
+  chpl_localeID_t _0_rvfDerefTmp;
+  int64_t _1_rvfDerefTmp;
+  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _2_rvfDerefTmp;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _3_rvfDerefTmp;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
+  int64_t _5_rvfDerefTmp;
+} chpl__class_localson_fn33_object;
+
+typedef struct chpl__class_localson_fn34_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
   chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
@@ -4057,144 +4067,134 @@ typedef struct chpl__class_localson_fn33_s {
   int64_t _3_rvfDerefTmp;
   _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _4_rvfDerefTmp;
   chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _5_rvfDerefTmp;
-} chpl__class_localson_fn33_object;
-
-typedef struct chpl__class_localson_fn34_s {
-  chpl_comm_on_bundle_t _runtime_hdr;
-  chpl_localeID_t _0_rvfDerefTmp;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _2_rvfDerefTmp;
-  int64_t _3_rvfDerefTmp;
-  int64_t _4_rvfDerefTmp;
-  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _5_rvfDerefTmp;
 } chpl__class_localson_fn34_object;
 
 typedef struct chpl__class_localscobegin_fn12_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_Replicated _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_Replicated _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_Replicated _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_Replicated _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn12_object;
 
 typedef struct chpl__class_localscobegin_fn13_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_CyclicDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_CyclicDom_1_int64_t_F _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_CyclicDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_CyclicDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn13_object;
 
 typedef struct chpl__class_localscobegin_fn14_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn14_object;
 
 typedef struct chpl__class_localscobegin_fn15_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn15_object;
 
 typedef struct chpl__class_localscobegin_fn16_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn16_object;
 
 typedef struct chpl__class_localscobegin_fn17_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn17_object;
 
 typedef struct chpl__class_localscobegin_fn18_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn18_object;
 
 typedef struct chpl__class_localscobegin_fn19_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn19_object;
 
 typedef struct chpl__class_localscobegin_fn20_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn20_object;
 
 typedef struct chpl__class_localscobegin_fn21_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_Cyclic_1_int64_t _1_newValue_captemp;
-  int64_t _2_hereID;
-  int64_t _3_privatizeData;
-  chpl____wide_Cyclic_1_int64_t _4_originalValue;
+  int64_t _0_privatizeData;
+  chpl____wide_Cyclic_1_int64_t _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_Cyclic_1_int64_t _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn21_object;
 
 typedef struct chpl__class_localscobegin_fn22_s {
   chpl_task_bundle_t _runtime_hdr;
-  int64_t _0_n;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_newValue_captemp;
-  int64_t _2_hereID;
-  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _3_privatizeData;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _4_originalValue;
+  _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _0_privatizeData;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_originalValue;
+  int64_t _2_n;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
+  int64_t _4_hereID;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn22_object;
 
 typedef struct chpl__class_localson_fn35_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
+  int64_t _1_rvfDerefTmp;
   int64_t _2_rvfDerefTmp;
-  int64_t _3_rvfDerefTmp;
+  _tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _3_rvfDerefTmp;
   chpl____wide_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
-  _tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _5_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn35_object;
 
 typedef struct chpl__class_localson_fn36_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
   int64_t _1_rvfDerefTmp;
-  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _2_rvfDerefTmp;
-  int64_t _3_rvfDerefTmp;
+  int64_t _2_rvfDerefTmp;
+  chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _3_rvfDerefTmp;
   chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _4_rvfDerefTmp;
   int64_t _5_rvfDerefTmp;
 } chpl__class_localson_fn36_object;
@@ -4202,10 +4202,10 @@ typedef struct chpl__class_localson_fn36_s {
 typedef struct chpl__class_localson_fn37_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _1_rvfDerefTmp;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _2_rvfDerefTmp;
-  int64_t _3_rvfDerefTmp;
-  int64_t _4_rvfDerefTmp;
+  int64_t _1_rvfDerefTmp;
+  int64_t _2_rvfDerefTmp;
+  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _3_rvfDerefTmp;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
   chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn37_object;
 
@@ -4213,9 +4213,9 @@ typedef struct chpl__class_localson_fn38_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
   chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
-  int64_t _2_rvfDerefTmp;
+  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _2_rvfDerefTmp;
   int64_t _3_rvfDerefTmp;
-  chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
+  int64_t _4_rvfDerefTmp;
   _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T _5_rvfDerefTmp;
 } chpl__class_localson_fn38_object;
 
@@ -4223,30 +4223,30 @@ typedef struct chpl__class_localson_fn39_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
   int64_t _1_rvfDerefTmp;
-  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _2_rvfDerefTmp;
+  int64_t _2_rvfDerefTmp;
   int64_t _3_rvfDerefTmp;
   chpl____wide_CyclicArr_Bitmap_1_int64_t_F _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  chpl____wide_CyclicArr_Bitmap_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn39_object;
 
 typedef struct chpl__class_localson_fn40_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
+  chpl____wide_Cyclic_1_int64_t _1_rvfDerefTmp;
   chpl____wide_Cyclic_1_int64_t _2_rvfDerefTmp;
   int64_t _3_rvfDerefTmp;
   int64_t _4_rvfDerefTmp;
-  chpl____wide_Cyclic_1_int64_t _5_rvfDerefTmp;
+  int64_t _5_rvfDerefTmp;
 } chpl__class_localson_fn40_object;
 
 typedef struct chpl__class_localson_fn41_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
-  int64_t _2_rvfDerefTmp;
+  chpl____wide_Replicated _1_rvfDerefTmp;
+  chpl____wide_Replicated _2_rvfDerefTmp;
   int64_t _3_rvfDerefTmp;
-  chpl____wide_Replicated _4_rvfDerefTmp;
-  chpl____wide_Replicated _5_rvfDerefTmp;
+  int64_t _4_rvfDerefTmp;
+  int64_t _5_rvfDerefTmp;
 } chpl__class_localson_fn41_object;
 
 typedef struct chpl__class_localson_fn42_s {
@@ -4254,29 +4254,29 @@ typedef struct chpl__class_localson_fn42_s {
   chpl_localeID_t _0_rvfDerefTmp;
   int64_t _1_rvfDerefTmp;
   chpl____wide_CyclicDom_1_int64_t_F _2_rvfDerefTmp;
-  int64_t _3_rvfDerefTmp;
-  chpl____wide_CyclicDom_1_int64_t_F _4_rvfDerefTmp;
+  chpl____wide_CyclicDom_1_int64_t_F _3_rvfDerefTmp;
+  int64_t _4_rvfDerefTmp;
   int64_t _5_rvfDerefTmp;
 } chpl__class_localson_fn42_object;
 
 typedef struct chpl__class_localson_fn43_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _2_rvfDerefTmp;
-  _tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _3_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
+  int64_t _2_rvfDerefTmp;
+  int64_t _3_rvfDerefTmp;
+  _tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T _4_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn43_object;
 
 typedef struct chpl__class_localson_fn44_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
-  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _2_rvfDerefTmp;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _3_rvfDerefTmp;
-  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
+  int64_t _2_rvfDerefTmp;
+  int64_t _3_rvfDerefTmp;
+  _tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T _4_rvfDerefTmp;
+  chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn44_object;
 
 typedef struct chpl__class_localson_fn45_s {
@@ -4344,31 +4344,31 @@ typedef struct chpl__class_localson_fn50_s {
 
 typedef struct chpl__class_localscobegin_fn25_s {
   chpl_task_bundle_t _runtime_hdr;
-  chpl____wide_ReplicatedDom_1_int64_t_F _0_originalValue;
-  _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _1_reprivatizeData;
-  int64_t _2_pid;
-  chpl____wide_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
-  int64_t _4_hereID;
+  _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _0_reprivatizeData;
+  int64_t _1_pid;
+  chpl____wide_ReplicatedDom_1_int64_t_F _2_newValue_captemp;
+  int64_t _3_hereID;
+  chpl____wide_ReplicatedDom_1_int64_t_F _4_originalValue;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn25_object;
 
 typedef struct chpl__class_localscobegin_fn26_s {
   chpl_task_bundle_t _runtime_hdr;
-  chpl____wide_CyclicDom_1_int64_t_F _0_originalValue;
-  int64_t _1_reprivatizeData;
-  int64_t _2_pid;
-  chpl____wide_CyclicDom_1_int64_t_F _3_newValue_captemp;
-  int64_t _4_hereID;
+  int64_t _0_reprivatizeData;
+  int64_t _1_pid;
+  chpl____wide_CyclicDom_1_int64_t_F _2_newValue_captemp;
+  int64_t _3_hereID;
+  chpl____wide_CyclicDom_1_int64_t_F _4_originalValue;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn26_object;
 
 typedef struct chpl__class_localscobegin_fn27_s {
   chpl_task_bundle_t _runtime_hdr;
-  chpl____wide_ReplicatedDom_1_int64_t_F _0_originalValue;
-  _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _1_reprivatizeData;
-  int64_t _2_pid;
-  chpl____wide_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
-  int64_t _4_hereID;
+  _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _0_reprivatizeData;
+  int64_t _1_pid;
+  chpl____wide_ReplicatedDom_1_int64_t_F _2_newValue_captemp;
+  int64_t _3_hereID;
+  chpl____wide_ReplicatedDom_1_int64_t_F _4_originalValue;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn27_object;
 
@@ -4376,79 +4376,79 @@ typedef struct chpl__class_localson_fn51_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
   int64_t _1_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _2_rvfDerefTmp;
+  int64_t _2_rvfDerefTmp;
   chpl____wide_ReplicatedDom_1_int64_t_F _3_rvfDerefTmp;
-  _tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
+  _tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn51_object;
 
 typedef struct chpl__class_localson_fn52_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
+  _tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _1_rvfDerefTmp;
   int64_t _2_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _3_rvfDerefTmp;
+  int64_t _3_rvfDerefTmp;
   chpl____wide_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
-  _tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _5_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn52_object;
 
 typedef struct chpl__class_localson_fn53_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
   int64_t _1_rvfDerefTmp;
-  int64_t _2_rvfDerefTmp;
-  int64_t _3_rvfDerefTmp;
-  chpl____wide_CyclicDom_1_int64_t_F _4_rvfDerefTmp;
-  chpl____wide_CyclicDom_1_int64_t_F _5_rvfDerefTmp;
+  chpl____wide_CyclicDom_1_int64_t_F _2_rvfDerefTmp;
+  chpl____wide_CyclicDom_1_int64_t_F _3_rvfDerefTmp;
+  int64_t _4_rvfDerefTmp;
+  int64_t _5_rvfDerefTmp;
 } chpl__class_localson_fn53_object;
 
 typedef struct chpl__class_localscobegin_fn28_s {
   chpl_task_bundle_t _runtime_hdr;
-  chpl____wide_CyclicDom_1_int64_t_F _0_originalValue;
-  int64_t _1_reprivatizeData;
-  int64_t _2_pid;
-  chpl____wide_CyclicDom_1_int64_t_F _3_newValue_captemp;
-  int64_t _4_hereID;
+  int64_t _0_reprivatizeData;
+  int64_t _1_pid;
+  chpl____wide_CyclicDom_1_int64_t_F _2_newValue_captemp;
+  int64_t _3_hereID;
+  chpl____wide_CyclicDom_1_int64_t_F _4_originalValue;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn28_object;
 
 typedef struct chpl__class_localscobegin_fn29_s {
   chpl_task_bundle_t _runtime_hdr;
-  chpl____wide_ReplicatedDom_1_int64_t_F _0_originalValue;
-  _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _1_reprivatizeData;
-  int64_t _2_pid;
-  chpl____wide_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
-  int64_t _4_hereID;
+  _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _0_reprivatizeData;
+  int64_t _1_pid;
+  chpl____wide_ReplicatedDom_1_int64_t_F _2_newValue_captemp;
+  int64_t _3_hereID;
+  chpl____wide_ReplicatedDom_1_int64_t_F _4_originalValue;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn29_object;
 
 typedef struct chpl__class_localscobegin_fn30_s {
   chpl_task_bundle_t _runtime_hdr;
-  chpl____wide_ReplicatedDom_1_int64_t_F _0_originalValue;
-  _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _1_reprivatizeData;
-  int64_t _2_pid;
-  chpl____wide_ReplicatedDom_1_int64_t_F _3_newValue_captemp;
-  int64_t _4_hereID;
+  _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _0_reprivatizeData;
+  int64_t _1_pid;
+  chpl____wide_ReplicatedDom_1_int64_t_F _2_newValue_captemp;
+  int64_t _3_hereID;
+  chpl____wide_ReplicatedDom_1_int64_t_F _4_originalValue;
   chpl___EndCount_atomic_int64_int64_t _5__cobeginCount;
 } chpl__class_localscobegin_fn30_object;
 
 typedef struct chpl__class_localson_fn54_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  int64_t _1_rvfDerefTmp;
-  int64_t _2_rvfDerefTmp;
-  chpl____wide_CyclicDom_1_int64_t_F _3_rvfDerefTmp;
-  chpl____wide_CyclicDom_1_int64_t_F _4_rvfDerefTmp;
+  chpl____wide_CyclicDom_1_int64_t_F _1_rvfDerefTmp;
+  chpl____wide_CyclicDom_1_int64_t_F _2_rvfDerefTmp;
+  int64_t _3_rvfDerefTmp;
+  int64_t _4_rvfDerefTmp;
   int64_t _5_rvfDerefTmp;
 } chpl__class_localson_fn54_object;
 
 typedef struct chpl__class_localson_fn55_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _1_rvfDerefTmp;
+  int64_t _1_rvfDerefTmp;
   chpl____wide_ReplicatedDom_1_int64_t_F _2_rvfDerefTmp;
-  _tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _3_rvfDerefTmp;
-  int64_t _4_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _3_rvfDerefTmp;
+  _tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _4_rvfDerefTmp;
   int64_t _5_rvfDerefTmp;
 } chpl__class_localson_fn55_object;
 
@@ -4456,10 +4456,10 @@ typedef struct chpl__class_localson_fn56_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
   int64_t _1_rvfDerefTmp;
-  chpl____wide_ReplicatedDom_1_int64_t_F _2_rvfDerefTmp;
+  int64_t _2_rvfDerefTmp;
   chpl____wide_ReplicatedDom_1_int64_t_F _3_rvfDerefTmp;
-  _tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _4_rvfDerefTmp;
-  int64_t _5_rvfDerefTmp;
+  chpl____wide_ReplicatedDom_1_int64_t_F _4_rvfDerefTmp;
+  _tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F _5_rvfDerefTmp;
 } chpl__class_localson_fn56_object;
 
 typedef struct chpl__class_localson_fn57_s {
@@ -4861,99 +4861,99 @@ typedef struct chpl__class_localscoforall_fn14_s {
 typedef struct chpl__class_localscoforall_fn15_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_LocCyclic_1_int64_t _0_x1__e1_args;
-  int64_t _1__yieldedIndex;
-  int64_t _2_numChunks;
-  _ref_range_int64_t_bounded_F _3_tmp;
-  int64_t _4_len;
-  chpl___EndCount_atomic_int64_int64_t _5__coforallCount;
+  int64_t _1_numChunks;
+  int64_t _2__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
+  _ref_range_int64_t_bounded_F _4_tmp;
+  int64_t _5_len;
 } chpl__class_localscoforall_fn15_object;
 
 typedef struct chpl__class_localscoforall_fn16_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_LocReplicatedDom_1_int64_t_F _0_x1__e1_args;
-  _ref_range_int64_t_bounded_F _1_tmp;
-  int64_t _2_len;
-  int64_t _3__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _4__coforallCount;
-  int64_t _5_numChunks;
+  int64_t _1__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _2__coforallCount;
+  int64_t _3_numChunks;
+  _ref_range_int64_t_bounded_F _4_tmp;
+  int64_t _5_len;
 } chpl__class_localscoforall_fn16_object;
 
 typedef struct chpl__class_localscoforall_fn17_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_locale _0_x1__e1_args;
-  chpl___EndCount_atomic_int64_int64_t _1__coforallCount;
-  _ref_range_int64_t_bounded_F _2_tmp;
+  _ref_range_int64_t_bounded_F _1_tmp;
+  int64_t _2_len;
   int64_t _3_numChunks;
-  int64_t _4_len;
-  int64_t _5__yieldedIndex;
+  int64_t _4__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _5__coforallCount;
 } chpl__class_localscoforall_fn17_object;
 
 typedef struct chpl__class_localscoforall_fn18_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_localesSignal _0_x1__e1_args;
-  chpl___EndCount_atomic_int64_int64_t _1__coforallCount;
-  int64_t _2_numChunks;
+  int64_t _1__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _2__coforallCount;
   _ref_range_int64_t_bounded_F _3_tmp;
   int64_t _4_len;
-  int64_t _5__yieldedIndex;
+  int64_t _5_numChunks;
 } chpl__class_localscoforall_fn18_object;
 
 typedef struct chpl__class_localscoforall_fn19_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_uint64_t _0_x1__e1_args;
-  int64_t _1_len;
-  int64_t _2__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
-  int64_t _4_numChunks;
-  _ref_range_int64_t_bounded_F _5_tmp;
+  _ref_range_int64_t_bounded_F _1_tmp;
+  int64_t _2_len;
+  int64_t _3_numChunks;
+  int64_t _4__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _5__coforallCount;
 } chpl__class_localscoforall_fn19_object;
 
 typedef struct chpl__class_localscoforall_fn20_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t _0_x1__e1_args;
-  _ref_range_int64_t_bounded_F _1_tmp;
-  int64_t _2_len;
-  int64_t _3__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _4__coforallCount;
-  int64_t _5_numChunks;
+  int64_t _1_len;
+  int64_t _2__yieldedIndex;
+  int64_t _3_numChunks;
+  _ref_range_int64_t_bounded_F _4_tmp;
+  chpl___EndCount_atomic_int64_int64_t _5__coforallCount;
 } chpl__class_localscoforall_fn20_object;
 
 typedef struct chpl__class_localscoforall_fn21_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_chpl_TableEntry_int64_t _0_x1__e1_args;
-  chpl___EndCount_atomic_int64_int64_t _1__coforallCount;
-  int64_t _2_numChunks;
-  _ref_range_int64_t_bounded_F _3_tmp;
-  int64_t _4_len;
-  int64_t _5__yieldedIndex;
+  _ref_range_int64_t_bounded_F _1_tmp;
+  int64_t _2_len;
+  int64_t _3_numChunks;
+  int64_t _4__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _5__coforallCount;
 } chpl__class_localscoforall_fn21_object;
 
 typedef struct chpl__class_localscoforall_fn22_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_LocCyclicArr_Bitmap_1_int64_t_F _0_x1__e1_args;
-  _ref_range_int64_t_bounded_F _1_tmp;
-  int64_t _2_len;
+  int64_t _1_numChunks;
+  int64_t _2__yieldedIndex;
   chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
-  int64_t _4__yieldedIndex;
-  int64_t _5_numChunks;
+  _ref_range_int64_t_bounded_F _4_tmp;
+  int64_t _5_len;
 } chpl__class_localscoforall_fn22_object;
 
 typedef struct chpl__class_localscoforall_fn23_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_Bitmap _0_x1__e1_args;
-  int64_t _1_numChunks;
-  _ref_range_int64_t_bounded_F _2_tmp;
-  int64_t _3_len;
-  int64_t _4__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _5__coforallCount;
+  int64_t _1__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _2__coforallCount;
+  _ref_range_int64_t_bounded_F _3_tmp;
+  int64_t _4_len;
+  int64_t _5_numChunks;
 } chpl__class_localscoforall_fn23_object;
 
 typedef struct chpl__class_localscoforall_fn24_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _0_x1__e1_args;
-  int64_t _1__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _2__coforallCount;
-  int64_t _3_numChunks;
+  int64_t _1_numChunks;
+  int64_t _2__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
   _ref_range_int64_t_bounded_F _4_tmp;
   int64_t _5_len;
 } chpl__class_localscoforall_fn24_object;
@@ -4961,9 +4961,9 @@ typedef struct chpl__class_localscoforall_fn24_s {
 typedef struct chpl__class_localscoforall_fn25_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata__remoteAccessData__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F_F _0_x1__e1_args;
-  int64_t _1__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _2__coforallCount;
-  int64_t _3_numChunks;
+  int64_t _1_numChunks;
+  int64_t _2__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
   _ref_range_int64_t_bounded_F _4_tmp;
   int64_t _5_len;
 } chpl__class_localscoforall_fn25_object;
@@ -4971,59 +4971,59 @@ typedef struct chpl__class_localscoforall_fn25_s {
 typedef struct chpl__class_localscoforall_fn26_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F _0_x1__e1_args;
-  int64_t _1_len;
+  int64_t _1_numChunks;
   int64_t _2__yieldedIndex;
   chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
-  int64_t _4_numChunks;
-  _ref_range_int64_t_bounded_F _5_tmp;
+  _ref_range_int64_t_bounded_F _4_tmp;
+  int64_t _5_len;
 } chpl__class_localscoforall_fn26_object;
 
 typedef struct chpl__class_localscoforall_fn27_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F _0_x1__e1_args;
-  chpl___EndCount_atomic_int64_int64_t _1__coforallCount;
-  int64_t _2_numChunks;
-  _ref_range_int64_t_bounded_F _3_tmp;
-  int64_t _4_len;
-  int64_t _5__yieldedIndex;
+  int64_t _1_numChunks;
+  int64_t _2__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
+  _ref_range_int64_t_bounded_F _4_tmp;
+  int64_t _5_len;
 } chpl__class_localscoforall_fn27_object;
 
 typedef struct chpl__class_localscoforall_fn28_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_atomicbool _0_x1__e1_args;
-  _ref_range_int64_t_bounded_F _1_tmp;
-  int64_t _2_len;
-  int64_t _3__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _4__coforallCount;
+  int64_t _1__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _2__coforallCount;
+  _ref_range_int64_t_bounded_F _3_tmp;
+  int64_t _4_len;
   int64_t _5_numChunks;
 } chpl__class_localscoforall_fn28_object;
 
 typedef struct chpl__class_localscoforall_fn29_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_LocCyclicDom_1_int64_t_F _0_x1__e1_args;
-  int64_t _1_len;
-  int64_t _2__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
-  int64_t _4_numChunks;
-  _ref_range_int64_t_bounded_F _5_tmp;
+  _ref_range_int64_t_bounded_F _1_tmp;
+  int64_t _2_len;
+  int64_t _3_numChunks;
+  int64_t _4__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _5__coforallCount;
 } chpl__class_localscoforall_fn29_object;
 
 typedef struct chpl__class_localscoforall_fn30_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata__remoteAccessData_Bitmap_1_int64_t_F_F _0_x1__e1_args;
-  int64_t _1_len;
-  int64_t _2__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
+  chpl___EndCount_atomic_int64_int64_t _1__coforallCount;
+  _ref_range_int64_t_bounded_F _2_tmp;
+  int64_t _3_len;
   int64_t _4_numChunks;
-  _ref_range_int64_t_bounded_F _5_tmp;
+  int64_t _5__yieldedIndex;
 } chpl__class_localscoforall_fn30_object;
 
 typedef struct chpl__class_localscoforall_fn31_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata_FCHGlobalNode _0_x1__e1_args;
-  int64_t _1__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _2__coforallCount;
-  int64_t _3_numChunks;
+  int64_t _1_numChunks;
+  int64_t _2__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
   _ref_range_int64_t_bounded_F _4_tmp;
   int64_t _5_len;
 } chpl__class_localscoforall_fn31_object;
@@ -5031,11 +5031,11 @@ typedef struct chpl__class_localscoforall_fn31_s {
 typedef struct chpl__class_localscoforall_fn32_s {
   chpl_task_bundle_t _runtime_hdr;
   _ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t _0_x1__e1_args;
-  int64_t _1_len;
-  int64_t _2__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _3__coforallCount;
-  int64_t _4_numChunks;
-  _ref_range_int64_t_bounded_F _5_tmp;
+  _ref_range_int64_t_bounded_F _1_tmp;
+  int64_t _2_len;
+  int64_t _3_numChunks;
+  int64_t _4__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _5__coforallCount;
   _ref__RuntimeTypeInfo28 _6_tmp;
 } chpl__class_localscoforall_fn32_object;
 
@@ -5445,12 +5445,12 @@ typedef struct chpl__class_localson_fn163_s {
 typedef struct chpl__class_localson_fn164_s {
   chpl_comm_on_bundle_t _runtime_hdr;
   chpl_localeID_t _0_rvfDerefTmp;
-  chpl____wide_DefaultAssociativeDom_int64_t_T _1_rvfDerefTmp;
-  int64_t _2_rvfDerefTmp;
-  chpl_bool _3_rvfDerefTmp;
-  chpl____wide__ref_int64_t _4_tmp;
-  int64_t _5_rvfDerefTmp;
-  chpl____wide__ref_int64_t _6_tmp;
+  chpl____wide__ref_int64_t _1_tmp;
+  chpl____wide__ref_int64_t _2_tmp;
+  int64_t _3_rvfDerefTmp;
+  int64_t _4_rvfDerefTmp;
+  chpl____wide_DefaultAssociativeDom_int64_t_T _5_rvfDerefTmp;
+  chpl_bool _6_rvfDerefTmp;
 } chpl__class_localson_fn164_object;
 
 typedef struct chpl__class_localson_fn165_s {
@@ -5857,37 +5857,37 @@ typedef struct chpl__class_localson_fn_chpl24_s {
 typedef struct chpl__class_localson_fn_chpl25_s {
   chpl_comm_on_bundle_t _runtime_hdr_chpl;
   chpl_localeID_t _0_rvfDerefTmp_chpl;
-  chpl____wide__ref_channel_F_dynamic_F _1_tmp_chpl;
-  int64_t _2_rvfDerefTmp_chpl;
-  file_chpl _3_rvfDerefTmp_chpl;
-  int32_t _4_rvfDerefTmp_chpl;
-  chpl____wide__ref_syserr _5_tmp_chpl;
-  iostyle _6_rvfDerefTmp_chpl;
-  int64_t _7_rvfDerefTmp_chpl;
+  int64_t _1_rvfDerefTmp_chpl;
+  file_chpl _2_rvfDerefTmp_chpl;
+  int32_t _3_rvfDerefTmp_chpl;
+  chpl____wide__ref_syserr _4_tmp_chpl;
+  iostyle _5_rvfDerefTmp_chpl;
+  int64_t _6_rvfDerefTmp_chpl;
+  chpl____wide__ref_channel_F_dynamic_F _7_tmp_chpl;
 } chpl__class_localson_fn_chpl25_object;
 
 typedef struct chpl__class_localson_fn_chpl26_s {
   chpl_comm_on_bundle_t _runtime_hdr_chpl;
   chpl_localeID_t _0_rvfDerefTmp_chpl;
-  int32_t _1_rvfDerefTmp_chpl;
-  chpl____wide__ref_syserr _2_tmp_chpl;
-  iostyle _3_rvfDerefTmp_chpl;
-  int64_t _4_rvfDerefTmp_chpl;
-  chpl____wide__ref_channel_T_dynamic_T _5_tmp_chpl;
+  file_chpl _1_rvfDerefTmp_chpl;
+  iostyle _2_rvfDerefTmp_chpl;
+  chpl____wide__ref_syserr _3_tmp_chpl;
+  int32_t _4_rvfDerefTmp_chpl;
+  int64_t _5_rvfDerefTmp_chpl;
   int64_t _6_rvfDerefTmp_chpl;
-  file_chpl _7_rvfDerefTmp_chpl;
+  chpl____wide__ref_channel_T_dynamic_T _7_tmp_chpl;
 } chpl__class_localson_fn_chpl26_object;
 
 typedef struct chpl__class_localson_fn_chpl27_s {
   chpl_comm_on_bundle_t _runtime_hdr_chpl;
   chpl_localeID_t _0_rvfDerefTmp_chpl;
-  file_chpl _1_rvfDerefTmp_chpl;
-  int32_t _2_rvfDerefTmp_chpl;
-  chpl____wide__ref_syserr _3_tmp_chpl;
-  iostyle _4_rvfDerefTmp_chpl;
-  int64_t _5_rvfDerefTmp_chpl;
-  chpl____wide__ref_channel_F_dynamic_T _6_tmp_chpl;
-  int64_t _7_rvfDerefTmp_chpl;
+  iostyle _1_rvfDerefTmp_chpl;
+  int64_t _2_rvfDerefTmp_chpl;
+  chpl____wide__ref_channel_F_dynamic_T _3_tmp_chpl;
+  int64_t _4_rvfDerefTmp_chpl;
+  file_chpl _5_rvfDerefTmp_chpl;
+  int32_t _6_rvfDerefTmp_chpl;
+  chpl____wide__ref_syserr _7_tmp_chpl;
 } chpl__class_localson_fn_chpl27_object;
 
 typedef struct chpl__class_localson_fn_chpl28_s {
@@ -5973,49 +5973,49 @@ typedef struct chpl__class_localson_fn_chpl38_s {
 typedef struct chpl__class_localson_fn_chpl39_s {
   chpl_comm_on_bundle_t _runtime_hdr_chpl;
   chpl_localeID_t _0_rvfDerefTmp_chpl;
-  chpl____wide__ref_channel_F_dynamic_F _1_tmp_chpl;
-  int64_t _2_rvfDerefTmp_chpl;
-  iostyle _3_rvfDerefTmp_chpl;
-  file_chpl _4_rvfDerefTmp_chpl;
-  chpl____wide__ref_syserr _5_tmp_chpl;
-  int32_t _6_rvfDerefTmp_chpl;
-  int64_t _7_rvfDerefTmp_chpl;
-} chpl__class_localson_fn_chpl39_object;
-
-typedef struct chpl__class_localson_fn_chpl40_s {
-  chpl_comm_on_bundle_t _runtime_hdr_chpl;
-  chpl_localeID_t _0_rvfDerefTmp_chpl;
-  file_chpl _1_rvfDerefTmp_chpl;
-  int64_t _2_rvfDerefTmp_chpl;
-  chpl____wide__ref_channel_F_dynamic_T _3_tmp_chpl;
-  int64_t _4_rvfDerefTmp_chpl;
-  int32_t _5_rvfDerefTmp_chpl;
-  iostyle _6_rvfDerefTmp_chpl;
-  chpl____wide__ref_syserr _7_tmp_chpl;
-} chpl__class_localson_fn_chpl40_object;
-
-typedef struct chpl__class_localson_fn_chpl41_s {
-  chpl_comm_on_bundle_t _runtime_hdr_chpl;
-  chpl_localeID_t _0_rvfDerefTmp_chpl;
-  int64_t _1_rvfDerefTmp_chpl;
-  chpl____wide__ref_syserr _2_tmp_chpl;
-  file_chpl _3_rvfDerefTmp_chpl;
-  int32_t _4_rvfDerefTmp_chpl;
-  chpl____wide__ref_channel_T_dynamic_T _5_tmp_chpl;
-  int64_t _6_rvfDerefTmp_chpl;
-  iostyle _7_rvfDerefTmp_chpl;
-} chpl__class_localson_fn_chpl41_object;
-
-typedef struct chpl__class_localson_fn_chpl42_s {
-  chpl_comm_on_bundle_t _runtime_hdr_chpl;
-  chpl_localeID_t _0_rvfDerefTmp_chpl;
   int64_t _1_rvfDerefTmp_chpl;
   iostyle _2_rvfDerefTmp_chpl;
   file_chpl _3_rvfDerefTmp_chpl;
   chpl____wide__ref_syserr _4_tmp_chpl;
   int32_t _5_rvfDerefTmp_chpl;
   int64_t _6_rvfDerefTmp_chpl;
-  chpl____wide__ref_channel_T_dynamic_F _7_tmp_chpl;
+  chpl____wide__ref_channel_F_dynamic_F _7_tmp_chpl;
+} chpl__class_localson_fn_chpl39_object;
+
+typedef struct chpl__class_localson_fn_chpl40_s {
+  chpl_comm_on_bundle_t _runtime_hdr_chpl;
+  chpl_localeID_t _0_rvfDerefTmp_chpl;
+  iostyle _1_rvfDerefTmp_chpl;
+  int64_t _2_rvfDerefTmp_chpl;
+  chpl____wide__ref_syserr _3_tmp_chpl;
+  file_chpl _4_rvfDerefTmp_chpl;
+  int32_t _5_rvfDerefTmp_chpl;
+  chpl____wide__ref_channel_F_dynamic_T _6_tmp_chpl;
+  int64_t _7_rvfDerefTmp_chpl;
+} chpl__class_localson_fn_chpl40_object;
+
+typedef struct chpl__class_localson_fn_chpl41_s {
+  chpl_comm_on_bundle_t _runtime_hdr_chpl;
+  chpl_localeID_t _0_rvfDerefTmp_chpl;
+  chpl____wide__ref_channel_T_dynamic_T _1_tmp_chpl;
+  int64_t _2_rvfDerefTmp_chpl;
+  iostyle _3_rvfDerefTmp_chpl;
+  file_chpl _4_rvfDerefTmp_chpl;
+  int32_t _5_rvfDerefTmp_chpl;
+  chpl____wide__ref_syserr _6_tmp_chpl;
+  int64_t _7_rvfDerefTmp_chpl;
+} chpl__class_localson_fn_chpl41_object;
+
+typedef struct chpl__class_localson_fn_chpl42_s {
+  chpl_comm_on_bundle_t _runtime_hdr_chpl;
+  chpl_localeID_t _0_rvfDerefTmp_chpl;
+  int32_t _1_rvfDerefTmp_chpl;
+  chpl____wide__ref_syserr _2_tmp_chpl;
+  int64_t _3_rvfDerefTmp_chpl;
+  chpl____wide__ref_channel_T_dynamic_F _4_tmp_chpl;
+  int64_t _5_rvfDerefTmp_chpl;
+  iostyle _6_rvfDerefTmp_chpl;
+  file_chpl _7_rvfDerefTmp_chpl;
 } chpl__class_localson_fn_chpl42_object;
 
 typedef struct chpl__class_localson_fn_chpl43_s {
@@ -7247,71 +7247,71 @@ static void _newPrivatizedClassHelp11(chpl____wide_Replicated parentValue,
                                       int64_t n,
                                       int64_t hereID,
                                       int64_t privatizeData);
-static void cobegin_fn(int64_t n,
+static void cobegin_fn(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
+                       chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
+                       int64_t n,
                        chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue,
                        int64_t hereID,
-                       _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
-                       chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
                        chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn2(int64_t n,
+static void cobegin_fn2(int64_t privatizeData,
+                        chpl____wide_CyclicDom_1_int64_t_F originalValue,
+                        int64_t n,
                         chpl____wide_CyclicDom_1_int64_t_F newValue,
                         int64_t hereID,
-                        int64_t privatizeData,
-                        chpl____wide_CyclicDom_1_int64_t_F originalValue,
                         chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn3(int64_t n,
+static void cobegin_fn3(_ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
+                        chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+                        int64_t n,
                         chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                         int64_t hereID,
-                        _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
-                        chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                         chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn4(int64_t n,
+static void cobegin_fn4(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
+                        chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
+                        int64_t n,
                         chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue,
                         int64_t hereID,
-                        _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
-                        chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
                         chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn5(int64_t n,
+static void cobegin_fn5(int64_t privatizeData,
+                        chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F originalValue,
+                        int64_t n,
                         chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F newValue,
                         int64_t hereID,
-                        int64_t privatizeData,
-                        chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F originalValue,
                         chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn6(int64_t n,
+static void cobegin_fn6(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
+                        chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
+                        int64_t n,
                         chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue,
                         int64_t hereID,
-                        _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
-                        chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
                         chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn7(int64_t n,
+static void cobegin_fn7(int64_t privatizeData,
+                        chpl____wide_Replicated originalValue,
+                        int64_t n,
                         chpl____wide_Replicated newValue,
                         int64_t hereID,
-                        int64_t privatizeData,
-                        chpl____wide_Replicated originalValue,
                         chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn8(int64_t n,
+static void cobegin_fn8(int64_t privatizeData,
+                        chpl____wide_CyclicArr_Bitmap_1_int64_t_F originalValue,
+                        int64_t n,
                         chpl____wide_CyclicArr_Bitmap_1_int64_t_F newValue,
                         int64_t hereID,
-                        int64_t privatizeData,
-                        chpl____wide_CyclicArr_Bitmap_1_int64_t_F originalValue,
                         chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn9(int64_t n,
+static void cobegin_fn9(int64_t privatizeData,
+                        chpl____wide_Cyclic_1_int64_t originalValue,
+                        int64_t n,
                         chpl____wide_Cyclic_1_int64_t newValue,
                         int64_t hereID,
-                        int64_t privatizeData,
-                        chpl____wide_Cyclic_1_int64_t originalValue,
                         chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn10(int64_t n,
+static void cobegin_fn10(_ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
+                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
-                         _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
-                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn11(int64_t n,
+static void cobegin_fn11(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
+                         chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
-                         _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
-                         chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
 static void wrapcobegin_fn(_class_localscobegin_fn5 c);
 static void wrapcobegin_fn2(_class_localscobegin_fn4 c);
@@ -7324,61 +7324,61 @@ static void wrapcobegin_fn8(_class_localscobegin_fn8 c);
 static void wrapcobegin_fn9(_class_localscobegin_fn3 c);
 static void wrapcobegin_fn10(_class_localscobegin_fn c);
 static void wrapcobegin_fn11(_class_localscobegin_fn9 c);
-static void on_fn24(chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
+static void on_fn24(int64_t n,
+                    _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
+                    chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue,
+                    chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
+                    int64_t hereID);
+static void on_fn25(chpl____wide_CyclicArr_Bitmap_1_int64_t_F originalValue,
+                    int64_t hereID,
+                    int64_t n,
+                    int64_t privatizeData,
+                    chpl____wide_CyclicArr_Bitmap_1_int64_t_F newValue);
+static void on_fn26(int64_t privatizeData,
+                    chpl____wide_Cyclic_1_int64_t newValue,
+                    chpl____wide_Cyclic_1_int64_t originalValue,
+                    int64_t hereID,
+                    int64_t n);
+static void on_fn27(chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
                     int64_t hereID,
                     int64_t n,
                     _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
                     chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue);
-static void on_fn25(int64_t privatizeData,
-                    chpl____wide_CyclicArr_Bitmap_1_int64_t_F newValue,
-                    chpl____wide_CyclicArr_Bitmap_1_int64_t_F originalValue,
-                    int64_t hereID,
-                    int64_t n);
-static void on_fn26(chpl____wide_Cyclic_1_int64_t newValue,
-                    chpl____wide_Cyclic_1_int64_t originalValue,
-                    int64_t hereID,
-                    int64_t n,
-                    int64_t privatizeData);
-static void on_fn27(chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue,
-                    chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
-                    int64_t hereID,
-                    int64_t n,
-                    _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData);
 static void on_fn28(int64_t privatizeData,
                     chpl____wide_Replicated newValue,
                     chpl____wide_Replicated originalValue,
                     int64_t hereID,
                     int64_t n);
-static void on_fn29(int64_t n,
-                    _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
-                    chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue,
-                    chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
-                    int64_t hereID);
-static void on_fn30(int64_t hereID,
+static void on_fn29(int64_t hereID,
                     int64_t n,
                     _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
                     chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue,
                     chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue);
-static void on_fn31(int64_t n,
-                    int64_t privatizeData,
-                    chpl____wide_CyclicDom_1_int64_t_F newValue,
-                    chpl____wide_CyclicDom_1_int64_t_F originalValue,
-                    int64_t hereID);
-static void on_fn32(int64_t n,
-                    _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
-                    chpl____wide_ReplicatedDom_1_int64_t_F newValue,
-                    chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
-                    int64_t hereID);
-static void on_fn33(chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+static void on_fn30(chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue,
+                    chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
                     int64_t hereID,
                     int64_t n,
-                    _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
-                    chpl____wide_ReplicatedDom_1_int64_t_F newValue);
-static void on_fn34(int64_t n,
+                    _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData);
+static void on_fn31(int64_t hereID,
+                    int64_t n,
                     int64_t privatizeData,
-                    chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F newValue,
-                    chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F originalValue,
-                    int64_t hereID);
+                    chpl____wide_CyclicDom_1_int64_t_F newValue,
+                    chpl____wide_CyclicDom_1_int64_t_F originalValue);
+static void on_fn32(chpl____wide_ReplicatedDom_1_int64_t_F newValue,
+                    chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+                    int64_t hereID,
+                    int64_t n,
+                    _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData);
+static void on_fn33(int64_t hereID,
+                    int64_t n,
+                    _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
+                    chpl____wide_ReplicatedDom_1_int64_t_F newValue,
+                    chpl____wide_ReplicatedDom_1_int64_t_F originalValue);
+static void on_fn34(chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F originalValue,
+                    int64_t hereID,
+                    int64_t n,
+                    int64_t privatizeData,
+                    chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F newValue);
 static void wrapon_fn24(_class_localson_fn34 c);
 static void wrapon_fn25(_class_localson_fn30 c);
 static void wrapon_fn26(_class_localson_fn33 c);
@@ -7390,71 +7390,71 @@ static void wrapon_fn31(_class_localson_fn28 c);
 static void wrapon_fn32(_class_localson_fn29 c);
 static void wrapon_fn33(_class_localson_fn24 c);
 static void wrapon_fn34(_class_localson_fn26 c);
-static void cobegin_fn12(int64_t n,
+static void cobegin_fn12(int64_t privatizeData,
+                         chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F newValue,
                          int64_t hereID,
-                         int64_t privatizeData,
-                         chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn13(int64_t n,
+static void cobegin_fn13(int64_t privatizeData,
+                         chpl____wide_CyclicArr_Bitmap_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_CyclicArr_Bitmap_1_int64_t_F newValue,
                          int64_t hereID,
-                         int64_t privatizeData,
-                         chpl____wide_CyclicArr_Bitmap_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn14(int64_t n,
+static void cobegin_fn14(int64_t privatizeData,
+                         chpl____wide_Replicated originalValue,
+                         int64_t n,
                          chpl____wide_Replicated newValue,
                          int64_t hereID,
-                         int64_t privatizeData,
-                         chpl____wide_Replicated originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn15(int64_t n,
+static void cobegin_fn15(int64_t privatizeData,
+                         chpl____wide_Cyclic_1_int64_t originalValue,
+                         int64_t n,
                          chpl____wide_Cyclic_1_int64_t newValue,
                          int64_t hereID,
-                         int64_t privatizeData,
-                         chpl____wide_Cyclic_1_int64_t originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn16(int64_t n,
+static void cobegin_fn16(_ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
+                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
-                         _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
-                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn17(int64_t n,
+static void cobegin_fn17(_ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
+                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
-                         _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
-                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn18(int64_t n,
+static void cobegin_fn18(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
+                         chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
-                         _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
-                         chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn19(int64_t n,
+static void cobegin_fn19(int64_t privatizeData,
+                         chpl____wide_CyclicDom_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_CyclicDom_1_int64_t_F newValue,
                          int64_t hereID,
-                         int64_t privatizeData,
-                         chpl____wide_CyclicDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn20(int64_t n,
+static void cobegin_fn20(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
+                         chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
-                         _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
-                         chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn21(int64_t n,
+static void cobegin_fn21(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
+                         chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
-                         _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
-                         chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn22(int64_t n,
+static void cobegin_fn22(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
+                         chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
+                         int64_t n,
                          chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
-                         _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
-                         chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
 static void wrapcobegin_fn12(_class_localscobegin_fn21 c);
 static void wrapcobegin_fn13(_class_localscobegin_fn16 c);
@@ -7467,55 +7467,55 @@ static void wrapcobegin_fn19(_class_localscobegin_fn14 c);
 static void wrapcobegin_fn20(_class_localscobegin_fn15 c);
 static void wrapcobegin_fn21(_class_localscobegin_fn12 c);
 static void wrapcobegin_fn22(_class_localscobegin_fn17 c);
-static void on_fn35(int64_t hereID,
+static void on_fn35(int64_t n,
+                    int64_t privatizeData,
                     chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F newValue,
-                    int64_t privatizeData,
                     chpl____wide_CyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F originalValue,
-                    int64_t n);
-static void on_fn36(int64_t hereID,
-                    chpl____wide_ReplicatedDom_1_int64_t_F newValue,
+                    int64_t hereID);
+static void on_fn36(chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+                    int64_t hereID,
+                    int64_t n,
                     _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
-                    chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
-                    int64_t n);
-static void on_fn37(int64_t hereID,
+                    chpl____wide_ReplicatedDom_1_int64_t_F newValue);
+static void on_fn37(int64_t privatizeData,
                     chpl____wide_CyclicDom_1_int64_t_F newValue,
-                    int64_t privatizeData,
                     chpl____wide_CyclicDom_1_int64_t_F originalValue,
+                    int64_t hereID,
                     int64_t n);
 static void on_fn38(int64_t hereID,
+                    int64_t n,
+                    int64_t privatizeData,
                     chpl____wide_CyclicArr_Bitmap_1_int64_t_F newValue,
-                    int64_t privatizeData,
-                    chpl____wide_CyclicArr_Bitmap_1_int64_t_F originalValue,
-                    int64_t n);
-static void on_fn39(chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+                    chpl____wide_CyclicArr_Bitmap_1_int64_t_F originalValue);
+static void on_fn39(int64_t hereID,
                     int64_t n,
-                    int64_t hereID,
+                    _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData,
                     chpl____wide_ReplicatedDom_1_int64_t_F newValue,
-                    _ref__tuple_3_int64_t__ref__domain_DefaultRectangularDom_1_int64_t_F__ref__array_DefaultAssociativeArr_LocReplicatedDom_1_int64_t_F_int64_t_T privatizeData);
-static void on_fn40(int64_t n,
+                    chpl____wide_ReplicatedDom_1_int64_t_F originalValue);
+static void on_fn40(chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
+                    int64_t hereID,
+                    int64_t n,
                     _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
-                    chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue,
-                    chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F originalValue,
-                    int64_t hereID);
-static void on_fn41(int64_t privatizeData,
+                    chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue);
+static void on_fn41(chpl____wide_Cyclic_1_int64_t newValue,
                     chpl____wide_Cyclic_1_int64_t originalValue,
-                    int64_t n,
                     int64_t hereID,
-                    chpl____wide_Cyclic_1_int64_t newValue);
-static void on_fn42(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
-                    chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
                     int64_t n,
-                    int64_t hereID,
-                    chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue);
-static void on_fn43(int64_t hereID,
+                    int64_t privatizeData);
+static void on_fn42(int64_t hereID,
                     int64_t n,
-                    int64_t privatizeData,
-                    chpl____wide_Replicated newValue,
-                    chpl____wide_Replicated originalValue);
-static void on_fn44(chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
-                    int64_t n,
-                    int64_t hereID,
+                    _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData,
                     chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue,
+                    chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue);
+static void on_fn43(chpl____wide_Replicated newValue,
+                    chpl____wide_Replicated originalValue,
+                    int64_t hereID,
+                    int64_t n,
+                    int64_t privatizeData);
+static void on_fn44(chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F newValue,
+                    chpl____wide_ReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_ReplicatedDom_1_int64_t_F originalValue,
+                    int64_t hereID,
+                    int64_t n,
                     _ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_int64_t_T privatizeData);
 static void on_fn45(_ref__tuple_2_int64_t__ref__array_DefaultAssociativeArr_LocReplicatedArr_FCHGlobalNode_1_int64_t_F_int64_t_T privatizeData,
                     chpl____wide_ReplicatedArr_FCHGlobalNode_ReplicatedDom_1_int64_t_F newValue,
@@ -7581,81 +7581,81 @@ static void _reprivatizeHelp3(chpl____wide_CyclicDom_1_int64_t_F parentValue,
                               int64_t pid,
                               int64_t hereID,
                               int64_t reprivatizeData);
-static void cobegin_fn25(chpl____wide_CyclicDom_1_int64_t_F originalValue,
-                         int64_t reprivatizeData,
+static void cobegin_fn25(int64_t reprivatizeData,
                          int64_t pid,
                          chpl____wide_CyclicDom_1_int64_t_F newValue,
                          int64_t hereID,
+                         chpl____wide_CyclicDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn26(chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
-                         _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
+static void cobegin_fn26(_ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
                          int64_t pid,
                          chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
+                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn27(chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
-                         _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
+static void cobegin_fn27(_ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
                          int64_t pid,
                          chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
+                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
 static void wrapcobegin_fn25(_class_localscobegin_fn26 c);
 static void wrapcobegin_fn26(_class_localscobegin_fn25 c);
 static void wrapcobegin_fn27(_class_localscobegin_fn27 c);
-static void on_fn51(int64_t reprivatizeData,
-                    int64_t hereID,
-                    int64_t pid,
+static void on_fn51(int64_t pid,
                     chpl____wide_CyclicDom_1_int64_t_F originalValue,
-                    chpl____wide_CyclicDom_1_int64_t_F newValue);
-static void on_fn52(int64_t pid,
-                    chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
-                    chpl____wide_ReplicatedDom_1_int64_t_F newValue,
-                    _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
+                    chpl____wide_CyclicDom_1_int64_t_F newValue,
+                    int64_t reprivatizeData,
                     int64_t hereID);
-static void on_fn53(int64_t hereID,
+static void on_fn52(int64_t hereID,
                     int64_t pid,
                     chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                     chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                     _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData);
+static void on_fn53(_ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
+                    int64_t hereID,
+                    int64_t pid,
+                    chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+                    chpl____wide_ReplicatedDom_1_int64_t_F newValue);
 static void wrapon_fn51(_class_localson_fn53 c);
 static void wrapon_fn52(_class_localson_fn51 c);
 static void wrapon_fn53(_class_localson_fn52 c);
-static void cobegin_fn28(chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
-                         _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
+static void cobegin_fn28(_ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
                          int64_t pid,
                          chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
+                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn29(chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
-                         _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
+static void cobegin_fn29(_ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
                          int64_t pid,
                          chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                          int64_t hereID,
+                         chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
-static void cobegin_fn30(chpl____wide_CyclicDom_1_int64_t_F originalValue,
-                         int64_t reprivatizeData,
+static void cobegin_fn30(int64_t reprivatizeData,
                          int64_t pid,
                          chpl____wide_CyclicDom_1_int64_t_F newValue,
                          int64_t hereID,
+                         chpl____wide_CyclicDom_1_int64_t_F originalValue,
                          chpl___EndCount_atomic_int64_int64_t _cobeginCount);
 static void wrapcobegin_fn28(_class_localscobegin_fn29 c);
 static void wrapcobegin_fn29(_class_localscobegin_fn30 c);
 static void wrapcobegin_fn30(_class_localscobegin_fn28 c);
-static void on_fn54(chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
-                    chpl____wide_ReplicatedDom_1_int64_t_F newValue,
-                    _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
-                    int64_t hereID,
-                    int64_t pid);
-static void on_fn55(int64_t pid,
+static void on_fn54(int64_t pid,
                     chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
                     chpl____wide_ReplicatedDom_1_int64_t_F newValue,
                     _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData,
                     int64_t hereID);
-static void on_fn56(int64_t hereID,
+static void on_fn55(int64_t hereID,
                     int64_t pid,
-                    chpl____wide_CyclicDom_1_int64_t_F originalValue,
+                    chpl____wide_ReplicatedDom_1_int64_t_F originalValue,
+                    chpl____wide_ReplicatedDom_1_int64_t_F newValue,
+                    _ref__tuple_1_star__ref__domain_DefaultRectangularDom_1_int64_t_F reprivatizeData);
+static void on_fn56(chpl____wide_CyclicDom_1_int64_t_F originalValue,
                     chpl____wide_CyclicDom_1_int64_t_F newValue,
-                    int64_t reprivatizeData);
+                    int64_t reprivatizeData,
+                    int64_t hereID,
+                    int64_t pid);
 static void wrapon_fn54(_class_localson_fn56 c);
 static void wrapon_fn55(_class_localson_fn54 c);
 static void wrapon_fn56(_class_localson_fn55 c);
@@ -8611,114 +8611,114 @@ static void init_elts17(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_F
 static void init_elts18(_ddata_FCHGlobalNode x,
                         int64_t s);
 static void coforall_fn15(_ddata_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t x1__e1_args,
-                          _ref_range_int64_t_bounded_F this12,
                           int64_t len,
                           int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks);
-static void coforall_fn16(_ddata_Bitmap x1__e1_args,
                           int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount);
+static void coforall_fn16(_ddata_Bitmap x1__e1_args,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
+                          _ref_range_int64_t_bounded_F this12,
                           int64_t len,
+                          int64_t numChunks);
+static void coforall_fn17(_ddata_LocCyclicArr_Bitmap_1_int64_t_F x1__e1_args,
+                          int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len);
+static void coforall_fn18(_ddata_chpl_TableEntry_int64_t x1__e1_args,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len,
+                          int64_t numChunks,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount);
-static void coforall_fn17(_ddata_LocCyclicArr_Bitmap_1_int64_t_F x1__e1_args,
-                          _ref_range_int64_t_bounded_F this12,
-                          int64_t len,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t chunk,
-                          int64_t numChunks);
-static void coforall_fn18(_ddata_chpl_TableEntry_int64_t x1__e1_args,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12,
-                          int64_t len,
-                          int64_t chunk);
 static void coforall_fn19(_ddata_LocReplicatedDom_1_int64_t_F x1__e1_args,
-                          _ref_range_int64_t_bounded_F this12,
-                          int64_t len,
-                          int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks);
-static void coforall_fn20(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F x1__e1_args,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           int64_t numChunks,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len);
+static void coforall_fn20(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F x1__e1_args,
+                          int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len);
 static void coforall_fn21(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t x1__e1_args,
+                          _ref_range_int64_t_bounded_F this12,
                           int64_t len,
+                          int64_t numChunks,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12,
                           _ref__RuntimeTypeInfo28 t);
 static void coforall_fn22(_ddata_atomicbool x1__e1_args,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len,
-                          int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           int64_t numChunks);
 static void coforall_fn23(_ddata_uint64_t x1__e1_args,
+                          _ref_range_int64_t_bounded_F this12,
                           int64_t len,
-                          int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12);
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount);
 static void coforall_fn24(_ddata__remoteAccessData__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F_F x1__e1_args,
+                          int64_t numChunks,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len);
 static void coforall_fn25(_ddata_FCHGlobalNode x1__e1_args,
+                          int64_t numChunks,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len);
 static void coforall_fn26(_ddata_LocCyclicDom_1_int64_t_F x1__e1_args,
-                          int64_t len,
-                          int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12);
-static void coforall_fn27(_ddata_LocCyclic_1_int64_t x1__e1_args,
-                          int64_t chunk,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len,
+                          int64_t numChunks,
+                          int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount);
+static void coforall_fn27(_ddata_LocCyclic_1_int64_t x1__e1_args,
+                          int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len);
 static void coforall_fn28(_ddata_localesSignal x1__e1_args,
+                          int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len,
-                          int64_t chunk);
+                          int64_t numChunks);
 static void coforall_fn29(_ddata_locale x1__e1_args,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           _ref_range_int64_t_bounded_F this12,
-                          int64_t numChunks,
                           int64_t len,
-                          int64_t chunk);
+                          int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount);
 static void coforall_fn30(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x1__e1_args,
-                          int64_t len,
-                          int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12);
-static void coforall_fn31(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F x1__e1_args,
-                          int64_t len,
-                          int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12);
-static void coforall_fn32(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x1__e1_args,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len,
+                          int64_t numChunks,
                           int64_t chunk);
+static void coforall_fn31(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F x1__e1_args,
+                          int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len);
+static void coforall_fn32(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x1__e1_args,
+                          int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len);
 static void wrapcoforall_fn15(_class_localscoforall_fn26 c);
 static void wrapcoforall_fn16(_class_localscoforall_fn18 c);
 static void wrapcoforall_fn17(_class_localscoforall_fn17 c);
@@ -9357,12 +9357,12 @@ static void _addWrapper(chpl____wide_DefaultAssociativeDom_int64_t_T this12,
                         int64_t slotNum,
                         chpl_bool haveLock,
                         _ref__tuple_2_star_int64_t _retArg);
-static void on_fn164(chpl____wide_DefaultAssociativeDom_int64_t_T this12,
-                     int64_t inSlot,
-                     chpl_bool haveLock,
-                     chpl____wide__ref_int64_t slotNum,
+static void on_fn164(chpl____wide__ref_int64_t slotNum,
+                     chpl____wide__ref_int64_t retVal,
                      int64_t idx,
-                     chpl____wide__ref_int64_t retVal);
+                     int64_t inSlot,
+                     chpl____wide_DefaultAssociativeDom_int64_t_T this12,
+                     chpl_bool haveLock);
 static void wrapon_fn164(_class_localson_fn164 c);
 static void _add(chpl____wide_DefaultAssociativeDom_int64_t_T this12,
                  int64_t idx,
@@ -10824,27 +10824,27 @@ static void channel_chpl4(_ref_file f_chpl,
                           int64_t end_chpl,
                           _ref_iostyle local_style_chpl,
                           _ref_channel_F_dynamic_T _retArg_chpl);
-static void on_fn_chpl25(_ref_file f_chpl,
-                         int32_t hints_chpl,
-                         chpl____wide__ref_syserr _formal_tmp_error_chpl,
-                         _ref_iostyle _formal_tmp_local_style_chpl,
+static void on_fn_chpl25(_ref_iostyle _formal_tmp_local_style_chpl,
                          int64_t end_chpl,
                          chpl____wide__ref_channel_F_dynamic_T this_chpl6,
-                         int64_t start_chpl);
-static void on_fn_chpl26(chpl____wide__ref_channel_F_dynamic_F this_chpl6,
                          int64_t start_chpl,
+                         _ref_file f_chpl,
+                         int32_t hints_chpl,
+                         chpl____wide__ref_syserr _formal_tmp_error_chpl);
+static void on_fn_chpl26(int64_t start_chpl,
                          _ref_file f_chpl,
                          int32_t hints_chpl,
                          chpl____wide__ref_syserr _formal_tmp_error_chpl,
                          _ref_iostyle _formal_tmp_local_style_chpl,
-                         int64_t end_chpl);
-static void on_fn_chpl27(int32_t hints_chpl,
-                         chpl____wide__ref_syserr _formal_tmp_error_chpl,
-                         _ref_iostyle _formal_tmp_local_style_chpl,
                          int64_t end_chpl,
-                         chpl____wide__ref_channel_T_dynamic_T this_chpl6,
+                         chpl____wide__ref_channel_F_dynamic_F this_chpl6);
+static void on_fn_chpl27(_ref_file f_chpl,
+                         _ref_iostyle _formal_tmp_local_style_chpl,
+                         chpl____wide__ref_syserr _formal_tmp_error_chpl,
+                         int32_t hints_chpl,
+                         int64_t end_chpl,
                          int64_t start_chpl,
-                         _ref_file f_chpl);
+                         chpl____wide__ref_channel_T_dynamic_T this_chpl6);
 static void on_fn_chpl28(_ref_file f_chpl,
                          int32_t hints_chpl,
                          chpl____wide__ref_syserr _formal_tmp_error_chpl,
@@ -10921,20 +10921,20 @@ static void reader_chpl2(_ref_file this_chpl6,
                          int32_t hints_chpl,
                          _ref_iostyle style_chpl,
                          _ref_channel_F_dynamic_T _retArg_chpl);
-static void on_fn_chpl39(_ref_file this_chpl6,
-                         int64_t end_chpl,
-                         chpl____wide__ref_channel_F_dynamic_T ret_chpl,
+static void on_fn_chpl39(_ref_iostyle style_chpl,
                          int64_t start_chpl,
+                         chpl____wide__ref_syserr _formal_tmp_error_chpl,
+                         _ref_file this_chpl6,
                          int32_t hints_chpl,
-                         _ref_iostyle style_chpl,
-                         chpl____wide__ref_syserr _formal_tmp_error_chpl);
-static void on_fn_chpl40(chpl____wide__ref_channel_F_dynamic_F ret_chpl,
-                         int64_t start_chpl,
+                         chpl____wide__ref_channel_F_dynamic_T ret_chpl,
+                         int64_t end_chpl);
+static void on_fn_chpl40(int64_t start_chpl,
                          _ref_iostyle style_chpl,
                          _ref_file this_chpl6,
                          chpl____wide__ref_syserr _formal_tmp_error_chpl,
                          int32_t hints_chpl,
-                         int64_t end_chpl);
+                         int64_t end_chpl,
+                         chpl____wide__ref_channel_F_dynamic_F ret_chpl);
 static void wrapon_fn_chpl39(_class_localson_fn_chpl40 c_chpl);
 static void wrapon_fn_chpl40(_class_localson_fn_chpl39 c_chpl);
 static void reader_chpl3(_ref_file this_chpl6,
@@ -10963,20 +10963,20 @@ static void writer_chpl2(_ref_file this_chpl6,
                          int32_t hints_chpl,
                          _ref_iostyle style_chpl,
                          _ref_channel_T_dynamic_F _retArg_chpl);
-static void on_fn_chpl41(int64_t start_chpl,
-                         chpl____wide__ref_syserr _formal_tmp_error_chpl,
-                         _ref_file this_chpl6,
-                         int32_t hints_chpl,
-                         chpl____wide__ref_channel_T_dynamic_T ret_chpl,
-                         int64_t end_chpl,
-                         _ref_iostyle style_chpl);
-static void on_fn_chpl42(int64_t start_chpl,
+static void on_fn_chpl41(chpl____wide__ref_channel_T_dynamic_T ret_chpl,
+                         int64_t start_chpl,
                          _ref_iostyle style_chpl,
                          _ref_file this_chpl6,
-                         chpl____wide__ref_syserr _formal_tmp_error_chpl,
                          int32_t hints_chpl,
+                         chpl____wide__ref_syserr _formal_tmp_error_chpl,
+                         int64_t end_chpl);
+static void on_fn_chpl42(int32_t hints_chpl,
+                         chpl____wide__ref_syserr _formal_tmp_error_chpl,
                          int64_t end_chpl,
-                         chpl____wide__ref_channel_T_dynamic_F ret_chpl);
+                         chpl____wide__ref_channel_T_dynamic_F ret_chpl,
+                         int64_t start_chpl,
+                         _ref_iostyle style_chpl,
+                         _ref_file this_chpl6);
 static void wrapon_fn_chpl41(_class_localson_fn_chpl41 c_chpl);
 static void wrapon_fn_chpl42(_class_localson_fn_chpl42 c_chpl);
 static void writer_chpl3(_ref_file this_chpl6,
@@ -11373,7 +11373,7 @@ static void chpl__init_FCHLock(int64_t _ln_chpl,
 static FCHFunctor_FCHQueue_int64_t_chpl _construct_FCHFunctor_chpl(FCHFunctor_FCHQueue_int64_t_chpl meme_chpl);
 static void chpl__auto_destroy_FCHFunctor(chpl____wide_FCHFunctor_FCHQueue_int64_t this_chpl6);
 static void this_chpl3(chpl____wide_FCHFunctor_FCHQueue_int64_t this_chpl6,
-                       chpl____wide__ref__wide_FCHQueue_int64_t data_chpl);
+                       chpl____wide_FCHQueue_int64_t data_chpl);
 static FCHLocalNode_FCHQueue_int64_t_chpl _construct_FCHLocalNode_chpl(FCHFunctor_FCHQueue_int64_t_chpl request_chpl,
                                                                        _ref_atomicbool wait_chpl,
                                                                        chpl_bool completed_chpl,
@@ -11406,13 +11406,13 @@ static EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl _construct_EnqueueFunctor_ch
                                                                                    EnqueueFunctor_FCHQueue_int64_t_int64_t_chpl meme_chpl);
 static void chpl__auto_destroy_EnqueueFunctor(chpl____wide_EnqueueFunctor_FCHQueue_int64_t_int64_t this_chpl6);
 static void this_chpl4(chpl____wide_EnqueueFunctor_FCHQueue_int64_t_int64_t this_chpl6,
-                       chpl____wide__ref__wide_FCHQueue_int64_t data_chpl);
+                       chpl____wide_FCHQueue_int64_t data_chpl);
 static DequeueFunctor_FCHQueue_int64_t_int64_t_chpl _construct_DequeueFunctor_chpl(int64_t retval_chpl,
                                                                                    chpl_bool hasElem_chpl,
                                                                                    DequeueFunctor_FCHQueue_int64_t_int64_t_chpl meme_chpl);
 static void chpl__auto_destroy_DequeueFunctor(chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t this_chpl6);
 static void this_chpl5(chpl____wide_DequeueFunctor_FCHQueue_int64_t_int64_t this_chpl6,
-                       chpl____wide__ref__wide_FCHQueue_int64_t data_chpl);
+                       chpl____wide_FCHQueue_int64_t data_chpl);
 static FCHQueue_int64_t_chpl _construct_FCHQueue_chpl(_ref_list_int64_t _list_chpl,
                                                       FCHLock_FCHQueue_int64_t_chpl fchLock_chpl,
                                                       FCHQueue_int64_t_chpl meme_chpl);
@@ -11465,20 +11465,20 @@ static chpl____wide_locale rootLocale;
 static chpl____wide_heap_locale origRootLocale;
 static chpl____wide_heap_DummyLocale dummyLocale;
 static int64_t numLocales;
-static string _str_literal_1966;
+static string _str_literal_1968;
 static string _str_literal_916;
 static string _str_literal_918;
-static string _str_literal_3382;
 static string _str_literal_3384;
 static string _str_literal_3386;
-static string _str_literal_3585;
-static string _str_literal_3596;
-static string _str_literal_1993;
+static string _str_literal_3388;
+static string _str_literal_3587;
+static string _str_literal_3598;
+static string _str_literal_1995;
 static string _str_literal_32;
 static string _str_literal_1867;
-static string _str_literal_1990;
-static string _str_literal_1936;
+static string _str_literal_1992;
 static string _str_literal_1869;
+static string _str_literal_1936;
 static string _str_literal_1857;
 static string _str_literal_1940;
 static string _str_literal_1942;
@@ -11487,11 +11487,11 @@ static string _str_literal_881;
 static string _str_literal_47;
 static string _str_literal_854;
 static string _str_literal_432;
-static string _str_literal_2821;
-static string _str_literal_2011;
 static string _str_literal_2823;
-static string _str_literal_2022;
-static string _str_literal_2009;
+static string _str_literal_2013;
+static string _str_literal_2825;
+static string _str_literal_2024;
+static string _str_literal_2011;
 static string _str_literal_1589;
 static string _str_literal_563;
 static string _str_literal_86;
@@ -11527,33 +11527,33 @@ static string _str_literal_1075;
 static string _str_literal_411;
 static string _str_literal_1079;
 static string _str_literal_1093;
-static string _str_literal_2397;
+static string _str_literal_2399;
 static string _str_literal_1096;
-static string _str_literal_2400;
-static string _str_literal_2406;
-static string _str_literal_2413;
+static string _str_literal_2402;
+static string _str_literal_2408;
 static string _str_literal_2415;
 static string _str_literal_2417;
 static string _str_literal_2419;
-static string _str_literal_2475;
+static string _str_literal_2421;
 static string _str_literal_2477;
+static string _str_literal_2479;
 static string _str_literal_1169;
 static string _str_literal_1171;
-static string _str_literal_2481;
-static string _str_literal_2495;
-static string _str_literal_2522;
-static string _str_literal_2529;
-static string _str_literal_2566;
-static string _str_literal_2569;
+static string _str_literal_2483;
+static string _str_literal_2497;
+static string _str_literal_2524;
+static string _str_literal_2531;
+static string _str_literal_2568;
 static string _str_literal_2571;
 static string _str_literal_2573;
 static string _str_literal_2575;
 static string _str_literal_2577;
-static string _str_literal_2615;
+static string _str_literal_2579;
 static string _str_literal_2617;
-static string _str_literal_2629;
+static string _str_literal_2619;
 static string _str_literal_2631;
 static string _str_literal_2633;
+static string _str_literal_2635;
 static int64_t numThreadsPerLocale;
 static int64_t dataParTasksPerLocale;
 static chpl_bool dataParIgnoreRunningTasks;

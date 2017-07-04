@@ -293,12 +293,12 @@ static void init_elts9(_ddata_locale x,
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn17)(&chpl_macro_tmp_28));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1__coforallCount = _coforallCount;
             T6 = this15;
-            (_args_forcoforall_fn)->_2_tmp = T6;
+            (_args_forcoforall_fn)->_1_tmp = T6;
+            (_args_forcoforall_fn)->_2_len = len;
             (_args_forcoforall_fn)->_3_numChunks = numChunks;
-            (_args_forcoforall_fn)->_4_len = len;
-            (_args_forcoforall_fn)->_5__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_4__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_5__coforallCount = _coforallCount;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn17 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(146), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn17_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -374,7 +374,6 @@ static void init_elts10(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x,
   range_int64_t_bounded_F _ic__F0_this2;
   int64_t i2;
   int64_t end;
-  int64_t ret3;
   _ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x2 = NULL;
   LocReplicatedArr_FCHGlobalNode_1_int64_t_F_chpl call_tmp16 = NULL;
   chpl____wide_LocReplicatedArr_FCHGlobalNode_1_int64_t_F T4 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -388,7 +387,7 @@ static void init_elts10(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x,
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_;
   atomic_int64 this14;
-  atomic_int_least64_t ret4;
+  atomic_int_least64_t ret3;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp4;
@@ -495,8 +494,7 @@ static void init_elts10(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x,
         call_tmp15 = (ret2 <= INT64(1));
         if (call_tmp15) {
           _ic__F0_this2 = _ic__F0_this;
-          ret3 = (&_ic__F0_this2)->_high;
-          end = ret3;
+          end = (&_ic__F0_this2)->_high;
           x2 = _ic__F1_x1__e1_args;
           for (i2 = (&_ic__F0_this2)->_low; ((i2 <= end)); i2 += INT64(1)) {
             call_tmp16 = ((LocReplicatedArr_FCHGlobalNode_1_int64_t_F_chpl)(nil));
@@ -517,12 +515,12 @@ static void init_elts10(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x,
           (this13)->i = _init_class_tmp_;
           (this13)->taskCnt = INT64(0);
           (this13)->taskList = NULL;
-          ret4 = type_tmp;
-          _ref_tmp_ = &ret4;
+          ret3 = type_tmp;
+          _ref_tmp_ = &ret3;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this14)->_v = ret4;
+          (&this14)->_v = ret3;
           ret_to_arg_ref_tmp_4 = &ret_tmp4;
-          _construct_atomic_int64(ret4, &this14, ret_to_arg_ref_tmp_4);
+          _construct_atomic_int64(ret3, &this14, ret_to_arg_ref_tmp_4);
           (this13)->i = ret_tmp4;
           (this13)->taskCnt = INT64(0);
           call_tmp17 = ((c_void_ptr)(nil));
@@ -542,12 +540,12 @@ static void init_elts10(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x,
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn27)(&chpl_macro_tmp_39));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_2_numChunks = numChunks;
+            (_args_forcoforall_fn)->_1_numChunks = numChunks;
+            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
             T6 = this15;
-            (_args_forcoforall_fn)->_3_tmp = T6;
-            (_args_forcoforall_fn)->_4_len = len;
-            (_args_forcoforall_fn)->_5__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_4_tmp = T6;
+            (_args_forcoforall_fn)->_5_len = len;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn31 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(160), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn27_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -622,8 +620,9 @@ static void init_elts17(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_F
   chpl_bool call_tmp15;
   range_int64_t_bounded_F _ic__F0_this2;
   int64_t i2;
-  int64_t end;
   int64_t ret3;
+  int64_t end;
+  int64_t ret4;
   _ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F x2 = NULL;
   LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_chpl call_tmp16 = NULL;
   chpl____wide_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F T4 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -637,7 +636,7 @@ static void init_elts17(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_F
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_;
   atomic_int64 this14;
-  atomic_int_least64_t ret4;
+  atomic_int_least64_t ret5;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp4;
@@ -650,9 +649,9 @@ static void init_elts17(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_F
   chpl____wide__ref_range_int64_t_bounded_F T5 = {CHPL_LOCALEID_T_INIT, NULL};
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
-  int64_t ret5;
-  int64_t end2;
   int64_t ret6;
+  int64_t end2;
+  int64_t ret7;
   _ref_range_int64_t_bounded_F this15 = NULL;
   _class_localscoforall_fn26 _args_forcoforall_fn = NULL;
   _ref_range_int64_t_bounded_F T6 = NULL;
@@ -746,10 +745,11 @@ static void init_elts17(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_F
         call_tmp15 = (ret2 <= INT64(1));
         if (call_tmp15) {
           _ic__F0_this2 = _ic__F0_this;
-          ret3 = (&_ic__F0_this2)->_high;
-          end = ret3;
+          ret3 = (&_ic__F0_this2)->_low;
+          ret4 = (&_ic__F0_this2)->_high;
+          end = ret4;
           x2 = _ic__F1_x1__e1_args;
-          for (i2 = (&_ic__F0_this2)->_low; ((i2 <= end)); i2 += INT64(1)) {
+          for (i2 = ret3; ((i2 <= end)); i2 += INT64(1)) {
             call_tmp16 = ((LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F_chpl)(nil));
             chpl_macro_tmp_48.locale = chpl_gen_getLocaleID();
             chpl_macro_tmp_48.addr = call_tmp16;
@@ -768,12 +768,12 @@ static void init_elts17(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_F
           (this13)->i = _init_class_tmp_;
           (this13)->taskCnt = INT64(0);
           (this13)->taskList = NULL;
-          ret4 = type_tmp;
-          _ref_tmp_ = &ret4;
+          ret5 = type_tmp;
+          _ref_tmp_ = &ret5;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this14)->_v = ret4;
+          (&this14)->_v = ret5;
           ret_to_arg_ref_tmp_4 = &ret_tmp4;
-          _construct_atomic_int64(ret4, &this14, ret_to_arg_ref_tmp_4);
+          _construct_atomic_int64(ret5, &this14, ret_to_arg_ref_tmp_4);
           (this13)->i = ret_tmp4;
           (this13)->taskCnt = INT64(0);
           call_tmp17 = ((c_void_ptr)(nil));
@@ -788,19 +788,19 @@ static void init_elts17(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_F
           numTasks = call_tmp18;
           _upEndCount3(_coforallCount, call_tmp18);
           _ic__F0_this3 = tmpIter;
-          ret5 = (&_ic__F0_this3)->_low;
-          ret6 = (&_ic__F0_this3)->_high;
-          end2 = ret6;
-          for (i3 = ret5; ((i3 <= end2)); i3 += INT64(1)) {
+          ret6 = (&_ic__F0_this3)->_low;
+          ret7 = (&_ic__F0_this3)->_high;
+          end2 = ret7;
+          for (i3 = ret6; ((i3 <= end2)); i3 += INT64(1)) {
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn26)(&chpl_macro_tmp_50));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1_len = len;
+            (_args_forcoforall_fn)->_1_numChunks = numChunks;
             (_args_forcoforall_fn)->_2__yieldedIndex = i3;
             (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_4_numChunks = numChunks;
             T6 = this15;
-            (_args_forcoforall_fn)->_5_tmp = T6;
+            (_args_forcoforall_fn)->_4_tmp = T6;
+            (_args_forcoforall_fn)->_5_len = len;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn15 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(144), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn26_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -1072,12 +1072,12 @@ static void init_elts7(_ddata_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_ui
             this19 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn20)(&chpl_macro_tmp_59));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
+            (_args_forcoforall_fn)->_1_len = len;
+            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_3_numChunks = numChunks;
             T4 = this19;
-            (_args_forcoforall_fn)->_1_tmp = T4;
-            (_args_forcoforall_fn)->_2_len = len;
-            (_args_forcoforall_fn)->_3__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_4__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_5_numChunks = numChunks;
+            (_args_forcoforall_fn)->_4_tmp = T4;
+            (_args_forcoforall_fn)->_5__coforallCount = _coforallCount;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn24 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(153), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn20_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -1152,9 +1152,7 @@ static void init_elts5(_ddata_LocReplicatedDom_1_int64_t_F x,
   chpl_bool call_tmp15;
   range_int64_t_bounded_F _ic__F0_this2;
   int64_t i2;
-  int64_t ret3;
   int64_t end;
-  int64_t ret4;
   _ddata_LocReplicatedDom_1_int64_t_F x2 = NULL;
   LocReplicatedDom_1_int64_t_F_chpl call_tmp16 = NULL;
   chpl____wide_LocReplicatedDom_1_int64_t_F T4 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -1168,7 +1166,7 @@ static void init_elts5(_ddata_LocReplicatedDom_1_int64_t_F x,
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_;
   atomic_int64 this14;
-  atomic_int_least64_t ret5;
+  atomic_int_least64_t ret3;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp4;
@@ -1181,9 +1179,8 @@ static void init_elts5(_ddata_LocReplicatedDom_1_int64_t_F x,
   chpl____wide__ref_range_int64_t_bounded_F T5 = {CHPL_LOCALEID_T_INIT, NULL};
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
-  int64_t ret6;
   int64_t end2;
-  int64_t ret7;
+  int64_t ret4;
   _ref_range_int64_t_bounded_F this15 = NULL;
   _class_localscoforall_fn16 _args_forcoforall_fn = NULL;
   _ref_range_int64_t_bounded_F T6 = NULL;
@@ -1277,11 +1274,9 @@ static void init_elts5(_ddata_LocReplicatedDom_1_int64_t_F x,
         call_tmp15 = (ret2 <= INT64(1));
         if (call_tmp15) {
           _ic__F0_this2 = _ic__F0_this;
-          ret3 = (&_ic__F0_this2)->_low;
-          ret4 = (&_ic__F0_this2)->_high;
-          end = ret4;
+          end = (&_ic__F0_this2)->_high;
           x2 = _ic__F1_x1__e1_args;
-          for (i2 = ret3; ((i2 <= end)); i2 += INT64(1)) {
+          for (i2 = (&_ic__F0_this2)->_low; ((i2 <= end)); i2 += INT64(1)) {
             call_tmp16 = ((LocReplicatedDom_1_int64_t_F_chpl)(nil));
             chpl_macro_tmp_68.locale = chpl_gen_getLocaleID();
             chpl_macro_tmp_68.addr = call_tmp16;
@@ -1300,12 +1295,12 @@ static void init_elts5(_ddata_LocReplicatedDom_1_int64_t_F x,
           (this13)->i = _init_class_tmp_;
           (this13)->taskCnt = INT64(0);
           (this13)->taskList = NULL;
-          ret5 = type_tmp;
-          _ref_tmp_ = &ret5;
+          ret3 = type_tmp;
+          _ref_tmp_ = &ret3;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this14)->_v = ret5;
+          (&this14)->_v = ret3;
           ret_to_arg_ref_tmp_4 = &ret_tmp4;
-          _construct_atomic_int64(ret5, &this14, ret_to_arg_ref_tmp_4);
+          _construct_atomic_int64(ret3, &this14, ret_to_arg_ref_tmp_4);
           (this13)->i = ret_tmp4;
           (this13)->taskCnt = INT64(0);
           call_tmp17 = ((c_void_ptr)(nil));
@@ -1320,19 +1315,18 @@ static void init_elts5(_ddata_LocReplicatedDom_1_int64_t_F x,
           numTasks = call_tmp18;
           _upEndCount3(_coforallCount, call_tmp18);
           _ic__F0_this3 = tmpIter;
-          ret6 = (&_ic__F0_this3)->_low;
-          ret7 = (&_ic__F0_this3)->_high;
-          end2 = ret7;
-          for (i3 = ret6; ((i3 <= end2)); i3 += INT64(1)) {
+          ret4 = (&_ic__F0_this3)->_high;
+          end2 = ret4;
+          for (i3 = (&_ic__F0_this3)->_low; ((i3 <= end2)); i3 += INT64(1)) {
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn16)(&chpl_macro_tmp_70));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
+            (_args_forcoforall_fn)->_1__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_2__coforallCount = _coforallCount;
+            (_args_forcoforall_fn)->_3_numChunks = numChunks;
             T6 = this15;
-            (_args_forcoforall_fn)->_1_tmp = T6;
-            (_args_forcoforall_fn)->_2_len = len;
-            (_args_forcoforall_fn)->_3__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_4__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_5_numChunks = numChunks;
+            (_args_forcoforall_fn)->_4_tmp = T6;
+            (_args_forcoforall_fn)->_5_len = len;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn32 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(161), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn16_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -1409,7 +1403,9 @@ static void init_elts12(_ddata_chpl_TableEntry_int64_t x,
   chpl_bool call_tmp14;
   range_int64_t_bounded_F _ic__F0_this2;
   int64_t i2;
+  int64_t ret3;
   int64_t end;
+  int64_t ret4;
   _ddata_chpl_TableEntry_int64_t x3 = NULL;
   chpl_TableEntry_int64_t this14;
   chpl__hash_status x4;
@@ -1425,7 +1421,7 @@ static void init_elts12(_ddata_chpl_TableEntry_int64_t x,
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_;
   atomic_int64 this16;
-  atomic_int_least64_t ret3;
+  atomic_int_least64_t ret5;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp6;
@@ -1439,7 +1435,7 @@ static void init_elts12(_ddata_chpl_TableEntry_int64_t x,
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
   int64_t end2;
-  int64_t ret4;
+  int64_t ret6;
   _ref_range_int64_t_bounded_F this17 = NULL;
   _class_localscoforall_fn21 _args_forcoforall_fn = NULL;
   _ref_range_int64_t_bounded_F T4 = NULL;
@@ -1534,9 +1530,11 @@ static void init_elts12(_ddata_chpl_TableEntry_int64_t x,
         call_tmp14 = (ret2 <= INT64(1));
         if (call_tmp14) {
           _ic__F0_this2 = _ic__F0_this;
-          end = (&_ic__F0_this2)->_high;
+          ret3 = (&_ic__F0_this2)->_low;
+          ret4 = (&_ic__F0_this2)->_high;
+          end = ret4;
           x3 = _ic__F1_x1__e1_args;
-          for (i2 = (&_ic__F0_this2)->_low; ((i2 <= end)); i2 += INT64(1)) {
+          for (i2 = ret3; ((i2 <= end)); i2 += INT64(1)) {
             (&this14)->status = chpl__hash_status_empty;
             (&this14)->idx = INT64(0);
             x4 = chpl__hash_status_empty;
@@ -1558,12 +1556,12 @@ static void init_elts12(_ddata_chpl_TableEntry_int64_t x,
           (this15)->i = _init_class_tmp_;
           (this15)->taskCnt = INT64(0);
           (this15)->taskList = NULL;
-          ret3 = type_tmp;
-          _ref_tmp_ = &ret3;
+          ret5 = type_tmp;
+          _ref_tmp_ = &ret5;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this16)->_v = ret3;
+          (&this16)->_v = ret5;
           ret_to_arg_ref_tmp_6 = &ret_tmp6;
-          _construct_atomic_int64(ret3, &this16, ret_to_arg_ref_tmp_6);
+          _construct_atomic_int64(ret5, &this16, ret_to_arg_ref_tmp_6);
           (this15)->i = ret_tmp6;
           (this15)->taskCnt = INT64(0);
           call_tmp15 = ((c_void_ptr)(nil));
@@ -1578,18 +1576,18 @@ static void init_elts12(_ddata_chpl_TableEntry_int64_t x,
           numTasks = call_tmp16;
           _upEndCount3(_coforallCount, call_tmp16);
           _ic__F0_this3 = tmpIter;
-          ret4 = (&_ic__F0_this3)->_high;
-          end2 = ret4;
+          ret6 = (&_ic__F0_this3)->_high;
+          end2 = ret6;
           for (i3 = (&_ic__F0_this3)->_low; ((i3 <= end2)); i3 += INT64(1)) {
             this17 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn21)(&chpl_macro_tmp_79));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_2_numChunks = numChunks;
             T4 = this17;
-            (_args_forcoforall_fn)->_3_tmp = T4;
-            (_args_forcoforall_fn)->_4_len = len;
-            (_args_forcoforall_fn)->_5__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_1_tmp = T4;
+            (_args_forcoforall_fn)->_2_len = len;
+            (_args_forcoforall_fn)->_3_numChunks = numChunks;
+            (_args_forcoforall_fn)->_4__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_5__coforallCount = _coforallCount;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn18 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(147), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn21_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -1664,9 +1662,7 @@ static void init_elts8(_ddata_LocCyclicArr_Bitmap_1_int64_t_F x,
   chpl_bool call_tmp15;
   range_int64_t_bounded_F _ic__F0_this2;
   int64_t i2;
-  int64_t ret3;
   int64_t end;
-  int64_t ret4;
   _ddata_LocCyclicArr_Bitmap_1_int64_t_F x2 = NULL;
   LocCyclicArr_Bitmap_1_int64_t_F_chpl call_tmp16 = NULL;
   chpl____wide_LocCyclicArr_Bitmap_1_int64_t_F T4 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -1680,7 +1676,7 @@ static void init_elts8(_ddata_LocCyclicArr_Bitmap_1_int64_t_F x,
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_;
   atomic_int64 this14;
-  atomic_int_least64_t ret5;
+  atomic_int_least64_t ret3;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp4;
@@ -1787,11 +1783,9 @@ static void init_elts8(_ddata_LocCyclicArr_Bitmap_1_int64_t_F x,
         call_tmp15 = (ret2 <= INT64(1));
         if (call_tmp15) {
           _ic__F0_this2 = _ic__F0_this;
-          ret3 = (&_ic__F0_this2)->_low;
-          ret4 = (&_ic__F0_this2)->_high;
-          end = ret4;
+          end = (&_ic__F0_this2)->_high;
           x2 = _ic__F1_x1__e1_args;
-          for (i2 = ret3; ((i2 <= end)); i2 += INT64(1)) {
+          for (i2 = (&_ic__F0_this2)->_low; ((i2 <= end)); i2 += INT64(1)) {
             call_tmp16 = ((LocCyclicArr_Bitmap_1_int64_t_F_chpl)(nil));
             chpl_macro_tmp_88.locale = chpl_gen_getLocaleID();
             chpl_macro_tmp_88.addr = call_tmp16;
@@ -1810,12 +1804,12 @@ static void init_elts8(_ddata_LocCyclicArr_Bitmap_1_int64_t_F x,
           (this13)->i = _init_class_tmp_;
           (this13)->taskCnt = INT64(0);
           (this13)->taskList = NULL;
-          ret5 = type_tmp;
-          _ref_tmp_ = &ret5;
+          ret3 = type_tmp;
+          _ref_tmp_ = &ret3;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this14)->_v = ret5;
+          (&this14)->_v = ret3;
           ret_to_arg_ref_tmp_4 = &ret_tmp4;
-          _construct_atomic_int64(ret5, &this14, ret_to_arg_ref_tmp_4);
+          _construct_atomic_int64(ret3, &this14, ret_to_arg_ref_tmp_4);
           (this13)->i = ret_tmp4;
           (this13)->taskCnt = INT64(0);
           call_tmp17 = ((c_void_ptr)(nil));
@@ -1835,12 +1829,12 @@ static void init_elts8(_ddata_LocCyclicArr_Bitmap_1_int64_t_F x,
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn22)(&chpl_macro_tmp_90));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            T6 = this15;
-            (_args_forcoforall_fn)->_1_tmp = T6;
-            (_args_forcoforall_fn)->_2_len = len;
+            (_args_forcoforall_fn)->_1_numChunks = numChunks;
+            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
             (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_4__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_5_numChunks = numChunks;
+            T6 = this15;
+            (_args_forcoforall_fn)->_4_tmp = T6;
+            (_args_forcoforall_fn)->_5_len = len;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn22 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(151), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn22_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -1948,7 +1942,9 @@ static void init_elts3(_ddata_Bitmap x,
   chpl_bool call_tmp16;
   range_int64_t_bounded_F _ic__F0_this2;
   int64_t i2;
+  int64_t ret5;
   int64_t end;
+  int64_t ret6;
   _ddata_Bitmap x3 = NULL;
   Bitmap_chpl this14;
   _syncvar_uint64_t _init_class_tmp_4;
@@ -1968,9 +1964,9 @@ static void init_elts3(_ddata_Bitmap x,
   _domain_DefaultRectangularDom_1_int64_t_F ret_tmp9;
   _ref__domain_DefaultRectangularDom_1_int64_t_F ret_to_arg_ref_tmp_9 = NULL;
   _ref__domain_DefaultRectangularDom_1_int64_t_F i_x2 = NULL;
-  _domain_DefaultRectangularDom_1_int64_t_F ret5;
+  _domain_DefaultRectangularDom_1_int64_t_F ret7;
   chpl_bool coerce_tmp2;
-  _domain_DefaultRectangularDom_1_int64_t_F ret6;
+  _domain_DefaultRectangularDom_1_int64_t_F ret8;
   _ref__domain_DefaultRectangularDom_1_int64_t_F _ref_tmp_5 = NULL;
   chpl____wide__ref__domain_DefaultRectangularDom_1_int64_t_F T14 = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__ref__domain_DefaultRectangularDom_1_int64_t_F call_tmp17 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -1995,7 +1991,7 @@ static void init_elts3(_ddata_Bitmap x,
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_7;
   atomic_int64 this16;
-  atomic_int_least64_t ret7;
+  atomic_int_least64_t ret9;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_7 = NULL;
   atomic_int64 ret_tmp14;
@@ -2008,7 +2004,6 @@ static void init_elts3(_ddata_Bitmap x,
   chpl____wide__ref_range_int64_t_bounded_F T17 = {CHPL_LOCALEID_T_INIT, NULL};
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
-  int64_t ret8;
   int64_t end2;
   _ref_range_int64_t_bounded_F this17 = NULL;
   _class_localscoforall_fn23 _args_forcoforall_fn = NULL;
@@ -2186,8 +2181,10 @@ static void init_elts3(_ddata_Bitmap x,
         call_tmp16 = (ret4 <= INT64(1));
         if (call_tmp16) {
           _ic__F0_this2 = _ic__F0_this;
-          end = (&_ic__F0_this2)->_high;
-          for (i2 = (&_ic__F0_this2)->_low; ((i2 <= end)); i2 += INT64(1)) {
+          ret5 = (&_ic__F0_this2)->_low;
+          ret6 = (&_ic__F0_this2)->_high;
+          end = ret6;
+          for (i2 = ret5; ((i2 <= end)); i2 += INT64(1)) {
             x3 = _ic__F1_x1__e1_args;
             chpl_macro_tmp_107.locale = chpl_gen_getLocaleID();
             chpl_macro_tmp_107.addr = nil;
@@ -2235,16 +2232,16 @@ static void init_elts3(_ddata_Bitmap x,
               chpl_macro_tmp_114.locale = chpl_gen_getLocaleID();
               chpl_macro_tmp_114.addr = _ref_tmp_5;
               T14 = chpl_macro_tmp_114;
-              ret6 = chpl__initCopy2(T14);
-              ret5 = ret6;
+              ret8 = chpl__initCopy2(T14);
+              ret7 = ret8;
               goto _end_chpl__unalias2;
             } else {
-              ret5 = ret_tmp9;
+              ret7 = ret_tmp9;
               goto _end_chpl__unalias2;
             }
             _end_chpl__unalias2:;
-            default_argbitmapSpace2 = ret5;
-            (&this14)->bitmapSpace_chpl = ret5;
+            default_argbitmapSpace2 = ret7;
+            (&this14)->bitmapSpace_chpl = ret7;
             _ref_tmp_6 = &default_argbitmapSpace2;
             chpl_macro_tmp_115.locale = chpl_gen_getLocaleID();
             chpl_macro_tmp_115.addr = _ref_tmp_6;
@@ -2274,12 +2271,12 @@ static void init_elts3(_ddata_Bitmap x,
           (this15)->i = _init_class_tmp_7;
           (this15)->taskCnt = INT64(0);
           (this15)->taskList = NULL;
-          ret7 = type_tmp;
-          _ref_tmp_7 = &ret7;
+          ret9 = type_tmp;
+          _ref_tmp_7 = &ret9;
           atomic_init_int_least64_t(_ref_tmp_7, INT64(0));
-          (&this16)->_v = ret7;
+          (&this16)->_v = ret9;
           ret_to_arg_ref_tmp_14 = &ret_tmp14;
-          _construct_atomic_int64(ret7, &this16, ret_to_arg_ref_tmp_14);
+          _construct_atomic_int64(ret9, &this16, ret_to_arg_ref_tmp_14);
           (this15)->i = ret_tmp14;
           (this15)->taskCnt = INT64(0);
           call_tmp19 = ((c_void_ptr)(nil));
@@ -2294,18 +2291,17 @@ static void init_elts3(_ddata_Bitmap x,
           numTasks = call_tmp20;
           _upEndCount3(_coforallCount, call_tmp20);
           _ic__F0_this3 = tmpIter;
-          ret8 = (&_ic__F0_this3)->_low;
           end2 = (&_ic__F0_this3)->_high;
-          for (i3 = ret8; ((i3 <= end2)); i3 += INT64(1)) {
+          for (i3 = (&_ic__F0_this3)->_low; ((i3 <= end2)); i3 += INT64(1)) {
             this17 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn23)(&chpl_macro_tmp_117));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1_numChunks = numChunks;
+            (_args_forcoforall_fn)->_1__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_2__coforallCount = _coforallCount;
             T18 = this17;
-            (_args_forcoforall_fn)->_2_tmp = T18;
-            (_args_forcoforall_fn)->_3_len = len;
-            (_args_forcoforall_fn)->_4__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_5__coforallCount = _coforallCount;
+            (_args_forcoforall_fn)->_3_tmp = T18;
+            (_args_forcoforall_fn)->_4_len = len;
+            (_args_forcoforall_fn)->_5_numChunks = numChunks;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn25 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(154), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn23_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -2395,6 +2391,7 @@ static void init_elts2(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x,
   int64_t i2;
   int64_t ret3;
   int64_t end;
+  int64_t ret4;
   _ddata__remoteAccessData_Bitmap_1_int64_t_F_F x2 = NULL;
   _remoteAccessData_Bitmap_1_int64_t_F_F this14;
   _tuple_1_star_int64_t _init_class_tmp_4;
@@ -2421,7 +2418,7 @@ static void init_elts2(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x,
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_7;
   atomic_int64 this16;
-  atomic_int_least64_t ret4;
+  atomic_int_least64_t ret5;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp6;
@@ -2434,7 +2431,6 @@ static void init_elts2(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x,
   chpl____wide__ref_range_int64_t_bounded_F T11 = {CHPL_LOCALEID_T_INIT, NULL};
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
-  int64_t ret5;
   int64_t end2;
   _ref_range_int64_t_bounded_F this17 = NULL;
   _class_localscoforall_fn30 _args_forcoforall_fn = NULL;
@@ -2576,7 +2572,8 @@ static void init_elts2(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x,
         if (call_tmp16) {
           _ic__F0_this2 = _ic__F0_this;
           ret3 = (&_ic__F0_this2)->_low;
-          end = (&_ic__F0_this2)->_high;
+          ret4 = (&_ic__F0_this2)->_high;
+          end = ret4;
           x2 = _ic__F1_x1__e1_args;
           for (i2 = ret3; ((i2 <= end)); i2 += INT64(1)) {
             *(_init_class_tmp_4 + INT64(0)) = INT64(0);
@@ -2633,12 +2630,12 @@ static void init_elts2(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x,
           (this15)->i = _init_class_tmp_7;
           (this15)->taskCnt = INT64(0);
           (this15)->taskList = NULL;
-          ret4 = type_tmp;
-          _ref_tmp_ = &ret4;
+          ret5 = type_tmp;
+          _ref_tmp_ = &ret5;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this16)->_v = ret4;
+          (&this16)->_v = ret5;
           ret_to_arg_ref_tmp_6 = &ret_tmp6;
-          _construct_atomic_int64(ret4, &this16, ret_to_arg_ref_tmp_6);
+          _construct_atomic_int64(ret5, &this16, ret_to_arg_ref_tmp_6);
           (this15)->i = ret_tmp6;
           (this15)->taskCnt = INT64(0);
           call_tmp19 = ((c_void_ptr)(nil));
@@ -2653,18 +2650,17 @@ static void init_elts2(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x,
           numTasks = call_tmp20;
           _upEndCount3(_coforallCount, call_tmp20);
           _ic__F0_this3 = tmpIter;
-          ret5 = (&_ic__F0_this3)->_low;
           end2 = (&_ic__F0_this3)->_high;
-          for (i3 = ret5; ((i3 <= end2)); i3 += INT64(1)) {
+          for (i3 = (&_ic__F0_this3)->_low; ((i3 <= end2)); i3 += INT64(1)) {
             this17 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn30)(&chpl_macro_tmp_138));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1_len = len;
-            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_4_numChunks = numChunks;
+            (_args_forcoforall_fn)->_1__coforallCount = _coforallCount;
             T12 = this17;
-            (_args_forcoforall_fn)->_5_tmp = T12;
+            (_args_forcoforall_fn)->_2_tmp = T12;
+            (_args_forcoforall_fn)->_3_len = len;
+            (_args_forcoforall_fn)->_4_numChunks = numChunks;
+            (_args_forcoforall_fn)->_5__yieldedIndex = i3;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn26 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(155), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn30_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -2739,7 +2735,6 @@ static void init_elts11(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlob
   chpl_bool call_tmp15;
   range_int64_t_bounded_F _ic__F0_this2;
   int64_t i2;
-  int64_t ret3;
   int64_t end;
   _ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F x2 = NULL;
   LocCyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F_chpl call_tmp16 = NULL;
@@ -2754,7 +2749,7 @@ static void init_elts11(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlob
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_;
   atomic_int64 this14;
-  atomic_int_least64_t ret4;
+  atomic_int_least64_t ret3;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp4;
@@ -2767,7 +2762,6 @@ static void init_elts11(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlob
   chpl____wide__ref_range_int64_t_bounded_F T5 = {CHPL_LOCALEID_T_INIT, NULL};
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
-  int64_t ret5;
   int64_t end2;
   _ref_range_int64_t_bounded_F this15 = NULL;
   _class_localscoforall_fn24 _args_forcoforall_fn = NULL;
@@ -2862,10 +2856,9 @@ static void init_elts11(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlob
         call_tmp15 = (ret2 <= INT64(1));
         if (call_tmp15) {
           _ic__F0_this2 = _ic__F0_this;
-          ret3 = (&_ic__F0_this2)->_low;
           end = (&_ic__F0_this2)->_high;
           x2 = _ic__F1_x1__e1_args;
-          for (i2 = ret3; ((i2 <= end)); i2 += INT64(1)) {
+          for (i2 = (&_ic__F0_this2)->_low; ((i2 <= end)); i2 += INT64(1)) {
             call_tmp16 = ((LocCyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F_chpl)(nil));
             chpl_macro_tmp_147.locale = chpl_gen_getLocaleID();
             chpl_macro_tmp_147.addr = call_tmp16;
@@ -2884,12 +2877,12 @@ static void init_elts11(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlob
           (this13)->i = _init_class_tmp_;
           (this13)->taskCnt = INT64(0);
           (this13)->taskList = NULL;
-          ret4 = type_tmp;
-          _ref_tmp_ = &ret4;
+          ret3 = type_tmp;
+          _ref_tmp_ = &ret3;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this14)->_v = ret4;
+          (&this14)->_v = ret3;
           ret_to_arg_ref_tmp_4 = &ret_tmp4;
-          _construct_atomic_int64(ret4, &this14, ret_to_arg_ref_tmp_4);
+          _construct_atomic_int64(ret3, &this14, ret_to_arg_ref_tmp_4);
           (this13)->i = ret_tmp4;
           (this13)->taskCnt = INT64(0);
           call_tmp17 = ((c_void_ptr)(nil));
@@ -2904,15 +2897,14 @@ static void init_elts11(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlob
           numTasks = call_tmp18;
           _upEndCount3(_coforallCount, call_tmp18);
           _ic__F0_this3 = tmpIter;
-          ret5 = (&_ic__F0_this3)->_low;
           end2 = (&_ic__F0_this3)->_high;
-          for (i3 = ret5; ((i3 <= end2)); i3 += INT64(1)) {
+          for (i3 = (&_ic__F0_this3)->_low; ((i3 <= end2)); i3 += INT64(1)) {
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn24)(&chpl_macro_tmp_149));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_2__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_3_numChunks = numChunks;
+            (_args_forcoforall_fn)->_1_numChunks = numChunks;
+            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
             T6 = this15;
             (_args_forcoforall_fn)->_4_tmp = T6;
             (_args_forcoforall_fn)->_5_len = len;
@@ -2991,6 +2983,7 @@ static void init_elts4(_ddata_uint64_t x,
   int64_t i2;
   int64_t ret3;
   int64_t end;
+  int64_t ret4;
   _ddata_uint64_t x2 = NULL;
   range_int64_t_bounded_F tmpIter;
   range_int64_t_boundedLow_F ret_tmp2;
@@ -3002,7 +2995,7 @@ static void init_elts4(_ddata_uint64_t x,
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_;
   atomic_int64 this14;
-  atomic_int_least64_t ret4;
+  atomic_int_least64_t ret5;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp4;
@@ -3016,7 +3009,6 @@ static void init_elts4(_ddata_uint64_t x,
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
   int64_t end2;
-  int64_t ret5;
   _ref_range_int64_t_bounded_F this15 = NULL;
   _class_localscoforall_fn19 _args_forcoforall_fn = NULL;
   _ref_range_int64_t_bounded_F T4 = NULL;
@@ -3110,7 +3102,8 @@ static void init_elts4(_ddata_uint64_t x,
         if (call_tmp15) {
           _ic__F0_this2 = _ic__F0_this;
           ret3 = (&_ic__F0_this2)->_low;
-          end = (&_ic__F0_this2)->_high;
+          ret4 = (&_ic__F0_this2)->_high;
+          end = ret4;
           x2 = _ic__F1_x1__e1_args;
           for (i2 = ret3; ((i2 <= end)); i2 += INT64(1)) {
             *(x2 + i2) = UINT64(0);
@@ -3127,12 +3120,12 @@ static void init_elts4(_ddata_uint64_t x,
           (this13)->i = _init_class_tmp_;
           (this13)->taskCnt = INT64(0);
           (this13)->taskList = NULL;
-          ret4 = type_tmp;
-          _ref_tmp_ = &ret4;
+          ret5 = type_tmp;
+          _ref_tmp_ = &ret5;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this14)->_v = ret4;
+          (&this14)->_v = ret5;
           ret_to_arg_ref_tmp_4 = &ret_tmp4;
-          _construct_atomic_int64(ret4, &this14, ret_to_arg_ref_tmp_4);
+          _construct_atomic_int64(ret5, &this14, ret_to_arg_ref_tmp_4);
           (this13)->i = ret_tmp4;
           (this13)->taskCnt = INT64(0);
           call_tmp16 = ((c_void_ptr)(nil));
@@ -3147,18 +3140,17 @@ static void init_elts4(_ddata_uint64_t x,
           numTasks = call_tmp17;
           _upEndCount3(_coforallCount, call_tmp17);
           _ic__F0_this3 = tmpIter;
-          ret5 = (&_ic__F0_this3)->_high;
-          end2 = ret5;
+          end2 = (&_ic__F0_this3)->_high;
           for (i3 = (&_ic__F0_this3)->_low; ((i3 <= end2)); i3 += INT64(1)) {
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn19)(&chpl_macro_tmp_158));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1_len = len;
-            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_4_numChunks = numChunks;
             T4 = this15;
-            (_args_forcoforall_fn)->_5_tmp = T4;
+            (_args_forcoforall_fn)->_1_tmp = T4;
+            (_args_forcoforall_fn)->_2_len = len;
+            (_args_forcoforall_fn)->_3_numChunks = numChunks;
+            (_args_forcoforall_fn)->_4__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_5__coforallCount = _coforallCount;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn27 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(156), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn19_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -3260,6 +3252,7 @@ static void init_elts6(_ddata_localesSignal x,
   chpl____wide__ref_range_int64_t_bounded_F T5 = {CHPL_LOCALEID_T_INIT, NULL};
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
+  int64_t ret4;
   int64_t end2;
   _ref_range_int64_t_bounded_F this15 = NULL;
   _class_localscoforall_fn18 _args_forcoforall_fn = NULL;
@@ -3395,17 +3388,18 @@ static void init_elts6(_ddata_localesSignal x,
           numTasks = call_tmp18;
           _upEndCount3(_coforallCount, call_tmp18);
           _ic__F0_this3 = tmpIter;
+          ret4 = (&_ic__F0_this3)->_low;
           end2 = (&_ic__F0_this3)->_high;
-          for (i3 = (&_ic__F0_this3)->_low; ((i3 <= end2)); i3 += INT64(1)) {
+          for (i3 = ret4; ((i3 <= end2)); i3 += INT64(1)) {
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn18)(&chpl_macro_tmp_169));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_2_numChunks = numChunks;
+            (_args_forcoforall_fn)->_1__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_2__coforallCount = _coforallCount;
             T6 = this15;
             (_args_forcoforall_fn)->_3_tmp = T6;
             (_args_forcoforall_fn)->_4_len = len;
-            (_args_forcoforall_fn)->_5__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_5_numChunks = numChunks;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn16 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(145), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn18_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -3647,12 +3641,12 @@ static void init_elts(_ddata_LocCyclic_1_int64_t x,
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn15)(&chpl_macro_tmp_180));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_2_numChunks = numChunks;
+            (_args_forcoforall_fn)->_1_numChunks = numChunks;
+            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
             T6 = this15;
-            (_args_forcoforall_fn)->_3_tmp = T6;
-            (_args_forcoforall_fn)->_4_len = len;
-            (_args_forcoforall_fn)->_5__coforallCount = _coforallCount;
+            (_args_forcoforall_fn)->_4_tmp = T6;
+            (_args_forcoforall_fn)->_5_len = len;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn19 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(148), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn15_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -3727,7 +3721,6 @@ static void init_elts14(_ddata_LocCyclicDom_1_int64_t_F x,
   chpl_bool call_tmp15;
   range_int64_t_bounded_F _ic__F0_this2;
   int64_t i2;
-  int64_t ret3;
   int64_t end;
   _ddata_LocCyclicDom_1_int64_t_F x2 = NULL;
   LocCyclicDom_1_int64_t_F_chpl call_tmp16 = NULL;
@@ -3742,7 +3735,7 @@ static void init_elts14(_ddata_LocCyclicDom_1_int64_t_F x,
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_;
   atomic_int64 this14;
-  atomic_int_least64_t ret4;
+  atomic_int_least64_t ret3;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp4;
@@ -3755,7 +3748,6 @@ static void init_elts14(_ddata_LocCyclicDom_1_int64_t_F x,
   chpl____wide__ref_range_int64_t_bounded_F T5 = {CHPL_LOCALEID_T_INIT, NULL};
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
-  int64_t ret5;
   int64_t end2;
   _ref_range_int64_t_bounded_F this15 = NULL;
   _class_localscoforall_fn29 _args_forcoforall_fn = NULL;
@@ -3850,10 +3842,9 @@ static void init_elts14(_ddata_LocCyclicDom_1_int64_t_F x,
         call_tmp15 = (ret2 <= INT64(1));
         if (call_tmp15) {
           _ic__F0_this2 = _ic__F0_this;
-          ret3 = (&_ic__F0_this2)->_low;
           end = (&_ic__F0_this2)->_high;
           x2 = _ic__F1_x1__e1_args;
-          for (i2 = ret3; ((i2 <= end)); i2 += INT64(1)) {
+          for (i2 = (&_ic__F0_this2)->_low; ((i2 <= end)); i2 += INT64(1)) {
             call_tmp16 = ((LocCyclicDom_1_int64_t_F_chpl)(nil));
             chpl_macro_tmp_189.locale = chpl_gen_getLocaleID();
             chpl_macro_tmp_189.addr = call_tmp16;
@@ -3872,12 +3863,12 @@ static void init_elts14(_ddata_LocCyclicDom_1_int64_t_F x,
           (this13)->i = _init_class_tmp_;
           (this13)->taskCnt = INT64(0);
           (this13)->taskList = NULL;
-          ret4 = type_tmp;
-          _ref_tmp_ = &ret4;
+          ret3 = type_tmp;
+          _ref_tmp_ = &ret3;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this14)->_v = ret4;
+          (&this14)->_v = ret3;
           ret_to_arg_ref_tmp_4 = &ret_tmp4;
-          _construct_atomic_int64(ret4, &this14, ret_to_arg_ref_tmp_4);
+          _construct_atomic_int64(ret3, &this14, ret_to_arg_ref_tmp_4);
           (this13)->i = ret_tmp4;
           (this13)->taskCnt = INT64(0);
           call_tmp17 = ((c_void_ptr)(nil));
@@ -3892,18 +3883,17 @@ static void init_elts14(_ddata_LocCyclicDom_1_int64_t_F x,
           numTasks = call_tmp18;
           _upEndCount3(_coforallCount, call_tmp18);
           _ic__F0_this3 = tmpIter;
-          ret5 = (&_ic__F0_this3)->_low;
           end2 = (&_ic__F0_this3)->_high;
-          for (i3 = ret5; ((i3 <= end2)); i3 += INT64(1)) {
+          for (i3 = (&_ic__F0_this3)->_low; ((i3 <= end2)); i3 += INT64(1)) {
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn29)(&chpl_macro_tmp_191));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1_len = len;
-            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_4_numChunks = numChunks;
             T6 = this15;
-            (_args_forcoforall_fn)->_5_tmp = T6;
+            (_args_forcoforall_fn)->_1_tmp = T6;
+            (_args_forcoforall_fn)->_2_len = len;
+            (_args_forcoforall_fn)->_3_numChunks = numChunks;
+            (_args_forcoforall_fn)->_4__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_5__coforallCount = _coforallCount;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
             /*** wrapcoforall_fn21 ***/ chpl_taskListAddCoStmt(INT32(-2), INT64(150), ((chpl_task_bundle_p)(_args_vforcoforall_fn)), sizeof(chpl__class_localscoforall_fn29_object), &((_coforallCount)->taskList), _taskListNodecoforall_fn, INT64(740), INT32(2));
@@ -4153,9 +4143,9 @@ static void init_elts18(_ddata_FCHGlobalNode x,
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn31)(&chpl_macro_tmp_202));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_2__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_3_numChunks = numChunks;
+            (_args_forcoforall_fn)->_1_numChunks = numChunks;
+            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
             T6 = this15;
             (_args_forcoforall_fn)->_4_tmp = T6;
             (_args_forcoforall_fn)->_5_len = len;
@@ -4548,9 +4538,9 @@ static void init_elts16(_ddata__remoteAccessData__array_DefaultRectangularArr_FC
             this17 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn25)(&chpl_macro_tmp_227));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_2__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_3_numChunks = numChunks;
+            (_args_forcoforall_fn)->_1_numChunks = numChunks;
+            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
             T14 = this17;
             (_args_forcoforall_fn)->_4_tmp = T14;
             (_args_forcoforall_fn)->_5_len = len;
@@ -4813,11 +4803,11 @@ static void init_elts15(_ddata_atomicbool x,
             this17 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn28)(&chpl_macro_tmp_236));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
+            (_args_forcoforall_fn)->_1__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_2__coforallCount = _coforallCount;
             T4 = this17;
-            (_args_forcoforall_fn)->_1_tmp = T4;
-            (_args_forcoforall_fn)->_2_len = len;
-            (_args_forcoforall_fn)->_3__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_4__coforallCount = _coforallCount;
+            (_args_forcoforall_fn)->_3_tmp = T4;
+            (_args_forcoforall_fn)->_4_len = len;
             (_args_forcoforall_fn)->_5_numChunks = numChunks;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
             _taskListNodecoforall_fn = chpl_nodeID;
@@ -4897,8 +4887,9 @@ static void init_elts13(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int6
   chpl_bool call_tmp14;
   range_int64_t_bounded_F _ic__F0_this2;
   int64_t i2;
-  int64_t end;
   int64_t ret3;
+  int64_t end;
+  int64_t ret4;
   _ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t x2 = NULL;
   _domain_DefaultRectangularDom_1_int64_t_F _runtime_type_tmp_2;
   _domain_DefaultRectangularDom_1_int64_t_F T4;
@@ -4915,7 +4906,7 @@ static void init_elts13(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int6
   c_void_ptr cast_tmp;
   atomic_int64 _init_class_tmp_;
   atomic_int64 this14;
-  atomic_int_least64_t ret4;
+  atomic_int_least64_t ret5;
   atomic_int_least64_t type_tmp;
   _ref_atomic_int_least64_t _ref_tmp_ = NULL;
   atomic_int64 ret_tmp6;
@@ -4928,7 +4919,9 @@ static void init_elts13(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int6
   chpl____wide__ref_range_int64_t_bounded_F T5 = {CHPL_LOCALEID_T_INIT, NULL};
   range_int64_t_bounded_F _ic__F0_this3;
   int64_t i3;
+  int64_t ret6;
   int64_t end2;
+  int64_t ret7;
   _ref_range_int64_t_bounded_F this15 = NULL;
   _class_localscoforall_fn32 _args_forcoforall_fn = NULL;
   _ref_range_int64_t_bounded_F T6 = NULL;
@@ -5022,9 +5015,10 @@ static void init_elts13(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int6
         call_tmp14 = (ret2 <= INT64(1));
         if (call_tmp14) {
           _ic__F0_this2 = _ic__F0_this;
-          ret3 = (&_ic__F0_this2)->_high;
-          end = ret3;
-          for (i2 = (&_ic__F0_this2)->_low; ((i2 <= end)); i2 += INT64(1)) {
+          ret3 = (&_ic__F0_this2)->_low;
+          ret4 = (&_ic__F0_this2)->_high;
+          end = ret4;
+          for (i2 = ret3; ((i2 <= end)); i2 += INT64(1)) {
             x2 = _ic__F1_x1__e1_args;
             T4 = (t)->dom;
             _runtime_type_tmp_2 = T4;
@@ -5045,12 +5039,12 @@ static void init_elts13(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int6
           (this13)->i = _init_class_tmp_;
           (this13)->taskCnt = INT64(0);
           (this13)->taskList = NULL;
-          ret4 = type_tmp;
-          _ref_tmp_ = &ret4;
+          ret5 = type_tmp;
+          _ref_tmp_ = &ret5;
           atomic_init_int_least64_t(_ref_tmp_, INT64(0));
-          (&this14)->_v = ret4;
+          (&this14)->_v = ret5;
           ret_to_arg_ref_tmp_6 = &ret_tmp6;
-          _construct_atomic_int64(ret4, &this14, ret_to_arg_ref_tmp_6);
+          _construct_atomic_int64(ret5, &this14, ret_to_arg_ref_tmp_6);
           (this13)->i = ret_tmp6;
           (this13)->taskCnt = INT64(0);
           call_tmp15 = ((c_void_ptr)(nil));
@@ -5065,17 +5059,19 @@ static void init_elts13(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int6
           numTasks = call_tmp16;
           _upEndCount3(_coforallCount, call_tmp16);
           _ic__F0_this3 = tmpIter;
-          end2 = (&_ic__F0_this3)->_high;
-          for (i3 = (&_ic__F0_this3)->_low; ((i3 <= end2)); i3 += INT64(1)) {
+          ret6 = (&_ic__F0_this3)->_low;
+          ret7 = (&_ic__F0_this3)->_high;
+          end2 = ret7;
+          for (i3 = ret6; ((i3 <= end2)); i3 += INT64(1)) {
             this15 = &_ic__F0_this;
             _args_forcoforall_fn = ((_class_localscoforall_fn32)(&chpl_macro_tmp_245));
             (_args_forcoforall_fn)->_0_x1__e1_args = _ic__F1_x1__e1_args;
-            (_args_forcoforall_fn)->_1_len = len;
-            (_args_forcoforall_fn)->_2__yieldedIndex = i3;
-            (_args_forcoforall_fn)->_3__coforallCount = _coforallCount;
-            (_args_forcoforall_fn)->_4_numChunks = numChunks;
             T6 = this15;
-            (_args_forcoforall_fn)->_5_tmp = T6;
+            (_args_forcoforall_fn)->_1_tmp = T6;
+            (_args_forcoforall_fn)->_2_len = len;
+            (_args_forcoforall_fn)->_3_numChunks = numChunks;
+            (_args_forcoforall_fn)->_4__yieldedIndex = i3;
+            (_args_forcoforall_fn)->_5__coforallCount = _coforallCount;
             T7 = t;
             (_args_forcoforall_fn)->_6_tmp = T7;
             _args_vforcoforall_fn = ((void*)(_args_forcoforall_fn));
@@ -5116,11 +5112,11 @@ static void init_elts13(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int6
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn31(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F x1__e1_args,
-                          int64_t len,
+                          int64_t numChunks,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12) {
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len) {
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5145,13 +5141,11 @@ static void coforall_fn31(_ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn15(_ddata_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t x1__e1_args,
-                          _ref_range_int64_t_bounded_F this12,
                           int64_t len,
                           int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks) {
-  int64_t ret;
-  int64_t ret2;
+                          int64_t numChunks,
+                          _ref_range_int64_t_bounded_F this12,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount) {
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5160,27 +5154,25 @@ static void coforall_fn15(_ddata_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t
   LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_chpl this13;
   atomic_uint64 _init_class_tmp_;
   atomic_uint64 this14;
-  atomic_uint_least64_t ret3;
+  atomic_uint_least64_t ret;
   atomic_uint_least64_t type_tmp;
   _ref_atomic_uint_least64_t _ref_tmp_ = NULL;
   atomic_uint64 ret_tmp2;
   _ref_atomic_uint64 ret_to_arg_ref_tmp_2 = NULL;
   LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_chpl ret_tmp3;
   _ref_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t ret_to_arg_ref_tmp_3 = NULL;
-  ret = (this12)->_high;
-  ret2 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, ret, (this12)->_low, ret2, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, (this12)->_low, (this12)->_low, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
     x = x1__e1_args;
     (&this13)->_atomicVar_chpl = _init_class_tmp_;
-    ret3 = type_tmp;
-    _ref_tmp_ = &ret3;
+    ret = type_tmp;
+    _ref_tmp_ = &ret;
     atomic_init_uint_least64_t(_ref_tmp_, ((uint64_t)(INT64(0))));
-    (&this14)->_v = ret3;
+    (&this14)->_v = ret;
     ret_to_arg_ref_tmp_2 = &ret_tmp2;
-    _construct_atomic_uint64(ret3, &this14, ret_to_arg_ref_tmp_2);
+    _construct_atomic_uint64(ret, &this14, ret_to_arg_ref_tmp_2);
     (&this13)->_atomicVar_chpl = ret_tmp2;
     ret_to_arg_ref_tmp_3 = &ret_tmp3;
     _construct_LocalAtomicObject_chpl(&ret_tmp2, &this13, ret_to_arg_ref_tmp_3);
@@ -5191,13 +5183,12 @@ static void coforall_fn15(_ddata_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn19(_ddata_LocReplicatedDom_1_int64_t_F x1__e1_args,
-                          _ref_range_int64_t_bounded_F this12,
-                          int64_t len,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks) {
+                          int64_t numChunks,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len) {
   int64_t ret;
-  int64_t ret2;
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5206,10 +5197,9 @@ static void coforall_fn19(_ddata_LocReplicatedDom_1_int64_t_F x1__e1_args,
   LocReplicatedDom_1_int64_t_F_chpl call_tmp2 = NULL;
   chpl____wide_LocReplicatedDom_1_int64_t_F T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide_LocReplicatedDom_1_int64_t_F chpl_macro_tmp_250;
-  ret = (this12)->_low;
-  ret2 = (this12)->_low;
+  ret = (this12)->_high;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, ret2, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, ret, (this12)->_low, (this12)->_low, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -5224,12 +5214,11 @@ static void coforall_fn19(_ddata_LocReplicatedDom_1_int64_t_F x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn18(_ddata_chpl_TableEntry_int64_t x1__e1_args,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len,
-                          int64_t chunk) {
-  int64_t ret;
+                          int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount) {
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5239,9 +5228,8 @@ static void coforall_fn18(_ddata_chpl_TableEntry_int64_t x1__e1_args,
   chpl__hash_status x2;
   chpl_TableEntry_int64_t ret_tmp2;
   _ref_chpl_TableEntry_int64_t ret_to_arg_ref_tmp_2 = NULL;
-  ret = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, (this12)->_low, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, (this12)->_low, (this12)->_low, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -5259,11 +5247,11 @@ static void coforall_fn18(_ddata_chpl_TableEntry_int64_t x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn17(_ddata_LocCyclicArr_Bitmap_1_int64_t_F x1__e1_args,
-                          _ref_range_int64_t_bounded_F this12,
-                          int64_t len,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
+                          int64_t numChunks,
                           int64_t chunk,
-                          int64_t numChunks) {
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len) {
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5288,11 +5276,11 @@ static void coforall_fn17(_ddata_LocCyclicArr_Bitmap_1_int64_t_F x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn16(_ddata_Bitmap x1__e1_args,
-                          int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len,
-                          int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount) {
+                          int64_t numChunks) {
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5425,13 +5413,14 @@ static void coforall_fn16(_ddata_Bitmap x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn30(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x1__e1_args,
-                          int64_t len,
-                          int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len,
                           int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12) {
+                          int64_t chunk) {
   int64_t ret;
   int64_t ret2;
+  int64_t ret3;
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5458,10 +5447,11 @@ static void coforall_fn30(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x1__e1_a
   chpl____wide__ddata_Bitmap chpl_macro_tmp_264;
   chpl____wide__ddata_Bitmap chpl_macro_tmp_265;
   chpl____wide__ddata_Bitmap chpl_macro_tmp_266;
-  ret = (this12)->_low;
+  ret = (this12)->_high;
   ret2 = (this12)->_low;
+  ret3 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, ret2, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, ret, ret2, ret3, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -5512,22 +5502,24 @@ static void coforall_fn30(_ddata__remoteAccessData_Bitmap_1_int64_t_F_F x1__e1_a
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn23(_ddata_uint64_t x1__e1_args,
+                          _ref_range_int64_t_bounded_F this12,
                           int64_t len,
-                          int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12) {
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount) {
   int64_t ret;
   int64_t ret2;
+  int64_t ret3;
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
   int64_t i;
   _ddata_uint64_t x = NULL;
-  ret = (this12)->_low;
+  ret = (this12)->_high;
   ret2 = (this12)->_low;
+  ret3 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, ret2, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, ret, ret2, ret3, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -5538,9 +5530,9 @@ static void coforall_fn23(_ddata_uint64_t x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn20(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F x1__e1_args,
+                          int64_t numChunks,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len) {
   _tuple_2_star_int64_t ret_tmp;
@@ -5567,11 +5559,11 @@ static void coforall_fn20(_ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGl
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn21(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t x1__e1_args,
+                          _ref_range_int64_t_bounded_F this12,
                           int64_t len,
+                          int64_t numChunks,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12,
                           _ref__RuntimeTypeInfo28 t) {
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
@@ -5600,39 +5592,37 @@ static void coforall_fn21(_ddata__array_DefaultRectangularArr_FCHGlobalNode_1_in
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn22(_ddata_atomicbool x1__e1_args,
-                          _ref_range_int64_t_bounded_F this12,
-                          int64_t len,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
+                          _ref_range_int64_t_bounded_F this12,
+                          int64_t len,
                           int64_t numChunks) {
   int64_t ret;
   int64_t ret2;
-  int64_t ret3;
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
   int64_t i;
   _ddata_atomicbool x = NULL;
   atomicbool this13;
-  atomic_bool ret4;
+  atomic_bool ret3;
   atomic_bool type_tmp;
   _ref_atomic_bool _ref_tmp_ = NULL;
   atomicbool ret_tmp2;
   _ref_atomicbool ret_to_arg_ref_tmp_2 = NULL;
-  ret = (this12)->_high;
+  ret = (this12)->_low;
   ret2 = (this12)->_low;
-  ret3 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, ret, ret2, ret3, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, ret2, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
     x = x1__e1_args;
-    ret4 = type_tmp;
-    _ref_tmp_ = &ret4;
+    ret3 = type_tmp;
+    _ref_tmp_ = &ret3;
     atomic_init_bool(_ref_tmp_, UINT8(false));
-    (&this13)->_v = ret4;
+    (&this13)->_v = ret3;
     ret_to_arg_ref_tmp_2 = &ret_tmp2;
-    _construct_atomicbool(ret4, &this13, ret_to_arg_ref_tmp_2);
+    _construct_atomicbool(ret3, &this13, ret_to_arg_ref_tmp_2);
     *(x + i) = ret_tmp2;
   }
   return;
@@ -5640,14 +5630,13 @@ static void coforall_fn22(_ddata_atomicbool x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn24(_ddata__remoteAccessData__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F_F x1__e1_args,
+                          int64_t numChunks,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len) {
   int64_t ret;
   int64_t ret2;
-  int64_t ret3;
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5680,11 +5669,10 @@ static void coforall_fn24(_ddata__remoteAccessData__array_DefaultRectangularArr_
   chpl____wide__ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t chpl_macro_tmp_273;
   chpl____wide__ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t chpl_macro_tmp_274;
   chpl____wide__ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t chpl_macro_tmp_275;
-  ret = (this12)->_high;
+  ret = (this12)->_low;
   ret2 = (this12)->_low;
-  ret3 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, ret, ret2, ret3, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, ret2, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -5745,9 +5733,9 @@ static void coforall_fn24(_ddata__remoteAccessData__array_DefaultRectangularArr_
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn25(_ddata_FCHGlobalNode x1__e1_args,
+                          int64_t numChunks,
                           int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len) {
   int64_t ret;
@@ -5778,14 +5766,13 @@ static void coforall_fn25(_ddata_FCHGlobalNode x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn26(_ddata_LocCyclicDom_1_int64_t_F x1__e1_args,
+                          _ref_range_int64_t_bounded_F this12,
                           int64_t len,
-                          int64_t chunk,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           int64_t numChunks,
-                          _ref_range_int64_t_bounded_F this12) {
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount) {
   int64_t ret;
   int64_t ret2;
-  int64_t ret3;
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5794,11 +5781,10 @@ static void coforall_fn26(_ddata_LocCyclicDom_1_int64_t_F x1__e1_args,
   LocCyclicDom_1_int64_t_F_chpl call_tmp2 = NULL;
   chpl____wide_LocCyclicDom_1_int64_t_F T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide_LocCyclicDom_1_int64_t_F chpl_macro_tmp_277;
-  ret = (this12)->_high;
+  ret = (this12)->_low;
   ret2 = (this12)->_low;
-  ret3 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, ret, ret2, ret3, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, ret2, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -5813,14 +5799,13 @@ static void coforall_fn26(_ddata_LocCyclicDom_1_int64_t_F x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn27(_ddata_LocCyclic_1_int64_t x1__e1_args,
-                          int64_t chunk,
                           int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           _ref_range_int64_t_bounded_F this12,
-                          int64_t len,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount) {
+                          int64_t len) {
   int64_t ret;
   int64_t ret2;
-  int64_t ret3;
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5829,11 +5814,10 @@ static void coforall_fn27(_ddata_LocCyclic_1_int64_t x1__e1_args,
   LocCyclic_1_int64_t_chpl call_tmp2 = NULL;
   chpl____wide_LocCyclic_1_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide_LocCyclic_1_int64_t chpl_macro_tmp_278;
-  ret = (this12)->_high;
+  ret = (this12)->_low;
   ret2 = (this12)->_low;
-  ret3 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, ret, ret2, ret3, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, ret2, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -5848,14 +5832,13 @@ static void coforall_fn27(_ddata_LocCyclic_1_int64_t x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn28(_ddata_localesSignal x1__e1_args,
+                          int64_t chunk,
                           chpl___EndCount_atomic_int64_int64_t _coforallCount,
-                          int64_t numChunks,
                           _ref_range_int64_t_bounded_F this12,
                           int64_t len,
-                          int64_t chunk) {
+                          int64_t numChunks) {
   int64_t ret;
   int64_t ret2;
-  int64_t ret3;
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5864,11 +5847,10 @@ static void coforall_fn28(_ddata_localesSignal x1__e1_args,
   localesSignal call_tmp2 = NULL;
   chpl____wide_localesSignal T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide_localesSignal chpl_macro_tmp_279;
-  ret = (this12)->_high;
+  ret = (this12)->_low;
   ret2 = (this12)->_low;
-  ret3 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, ret, ret2, ret3, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, ret2, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -5884,18 +5866,20 @@ static void coforall_fn28(_ddata_localesSignal x1__e1_args,
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn31(_class_localscoforall_fn27 c) {
   _ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F _0_x1__e1_args = NULL;
-  chpl___EndCount_atomic_int64_int64_t _1__coforallCount = NULL;
-  int64_t _2_numChunks;
-  _ref_range_int64_t_bounded_F _3_tmp = NULL;
+  int64_t _1_numChunks;
+  int64_t _2__yieldedIndex;
+  _ref_range_int64_t_bounded_F _4_tmp = NULL;
+  int64_t _5_len;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_280;
   _0_x1__e1_args = (c)->_0_x1__e1_args;
-  _1__coforallCount = (c)->_1__coforallCount;
-  _2_numChunks = (c)->_2_numChunks;
-  _3_tmp = (c)->_3_tmp;
-  coforall_fn32(_0_x1__e1_args, _1__coforallCount, _2_numChunks, _3_tmp, (c)->_4_len, (c)->_5__yieldedIndex);
-  endcount = (c)->_1__coforallCount;
+  _1_numChunks = (c)->_1_numChunks;
+  _2__yieldedIndex = (c)->_2__yieldedIndex;
+  _4_tmp = (c)->_4_tmp;
+  _5_len = (c)->_5_len;
+  coforall_fn32(_0_x1__e1_args, _1_numChunks, _2__yieldedIndex, (c)->_3__coforallCount, _4_tmp, _5_len);
+  endcount = (c)->_3__coforallCount;
   chpl_macro_tmp_280.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_280.addr = endcount;
   T = chpl_macro_tmp_280;
@@ -5905,12 +5889,13 @@ static void wrapcoforall_fn31(_class_localscoforall_fn27 c) {
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn29(_ddata_locale x1__e1_args,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           _ref_range_int64_t_bounded_F this12,
-                          int64_t numChunks,
                           int64_t len,
-                          int64_t chunk) {
+                          int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount) {
   int64_t ret;
+  int64_t ret2;
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -5919,9 +5904,10 @@ static void coforall_fn29(_ddata_locale x1__e1_args,
   locale call_tmp2 = NULL;
   chpl____wide_locale T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide_locale chpl_macro_tmp_281;
-  ret = (this12)->_high;
+  ret = (this12)->_low;
+  ret2 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, ret, (this12)->_low, (this12)->_low, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, ret, ret2, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -5936,19 +5922,19 @@ static void coforall_fn29(_ddata_locale x1__e1_args,
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn20(_class_localscoforall_fn24 c) {
-  chpl___EndCount_atomic_int64_int64_t _2__coforallCount = NULL;
-  int64_t _3_numChunks;
+  _ddata_LocCyclicArr__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F _0_x1__e1_args = NULL;
+  chpl___EndCount_atomic_int64_int64_t _3__coforallCount = NULL;
   _ref_range_int64_t_bounded_F _4_tmp = NULL;
   int64_t _5_len;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_282;
-  _2__coforallCount = (c)->_2__coforallCount;
-  _3_numChunks = (c)->_3_numChunks;
+  _0_x1__e1_args = (c)->_0_x1__e1_args;
+  _3__coforallCount = (c)->_3__coforallCount;
   _4_tmp = (c)->_4_tmp;
   _5_len = (c)->_5_len;
-  coforall_fn20((c)->_0_x1__e1_args, (c)->_1__yieldedIndex, _2__coforallCount, _3_numChunks, _4_tmp, _5_len);
-  endcount = (c)->_2__coforallCount;
+  coforall_fn20(_0_x1__e1_args, (c)->_1_numChunks, (c)->_2__yieldedIndex, _3__coforallCount, _4_tmp, _5_len);
+  endcount = (c)->_3__coforallCount;
   chpl_macro_tmp_282.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_282.addr = endcount;
   T = chpl_macro_tmp_282;
@@ -5958,12 +5944,14 @@ static void wrapcoforall_fn20(_class_localscoforall_fn24 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn15(_class_localscoforall_fn26 c) {
-  _ref_range_int64_t_bounded_F _5_tmp = NULL;
+  _ddata_LocReplicatedArr_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t_1_int64_t_F _0_x1__e1_args = NULL;
+  _ref_range_int64_t_bounded_F _4_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_283;
-  _5_tmp = (c)->_5_tmp;
-  coforall_fn31((c)->_0_x1__e1_args, (c)->_1_len, (c)->_2__yieldedIndex, (c)->_3__coforallCount, (c)->_4_numChunks, _5_tmp);
+  _0_x1__e1_args = (c)->_0_x1__e1_args;
+  _4_tmp = (c)->_4_tmp;
+  coforall_fn31(_0_x1__e1_args, (c)->_1_numChunks, (c)->_2__yieldedIndex, (c)->_3__coforallCount, _4_tmp, (c)->_5_len);
   endcount = (c)->_3__coforallCount;
   chpl_macro_tmp_283.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_283.addr = endcount;
@@ -5974,13 +5962,15 @@ static void wrapcoforall_fn15(_class_localscoforall_fn26 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn24(_class_localscoforall_fn20 c) {
-  _ref_range_int64_t_bounded_F _1_tmp = NULL;
+  _ddata_LocalAtomicObject_FCHLocalNode_FCHQueue_int64_t_uint64_t _0_x1__e1_args = NULL;
+  _ref_range_int64_t_bounded_F _4_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_284;
-  _1_tmp = (c)->_1_tmp;
-  coforall_fn15((c)->_0_x1__e1_args, _1_tmp, (c)->_2_len, (c)->_3__yieldedIndex, (c)->_4__coforallCount, (c)->_5_numChunks);
-  endcount = (c)->_4__coforallCount;
+  _0_x1__e1_args = (c)->_0_x1__e1_args;
+  _4_tmp = (c)->_4_tmp;
+  coforall_fn15(_0_x1__e1_args, (c)->_1_len, (c)->_2__yieldedIndex, (c)->_3_numChunks, _4_tmp, (c)->_5__coforallCount);
+  endcount = (c)->_5__coforallCount;
   chpl_macro_tmp_284.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_284.addr = endcount;
   T = chpl_macro_tmp_284;
@@ -5990,15 +5980,17 @@ static void wrapcoforall_fn24(_class_localscoforall_fn20 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn32(_class_localscoforall_fn16 c) {
-  _ref_range_int64_t_bounded_F _1_tmp = NULL;
-  chpl___EndCount_atomic_int64_int64_t _4__coforallCount = NULL;
+  _ddata_LocReplicatedDom_1_int64_t_F _0_x1__e1_args = NULL;
+  _ref_range_int64_t_bounded_F _4_tmp = NULL;
+  int64_t _5_len;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_285;
-  _1_tmp = (c)->_1_tmp;
-  _4__coforallCount = (c)->_4__coforallCount;
-  coforall_fn19((c)->_0_x1__e1_args, _1_tmp, (c)->_2_len, (c)->_3__yieldedIndex, _4__coforallCount, (c)->_5_numChunks);
-  endcount = (c)->_4__coforallCount;
+  _0_x1__e1_args = (c)->_0_x1__e1_args;
+  _4_tmp = (c)->_4_tmp;
+  _5_len = (c)->_5_len;
+  coforall_fn19(_0_x1__e1_args, (c)->_1__yieldedIndex, (c)->_2__coforallCount, (c)->_3_numChunks, _4_tmp, _5_len);
+  endcount = (c)->_2__coforallCount;
   chpl_macro_tmp_285.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_285.addr = endcount;
   T = chpl_macro_tmp_285;
@@ -6008,13 +6000,15 @@ static void wrapcoforall_fn32(_class_localscoforall_fn16 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn18(_class_localscoforall_fn21 c) {
-  _ref_range_int64_t_bounded_F _3_tmp = NULL;
+  _ddata_chpl_TableEntry_int64_t _0_x1__e1_args = NULL;
+  _ref_range_int64_t_bounded_F _1_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_286;
-  _3_tmp = (c)->_3_tmp;
-  coforall_fn18((c)->_0_x1__e1_args, (c)->_1__coforallCount, (c)->_2_numChunks, _3_tmp, (c)->_4_len, (c)->_5__yieldedIndex);
-  endcount = (c)->_1__coforallCount;
+  _0_x1__e1_args = (c)->_0_x1__e1_args;
+  _1_tmp = (c)->_1_tmp;
+  coforall_fn18(_0_x1__e1_args, _1_tmp, (c)->_2_len, (c)->_3_numChunks, (c)->_4__yieldedIndex, (c)->_5__coforallCount);
+  endcount = (c)->_5__coforallCount;
   chpl_macro_tmp_286.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_286.addr = endcount;
   T = chpl_macro_tmp_286;
@@ -6024,18 +6018,12 @@ static void wrapcoforall_fn18(_class_localscoforall_fn21 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn22(_class_localscoforall_fn22 c) {
-  _ddata_LocCyclicArr_Bitmap_1_int64_t_F _0_x1__e1_args = NULL;
-  _ref_range_int64_t_bounded_F _1_tmp = NULL;
-  int64_t _2_len;
-  chpl___EndCount_atomic_int64_int64_t _3__coforallCount = NULL;
+  _ref_range_int64_t_bounded_F _4_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_287;
-  _0_x1__e1_args = (c)->_0_x1__e1_args;
-  _1_tmp = (c)->_1_tmp;
-  _2_len = (c)->_2_len;
-  _3__coforallCount = (c)->_3__coforallCount;
-  coforall_fn17(_0_x1__e1_args, _1_tmp, _2_len, _3__coforallCount, (c)->_4__yieldedIndex, (c)->_5_numChunks);
+  _4_tmp = (c)->_4_tmp;
+  coforall_fn17((c)->_0_x1__e1_args, (c)->_1_numChunks, (c)->_2__yieldedIndex, (c)->_3__coforallCount, _4_tmp, (c)->_5_len);
   endcount = (c)->_3__coforallCount;
   chpl_macro_tmp_287.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_287.addr = endcount;
@@ -6046,19 +6034,21 @@ static void wrapcoforall_fn22(_class_localscoforall_fn22 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn25(_class_localscoforall_fn23 c) {
-  _ref_range_int64_t_bounded_F _2_tmp = NULL;
-  int64_t _3_len;
-  int64_t _4__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _5__coforallCount = NULL;
+  int64_t _1__yieldedIndex;
+  chpl___EndCount_atomic_int64_int64_t _2__coforallCount = NULL;
+  _ref_range_int64_t_bounded_F _3_tmp = NULL;
+  int64_t _4_len;
+  int64_t _5_numChunks;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_288;
-  _2_tmp = (c)->_2_tmp;
-  _3_len = (c)->_3_len;
-  _4__yieldedIndex = (c)->_4__yieldedIndex;
-  _5__coforallCount = (c)->_5__coforallCount;
-  coforall_fn16((c)->_0_x1__e1_args, (c)->_1_numChunks, _2_tmp, _3_len, _4__yieldedIndex, _5__coforallCount);
-  endcount = (c)->_5__coforallCount;
+  _1__yieldedIndex = (c)->_1__yieldedIndex;
+  _2__coforallCount = (c)->_2__coforallCount;
+  _3_tmp = (c)->_3_tmp;
+  _4_len = (c)->_4_len;
+  _5_numChunks = (c)->_5_numChunks;
+  coforall_fn16((c)->_0_x1__e1_args, _1__yieldedIndex, _2__coforallCount, _3_tmp, _4_len, _5_numChunks);
+  endcount = (c)->_2__coforallCount;
   chpl_macro_tmp_288.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_288.addr = endcount;
   T = chpl_macro_tmp_288;
@@ -6068,23 +6058,15 @@ static void wrapcoforall_fn25(_class_localscoforall_fn23 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn26(_class_localscoforall_fn30 c) {
-  _ddata__remoteAccessData_Bitmap_1_int64_t_F_F _0_x1__e1_args = NULL;
-  int64_t _1_len;
-  int64_t _2__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _3__coforallCount = NULL;
+  _ref_range_int64_t_bounded_F _2_tmp = NULL;
   int64_t _4_numChunks;
-  _ref_range_int64_t_bounded_F _5_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_289;
-  _0_x1__e1_args = (c)->_0_x1__e1_args;
-  _1_len = (c)->_1_len;
-  _2__yieldedIndex = (c)->_2__yieldedIndex;
-  _3__coforallCount = (c)->_3__coforallCount;
+  _2_tmp = (c)->_2_tmp;
   _4_numChunks = (c)->_4_numChunks;
-  _5_tmp = (c)->_5_tmp;
-  coforall_fn30(_0_x1__e1_args, _1_len, _2__yieldedIndex, _3__coforallCount, _4_numChunks, _5_tmp);
-  endcount = (c)->_3__coforallCount;
+  coforall_fn30((c)->_0_x1__e1_args, (c)->_1__coforallCount, _2_tmp, (c)->_3_len, _4_numChunks, (c)->_5__yieldedIndex);
+  endcount = (c)->_1__coforallCount;
   chpl_macro_tmp_289.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_289.addr = endcount;
   T = chpl_macro_tmp_289;
@@ -6094,15 +6076,13 @@ static void wrapcoforall_fn26(_class_localscoforall_fn30 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn27(_class_localscoforall_fn19 c) {
-  _ddata_uint64_t _0_x1__e1_args = NULL;
-  _ref_range_int64_t_bounded_F _5_tmp = NULL;
+  _ref_range_int64_t_bounded_F _1_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_290;
-  _0_x1__e1_args = (c)->_0_x1__e1_args;
-  _5_tmp = (c)->_5_tmp;
-  coforall_fn23(_0_x1__e1_args, (c)->_1_len, (c)->_2__yieldedIndex, (c)->_3__coforallCount, (c)->_4_numChunks, _5_tmp);
-  endcount = (c)->_3__coforallCount;
+  _1_tmp = (c)->_1_tmp;
+  coforall_fn23((c)->_0_x1__e1_args, _1_tmp, (c)->_2_len, (c)->_3_numChunks, (c)->_4__yieldedIndex, (c)->_5__coforallCount);
+  endcount = (c)->_5__coforallCount;
   chpl_macro_tmp_290.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_290.addr = endcount;
   T = chpl_macro_tmp_290;
@@ -6112,14 +6092,11 @@ static void wrapcoforall_fn27(_class_localscoforall_fn19 c) {
 
 /* ChapelBase.chpl:740 */
 static void coforall_fn32(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x1__e1_args,
-                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           int64_t numChunks,
+                          int64_t chunk,
+                          chpl___EndCount_atomic_int64_int64_t _coforallCount,
                           _ref_range_int64_t_bounded_F this12,
-                          int64_t len,
-                          int64_t chunk) {
-  int64_t ret;
-  int64_t ret2;
-  int64_t ret3;
+                          int64_t len) {
   _tuple_2_star_int64_t ret_tmp;
   _ref__tuple_2_star_int64_t ret_to_arg_ref_tmp_ = NULL;
   int64_t _ic__F1_high;
@@ -6128,11 +6105,8 @@ static void coforall_fn32(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x1__
   LocReplicatedArr_FCHGlobalNode_1_int64_t_F_chpl call_tmp2 = NULL;
   chpl____wide_LocReplicatedArr_FCHGlobalNode_1_int64_t_F T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide_LocReplicatedArr_FCHGlobalNode_1_int64_t_F chpl_macro_tmp_291;
-  ret = (this12)->_high;
-  ret2 = (this12)->_low;
-  ret3 = (this12)->_low;
   ret_to_arg_ref_tmp_ = &ret_tmp;
-  _computeBlock_chpl(len, numChunks, chunk, ret, ret2, ret3, ret_to_arg_ref_tmp_);
+  _computeBlock_chpl(len, numChunks, chunk, (this12)->_high, (this12)->_low, (this12)->_low, ret_to_arg_ref_tmp_);
   _ic__F1_high = *(ret_tmp + INT64(1));
   x = x1__e1_args;
   for (i = *(ret_tmp + INT64(0)); ((i <= _ic__F1_high)); i += INT64(1)) {
@@ -6147,25 +6121,17 @@ static void coforall_fn32(_ddata_LocReplicatedArr_FCHGlobalNode_1_int64_t_F x1__
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn30(_class_localscoforall_fn32 c) {
-  _ddata__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t _0_x1__e1_args = NULL;
-  int64_t _1_len;
-  int64_t _2__yieldedIndex;
-  chpl___EndCount_atomic_int64_int64_t _3__coforallCount = NULL;
-  int64_t _4_numChunks;
-  _ref_range_int64_t_bounded_F _5_tmp = NULL;
+  _ref_range_int64_t_bounded_F _1_tmp = NULL;
+  chpl___EndCount_atomic_int64_int64_t _5__coforallCount = NULL;
   _ref__RuntimeTypeInfo28 _6_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_292;
-  _0_x1__e1_args = (c)->_0_x1__e1_args;
-  _1_len = (c)->_1_len;
-  _2__yieldedIndex = (c)->_2__yieldedIndex;
-  _3__coforallCount = (c)->_3__coforallCount;
-  _4_numChunks = (c)->_4_numChunks;
-  _5_tmp = (c)->_5_tmp;
+  _1_tmp = (c)->_1_tmp;
+  _5__coforallCount = (c)->_5__coforallCount;
   _6_tmp = (c)->_6_tmp;
-  coforall_fn21(_0_x1__e1_args, _1_len, _2__yieldedIndex, _3__coforallCount, _4_numChunks, _5_tmp, _6_tmp);
-  endcount = (c)->_3__coforallCount;
+  coforall_fn21((c)->_0_x1__e1_args, _1_tmp, (c)->_2_len, (c)->_3_numChunks, (c)->_4__yieldedIndex, _5__coforallCount, _6_tmp);
+  endcount = (c)->_5__coforallCount;
   chpl_macro_tmp_292.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_292.addr = endcount;
   T = chpl_macro_tmp_292;
@@ -6175,19 +6141,13 @@ static void wrapcoforall_fn30(_class_localscoforall_fn32 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn29(_class_localscoforall_fn28 c) {
-  _ddata_atomicbool _0_x1__e1_args = NULL;
-  _ref_range_int64_t_bounded_F _1_tmp = NULL;
-  chpl___EndCount_atomic_int64_int64_t _4__coforallCount = NULL;
-  int64_t _5_numChunks;
+  _ref_range_int64_t_bounded_F _3_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_293;
-  _0_x1__e1_args = (c)->_0_x1__e1_args;
-  _1_tmp = (c)->_1_tmp;
-  _4__coforallCount = (c)->_4__coforallCount;
-  _5_numChunks = (c)->_5_numChunks;
-  coforall_fn22(_0_x1__e1_args, _1_tmp, (c)->_2_len, (c)->_3__yieldedIndex, _4__coforallCount, _5_numChunks);
-  endcount = (c)->_4__coforallCount;
+  _3_tmp = (c)->_3_tmp;
+  coforall_fn22((c)->_0_x1__e1_args, (c)->_1__yieldedIndex, (c)->_2__coforallCount, _3_tmp, (c)->_4_len, (c)->_5_numChunks);
+  endcount = (c)->_2__coforallCount;
   chpl_macro_tmp_293.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_293.addr = endcount;
   T = chpl_macro_tmp_293;
@@ -6197,13 +6157,15 @@ static void wrapcoforall_fn29(_class_localscoforall_fn28 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn23(_class_localscoforall_fn25 c) {
+  _ddata__remoteAccessData__array_DefaultRectangularArr_FCHGlobalNode_1_int64_t_F_int64_t_1_int64_t_F_F _0_x1__e1_args = NULL;
   _ref_range_int64_t_bounded_F _4_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_294;
+  _0_x1__e1_args = (c)->_0_x1__e1_args;
   _4_tmp = (c)->_4_tmp;
-  coforall_fn24((c)->_0_x1__e1_args, (c)->_1__yieldedIndex, (c)->_2__coforallCount, (c)->_3_numChunks, _4_tmp, (c)->_5_len);
-  endcount = (c)->_2__coforallCount;
+  coforall_fn24(_0_x1__e1_args, (c)->_1_numChunks, (c)->_2__yieldedIndex, (c)->_3__coforallCount, _4_tmp, (c)->_5_len);
+  endcount = (c)->_3__coforallCount;
   chpl_macro_tmp_294.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_294.addr = endcount;
   T = chpl_macro_tmp_294;
@@ -6213,13 +6175,15 @@ static void wrapcoforall_fn23(_class_localscoforall_fn25 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn28(_class_localscoforall_fn31 c) {
+  _ddata_FCHGlobalNode _0_x1__e1_args = NULL;
   _ref_range_int64_t_bounded_F _4_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_295;
+  _0_x1__e1_args = (c)->_0_x1__e1_args;
   _4_tmp = (c)->_4_tmp;
-  coforall_fn25((c)->_0_x1__e1_args, (c)->_1__yieldedIndex, (c)->_2__coforallCount, (c)->_3_numChunks, _4_tmp, (c)->_5_len);
-  endcount = (c)->_2__coforallCount;
+  coforall_fn25(_0_x1__e1_args, (c)->_1_numChunks, (c)->_2__yieldedIndex, (c)->_3__coforallCount, _4_tmp, (c)->_5_len);
+  endcount = (c)->_3__coforallCount;
   chpl_macro_tmp_295.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_295.addr = endcount;
   T = chpl_macro_tmp_295;
@@ -6229,13 +6193,21 @@ static void wrapcoforall_fn28(_class_localscoforall_fn31 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn21(_class_localscoforall_fn29 c) {
-  _ref_range_int64_t_bounded_F _5_tmp = NULL;
+  _ddata_LocCyclicDom_1_int64_t_F _0_x1__e1_args = NULL;
+  _ref_range_int64_t_bounded_F _1_tmp = NULL;
+  int64_t _2_len;
+  int64_t _3_numChunks;
+  int64_t _4__yieldedIndex;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_296;
-  _5_tmp = (c)->_5_tmp;
-  coforall_fn26((c)->_0_x1__e1_args, (c)->_1_len, (c)->_2__yieldedIndex, (c)->_3__coforallCount, (c)->_4_numChunks, _5_tmp);
-  endcount = (c)->_3__coforallCount;
+  _0_x1__e1_args = (c)->_0_x1__e1_args;
+  _1_tmp = (c)->_1_tmp;
+  _2_len = (c)->_2_len;
+  _3_numChunks = (c)->_3_numChunks;
+  _4__yieldedIndex = (c)->_4__yieldedIndex;
+  coforall_fn26(_0_x1__e1_args, _1_tmp, _2_len, _3_numChunks, _4__yieldedIndex, (c)->_5__coforallCount);
+  endcount = (c)->_5__coforallCount;
   chpl_macro_tmp_296.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_296.addr = endcount;
   T = chpl_macro_tmp_296;
@@ -6245,13 +6217,13 @@ static void wrapcoforall_fn21(_class_localscoforall_fn29 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn19(_class_localscoforall_fn15 c) {
-  _ref_range_int64_t_bounded_F _3_tmp = NULL;
+  _ref_range_int64_t_bounded_F _4_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_297;
-  _3_tmp = (c)->_3_tmp;
-  coforall_fn27((c)->_0_x1__e1_args, (c)->_1__yieldedIndex, (c)->_2_numChunks, _3_tmp, (c)->_4_len, (c)->_5__coforallCount);
-  endcount = (c)->_5__coforallCount;
+  _4_tmp = (c)->_4_tmp;
+  coforall_fn27((c)->_0_x1__e1_args, (c)->_1_numChunks, (c)->_2__yieldedIndex, (c)->_3__coforallCount, _4_tmp, (c)->_5_len);
+  endcount = (c)->_3__coforallCount;
   chpl_macro_tmp_297.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_297.addr = endcount;
   T = chpl_macro_tmp_297;
@@ -6261,19 +6233,13 @@ static void wrapcoforall_fn19(_class_localscoforall_fn15 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn16(_class_localscoforall_fn18 c) {
-  _ddata_localesSignal _0_x1__e1_args = NULL;
-  chpl___EndCount_atomic_int64_int64_t _1__coforallCount = NULL;
-  int64_t _2_numChunks;
   _ref_range_int64_t_bounded_F _3_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_298;
-  _0_x1__e1_args = (c)->_0_x1__e1_args;
-  _1__coforallCount = (c)->_1__coforallCount;
-  _2_numChunks = (c)->_2_numChunks;
   _3_tmp = (c)->_3_tmp;
-  coforall_fn28(_0_x1__e1_args, _1__coforallCount, _2_numChunks, _3_tmp, (c)->_4_len, (c)->_5__yieldedIndex);
-  endcount = (c)->_1__coforallCount;
+  coforall_fn28((c)->_0_x1__e1_args, (c)->_1__yieldedIndex, (c)->_2__coforallCount, _3_tmp, (c)->_4_len, (c)->_5_numChunks);
+  endcount = (c)->_2__coforallCount;
   chpl_macro_tmp_298.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_298.addr = endcount;
   T = chpl_macro_tmp_298;
@@ -6283,13 +6249,15 @@ static void wrapcoforall_fn16(_class_localscoforall_fn18 c) {
 
 /* ChapelBase.chpl:740 */
 static void wrapcoforall_fn17(_class_localscoforall_fn17 c) {
-  _ref_range_int64_t_bounded_F _2_tmp = NULL;
+  _ddata_locale _0_x1__e1_args = NULL;
+  _ref_range_int64_t_bounded_F _1_tmp = NULL;
   chpl___EndCount_atomic_int64_int64_t endcount = NULL;
   chpl____wide__EndCount_atomic_int64_int64_t T = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__EndCount_atomic_int64_int64_t chpl_macro_tmp_299;
-  _2_tmp = (c)->_2_tmp;
-  coforall_fn29((c)->_0_x1__e1_args, (c)->_1__coforallCount, _2_tmp, (c)->_3_numChunks, (c)->_4_len, (c)->_5__yieldedIndex);
-  endcount = (c)->_1__coforallCount;
+  _0_x1__e1_args = (c)->_0_x1__e1_args;
+  _1_tmp = (c)->_1_tmp;
+  coforall_fn29(_0_x1__e1_args, _1_tmp, (c)->_2_len, (c)->_3_numChunks, (c)->_4__yieldedIndex, (c)->_5__coforallCount);
+  endcount = (c)->_5__coforallCount;
   chpl_macro_tmp_299.locale = chpl_gen_getLocaleID();
   chpl_macro_tmp_299.addr = endcount;
   T = chpl_macro_tmp_299;
@@ -6303,10 +6271,8 @@ static chpl___EndCount_atomic_int64_int64_t _construct__EndCount(_ref_atomic_int
                                                                  c_void_ptr taskList,
                                                                  chpl___EndCount_atomic_int64_int64_t meme) {
   chpl___EndCount_atomic_int64_int64_t this12 = NULL;
-  object T = NULL;
   this12 = meme;
-  T = &((this12)->super);
-  _construct_object(T);
+  _construct_object(&((this12)->super));
   (this12)->i = *(i);
   (this12)->taskCnt = taskCnt;
   (this12)->taskList = taskList;
@@ -7661,8 +7627,9 @@ static uint64_t _command_line_cast8(c_string x) {
   _ref_string i_rhs = NULL;
   chpl____wide__ref_string T2 = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__ref_string T3 = {CHPL_LOCALEID_T_INIT, NULL};
+  int32_t coerce_tmp;
   chpl_bool call_tmp5;
-  c_ptr_uint8_t coerce_tmp = NULL;
+  c_ptr_uint8_t coerce_tmp2 = NULL;
   uint64_t call_tmp6;
   _ref_string _ref_tmp_2 = NULL;
   chpl____wide__ref_string T4 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -7717,12 +7684,13 @@ static uint64_t _command_line_cast8(c_string x) {
   }
   _end_localize:;
   localX = ret2;
-  call_tmp5 = ((&localX)->locale_id != chpl_nodeID);
+  coerce_tmp = (&localX)->locale_id;
+  call_tmp5 = (coerce_tmp != chpl_nodeID);
   if (call_tmp5) {
     halt(&local__str_literal_337 /* "Cannot call .c_str() on a remote string" */, INT64(977), INT32(2));
   }
-  coerce_tmp = (&localX)->buff;
-  call_tmp6 = c_string_to_uint64_t(((c_string)(((c_void_ptr)(coerce_tmp)))), INT64(977), INT32(2));
+  coerce_tmp2 = (&localX)->buff;
+  call_tmp6 = c_string_to_uint64_t(((c_string)(((c_void_ptr)(coerce_tmp2)))), INT64(977), INT32(2));
   ret = call_tmp6;
   _ref_tmp_2 = &localX;
   chpl_macro_tmp_378.locale = chpl_gen_getLocaleID();
@@ -7830,7 +7798,6 @@ static int64_t _command_line_cast(c_string x) {
   int64_t ret;
   string localX;
   string ret2;
-  int32_t coerce_tmp;
   chpl_bool call_tmp3;
   string ret_tmp2;
   _ref_string ret_to_arg_ref_tmp_2 = NULL;
@@ -7861,8 +7828,7 @@ static int64_t _command_line_cast(c_string x) {
   ret_to_arg_ref_tmp_ = &ret_tmp;
   _cast(x, ret_to_arg_ref_tmp_);
   call_tmp2 = ret_tmp;
-  coerce_tmp = (&call_tmp2)->locale_id;
-  call_tmp3 = (coerce_tmp == chpl_nodeID);
+  call_tmp3 = ((&call_tmp2)->locale_id == chpl_nodeID);
   if (call_tmp3) {
     ret_to_arg_ref_tmp_2 = &ret_tmp2;
     i_s = &call_tmp2;
@@ -7946,7 +7912,9 @@ static int64_t _command_line_cast15(c_string x) {
   _ref_string i_rhs = NULL;
   chpl____wide__ref_string T2 = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__ref_string T3 = {CHPL_LOCALEID_T_INIT, NULL};
+  int32_t coerce_tmp2;
   chpl_bool call_tmp5;
+  c_ptr_uint8_t coerce_tmp3 = NULL;
   int64_t call_tmp6;
   _ref_string _ref_tmp_2 = NULL;
   chpl____wide__ref_string T4 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -8002,11 +7970,13 @@ static int64_t _command_line_cast15(c_string x) {
   }
   _end_localize:;
   localX = ret2;
-  call_tmp5 = ((&localX)->locale_id != chpl_nodeID);
+  coerce_tmp2 = (&localX)->locale_id;
+  call_tmp5 = (coerce_tmp2 != chpl_nodeID);
   if (call_tmp5) {
     halt(&local__str_literal_337 /* "Cannot call .c_str() on a remote string" */, INT64(977), INT32(2));
   }
-  call_tmp6 = c_string_to_int64_t(((c_string)(((c_void_ptr)((&localX)->buff)))), INT64(977), INT32(2));
+  coerce_tmp3 = (&localX)->buff;
+  call_tmp6 = c_string_to_int64_t(((c_string)(((c_void_ptr)(coerce_tmp3)))), INT64(977), INT32(2));
   ret = call_tmp6;
   _ref_tmp_2 = &localX;
   chpl_macro_tmp_392.locale = chpl_gen_getLocaleID();
@@ -8067,9 +8037,8 @@ static int64_t _command_line_cast17(c_string x) {
   _ref_string i_rhs = NULL;
   chpl____wide__ref_string T2 = {CHPL_LOCALEID_T_INIT, NULL};
   chpl____wide__ref_string T3 = {CHPL_LOCALEID_T_INIT, NULL};
-  int32_t coerce_tmp2;
   chpl_bool call_tmp5;
-  c_ptr_uint8_t coerce_tmp3 = NULL;
+  c_ptr_uint8_t coerce_tmp2 = NULL;
   int64_t call_tmp6;
   _ref_string _ref_tmp_2 = NULL;
   chpl____wide__ref_string T4 = {CHPL_LOCALEID_T_INIT, NULL};
@@ -8125,13 +8094,12 @@ static int64_t _command_line_cast17(c_string x) {
   }
   _end_localize:;
   localX = ret2;
-  coerce_tmp2 = (&localX)->locale_id;
-  call_tmp5 = (coerce_tmp2 != chpl_nodeID);
+  call_tmp5 = ((&localX)->locale_id != chpl_nodeID);
   if (call_tmp5) {
     halt(&local__str_literal_337 /* "Cannot call .c_str() on a remote string" */, INT64(977), INT32(2));
   }
-  coerce_tmp3 = (&localX)->buff;
-  call_tmp6 = c_string_to_int64_t(((c_string)(((c_void_ptr)(coerce_tmp3)))), INT64(977), INT32(2));
+  coerce_tmp2 = (&localX)->buff;
+  call_tmp6 = c_string_to_int64_t(((c_string)(((c_void_ptr)(coerce_tmp2)))), INT64(977), INT32(2));
   ret = call_tmp6;
   _ref_tmp_2 = &localX;
   chpl_macro_tmp_398.locale = chpl_gen_getLocaleID();

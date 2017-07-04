@@ -43,11 +43,11 @@ static chpl_bool _cast2(_ref_string x) {
   chpl____wide__ref_string T4 = {CHPL_LOCALEID_T_INIT, NULL};
   _ref_string _ref_tmp_5 = NULL;
   chpl____wide__ref_string T5 = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref_string chpl_macro_tmp_5364;
-  chpl____wide__ref_string chpl_macro_tmp_5365;
   chpl____wide__ref_string chpl_macro_tmp_5366;
   chpl____wide__ref_string chpl_macro_tmp_5367;
   chpl____wide__ref_string chpl_macro_tmp_5368;
+  chpl____wide__ref_string chpl_macro_tmp_5369;
+  chpl____wide__ref_string chpl_macro_tmp_5370;
   local__str_literal_854 /* "'" */ = _str_literal_854 /* "'" */;
   local__str_literal_1869 /* "Unexpected value when converting from string to bool: '" */ = _str_literal_1869 /* "Unexpected value when converting from string to bool: '" */;
   local__str_literal_1867 /* "false" */ = _str_literal_1867 /* "false" */;
@@ -60,9 +60,9 @@ static chpl_bool _cast2(_ref_string x) {
   if (call_tmp2) {
     ret = UINT8(true);
     _ref_tmp_ = &str;
-    chpl_macro_tmp_5364.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_5364.addr = _ref_tmp_;
-    T = chpl_macro_tmp_5364;
+    chpl_macro_tmp_5366.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_5366.addr = _ref_tmp_;
+    T = chpl_macro_tmp_5366;
     deinit44(T);
     goto _end__cast;
   } else {
@@ -70,9 +70,9 @@ static chpl_bool _cast2(_ref_string x) {
     if (call_tmp3) {
       ret = UINT8(false);
       _ref_tmp_2 = &str;
-      chpl_macro_tmp_5365.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_5365.addr = _ref_tmp_2;
-      T2 = chpl_macro_tmp_5365;
+      chpl_macro_tmp_5367.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_5367.addr = _ref_tmp_2;
+      T2 = chpl_macro_tmp_5367;
       deinit44(T2);
       goto _end__cast;
     } else {
@@ -84,21 +84,21 @@ static chpl_bool _cast2(_ref_string x) {
       call_tmp5 = ret_tmp3;
       halt(&ret_tmp3, INT64(53), INT32(42));
       _ref_tmp_3 = &call_tmp4;
-      chpl_macro_tmp_5366.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_5366.addr = _ref_tmp_3;
-      T3 = chpl_macro_tmp_5366;
+      chpl_macro_tmp_5368.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_5368.addr = _ref_tmp_3;
+      T3 = chpl_macro_tmp_5368;
       deinit44(T3);
       _ref_tmp_4 = &call_tmp5;
-      chpl_macro_tmp_5367.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_5367.addr = _ref_tmp_4;
-      T4 = chpl_macro_tmp_5367;
+      chpl_macro_tmp_5369.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_5369.addr = _ref_tmp_4;
+      T4 = chpl_macro_tmp_5369;
       deinit44(T4);
     }
   }
   _ref_tmp_5 = &str;
-  chpl_macro_tmp_5368.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_5368.addr = _ref_tmp_5;
-  T5 = chpl_macro_tmp_5368;
+  chpl_macro_tmp_5370.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_5370.addr = _ref_tmp_5;
+  T5 = chpl_macro_tmp_5370;
   deinit44(T5);
   _end__cast:;
   return ret;

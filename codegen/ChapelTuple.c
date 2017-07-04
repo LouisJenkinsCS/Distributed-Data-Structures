@@ -18,10 +18,10 @@ static void chpl__init_ChapelTuple(int64_t _ln,
 static chpl____wide__ref_range_int64_t_bounded_F this10(chpl____wide__ref__tuple_1_star_range_int64_t_bounded_F this12,
                                                         int64_t i) {
   chpl____wide__ref_range_int64_t_bounded_F call_tmp2 = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref_range_int64_t_bounded_F chpl_macro_tmp_606;
-  chpl_macro_tmp_606.locale = (this12).locale;
-  chpl_macro_tmp_606.addr = (*((this12).addr) + (i - INT64(1)));
-  call_tmp2 = chpl_macro_tmp_606;
+  chpl____wide__ref_range_int64_t_bounded_F chpl_macro_tmp_608;
+  chpl_macro_tmp_608.locale = (this12).locale;
+  chpl_macro_tmp_608.addr = (*((this12).addr) + (i - INT64(1)));
+  call_tmp2 = chpl_macro_tmp_608;
   return call_tmp2;
 }
 
@@ -37,10 +37,10 @@ static _ref_int64_t this8(_ref__tuple_56_star_int64_t this12,
 static chpl____wide__ref_int64_t this9(chpl____wide__ref__tuple_1_star_int64_t this12,
                                        int64_t i) {
   chpl____wide__ref_int64_t call_tmp2 = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref_int64_t chpl_macro_tmp_607;
-  chpl_macro_tmp_607.locale = (this12).locale;
-  chpl_macro_tmp_607.addr = (*((this12).addr) + (i - INT64(1)));
-  call_tmp2 = chpl_macro_tmp_607;
+  chpl____wide__ref_int64_t chpl_macro_tmp_609;
+  chpl_macro_tmp_609.locale = (this12).locale;
+  chpl_macro_tmp_609.addr = (*((this12).addr) + (i - INT64(1)));
+  call_tmp2 = chpl_macro_tmp_609;
   return call_tmp2;
 }
 
@@ -183,8 +183,6 @@ static void readWriteThis(chpl____wide__ref__tuple_2_chpl_bool_int64_t this12,
   chpl____wide__ref_string T13 = {CHPL_LOCALEID_T_INIT, NULL};
   _ref_string _field_destructor_tmp_12 = NULL;
   chpl____wide__ref_string T14 = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref_string chpl_macro_tmp_608;
-  chpl____wide__ref_string chpl_macro_tmp_609;
   chpl____wide__ref_string chpl_macro_tmp_610;
   chpl____wide__ref_string chpl_macro_tmp_611;
   chpl____wide__ref_string chpl_macro_tmp_612;
@@ -192,11 +190,13 @@ static void readWriteThis(chpl____wide__ref__tuple_2_chpl_bool_int64_t this12,
   chpl____wide__ref_string chpl_macro_tmp_614;
   chpl____wide__ref_string chpl_macro_tmp_615;
   chpl____wide__ref_string chpl_macro_tmp_616;
-  chpl____wide__ref_chpl_bool chpl_macro_tmp_617;
-  chpl____wide__ref_int64_t chpl_macro_tmp_618;
-  chpl____wide__ref_string chpl_macro_tmp_619;
-  chpl____wide__ref_string chpl_macro_tmp_620;
+  chpl____wide__ref_string chpl_macro_tmp_617;
+  chpl____wide__ref_string chpl_macro_tmp_618;
+  chpl____wide__ref_chpl_bool chpl_macro_tmp_619;
+  chpl____wide__ref_int64_t chpl_macro_tmp_620;
   chpl____wide__ref_string chpl_macro_tmp_621;
+  chpl____wide__ref_string chpl_macro_tmp_622;
+  chpl____wide__ref_string chpl_macro_tmp_623;
   local__str_literal_411 /* ")" */ = _str_literal_411 /* ")" */;
   local__str_literal_587 /* "(" */ = _str_literal_587 /* "(" */;
   local__str_literal_585 /* "]" */ = _str_literal_585 /* "]" */;
@@ -335,19 +335,19 @@ static void readWriteThis(chpl____wide__ref__tuple_2_chpl_bool_int64_t this12,
     _ref_tmp_3 = &end;
     chpl___ASSIGN_18(_ref_tmp_3, &ret_tmp9);
     _field_destructor_tmp_ = &((&call_tmp8)->val_chpl);
-    chpl_macro_tmp_608.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_608.addr = _field_destructor_tmp_;
-    T = chpl_macro_tmp_608;
+    chpl_macro_tmp_610.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_610.addr = _field_destructor_tmp_;
+    T = chpl_macro_tmp_610;
     deinit44(T);
     _field_destructor_tmp_2 = &((&call_tmp9)->val_chpl);
-    chpl_macro_tmp_609.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_609.addr = _field_destructor_tmp_2;
-    T2 = chpl_macro_tmp_609;
+    chpl_macro_tmp_611.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_611.addr = _field_destructor_tmp_2;
+    T2 = chpl_macro_tmp_611;
     deinit44(T2);
     _field_destructor_tmp_3 = &((&call_tmp10)->val_chpl);
-    chpl_macro_tmp_610.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_610.addr = _field_destructor_tmp_3;
-    T3 = chpl_macro_tmp_610;
+    chpl_macro_tmp_612.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_612.addr = _field_destructor_tmp_3;
+    T3 = chpl_macro_tmp_612;
     deinit44(T3);
   } else {
     call_tmp11 = (call_tmp2 == local_QIO_TUPLE_FORMAT_JSON);
@@ -398,19 +398,19 @@ static void readWriteThis(chpl____wide__ref__tuple_2_chpl_bool_int64_t this12,
       _ref_tmp_6 = &end;
       chpl___ASSIGN_18(_ref_tmp_6, &ret_tmp12);
       _field_destructor_tmp_4 = &((&call_tmp12)->val_chpl);
-      chpl_macro_tmp_611.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_611.addr = _field_destructor_tmp_4;
-      T4 = chpl_macro_tmp_611;
+      chpl_macro_tmp_613.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_613.addr = _field_destructor_tmp_4;
+      T4 = chpl_macro_tmp_613;
       deinit44(T4);
       _field_destructor_tmp_5 = &((&call_tmp13)->val_chpl);
-      chpl_macro_tmp_612.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_612.addr = _field_destructor_tmp_5;
-      T5 = chpl_macro_tmp_612;
+      chpl_macro_tmp_614.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_614.addr = _field_destructor_tmp_5;
+      T5 = chpl_macro_tmp_614;
       deinit44(T5);
       _field_destructor_tmp_6 = &((&call_tmp14)->val_chpl);
-      chpl_macro_tmp_613.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_613.addr = _field_destructor_tmp_6;
-      T6 = chpl_macro_tmp_613;
+      chpl_macro_tmp_615.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_615.addr = _field_destructor_tmp_6;
+      T6 = chpl_macro_tmp_615;
       deinit44(T6);
     } else {
       (&_init_class_tmp_10)->len = INT64(0);
@@ -459,19 +459,19 @@ static void readWriteThis(chpl____wide__ref__tuple_2_chpl_bool_int64_t this12,
       _ref_tmp_9 = &end;
       chpl___ASSIGN_18(_ref_tmp_9, &ret_tmp15);
       _field_destructor_tmp_7 = &((&call_tmp15)->val_chpl);
-      chpl_macro_tmp_614.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_614.addr = _field_destructor_tmp_7;
-      T7 = chpl_macro_tmp_614;
+      chpl_macro_tmp_616.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_616.addr = _field_destructor_tmp_7;
+      T7 = chpl_macro_tmp_616;
       deinit44(T7);
       _field_destructor_tmp_8 = &((&call_tmp16)->val_chpl);
-      chpl_macro_tmp_615.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_615.addr = _field_destructor_tmp_8;
-      T8 = chpl_macro_tmp_615;
+      chpl_macro_tmp_617.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_617.addr = _field_destructor_tmp_8;
+      T8 = chpl_macro_tmp_617;
       deinit44(T8);
       _field_destructor_tmp_9 = &((&call_tmp17)->val_chpl);
-      chpl_macro_tmp_616.locale = chpl_gen_getLocaleID();
-      chpl_macro_tmp_616.addr = _field_destructor_tmp_9;
-      T9 = chpl_macro_tmp_616;
+      chpl_macro_tmp_618.locale = chpl_gen_getLocaleID();
+      chpl_macro_tmp_618.addr = _field_destructor_tmp_9;
+      T9 = chpl_macro_tmp_618;
       deinit44(T9);
     }
   }
@@ -479,36 +479,36 @@ static void readWriteThis(chpl____wide__ref__tuple_2_chpl_bool_int64_t this12,
   if (call_tmp18) {
     writeIt_chpl(f, &start);
   }
-  chpl_macro_tmp_617.locale = (this12).locale;
-  chpl_macro_tmp_617.addr = &(((this12).addr)->x1);
-  chpl_gen_comm_get(((void*)(&T10)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_617).locale), INT64(0), INT32(0)), (chpl_macro_tmp_617).addr, sizeof(chpl_bool), -1, COMMID(0), INT64(265), INT64(20));
+  chpl_macro_tmp_619.locale = (this12).locale;
+  chpl_macro_tmp_619.addr = &(((this12).addr)->x1);
+  chpl_gen_comm_get(((void*)(&T10)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_619).locale), INT64(0), INT32(0)), (chpl_macro_tmp_619).addr, sizeof(chpl_bool), -1, COMMID(0), INT64(265), INT64(20));
   writeIt_chpl3(f, T10);
   call_tmp19 = (! call_tmp6);
   if (call_tmp19) {
     writeIt_chpl(f, &comma);
   }
-  chpl_macro_tmp_618.locale = (this12).locale;
-  chpl_macro_tmp_618.addr = &(((this12).addr)->x2);
-  chpl_gen_comm_get(((void*)(&T11)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_618).locale), INT64(0), INT32(0)), (chpl_macro_tmp_618).addr, sizeof(int64_t), -1, COMMID(1), INT64(270), INT64(20));
+  chpl_macro_tmp_620.locale = (this12).locale;
+  chpl_macro_tmp_620.addr = &(((this12).addr)->x2);
+  chpl_gen_comm_get(((void*)(&T11)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_620).locale), INT64(0), INT32(0)), (chpl_macro_tmp_620).addr, sizeof(int64_t), -1, COMMID(1), INT64(270), INT64(20));
   writeIt_chpl2(f, T11);
   call_tmp20 = (! call_tmp6);
   if (call_tmp20) {
     writeIt_chpl(f, &end);
   }
   _field_destructor_tmp_10 = &((&end)->val_chpl);
-  chpl_macro_tmp_619.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_619.addr = _field_destructor_tmp_10;
-  T12 = chpl_macro_tmp_619;
+  chpl_macro_tmp_621.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_621.addr = _field_destructor_tmp_10;
+  T12 = chpl_macro_tmp_621;
   deinit44(T12);
   _field_destructor_tmp_11 = &((&comma)->val_chpl);
-  chpl_macro_tmp_620.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_620.addr = _field_destructor_tmp_11;
-  T13 = chpl_macro_tmp_620;
+  chpl_macro_tmp_622.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_622.addr = _field_destructor_tmp_11;
+  T13 = chpl_macro_tmp_622;
   deinit44(T13);
   _field_destructor_tmp_12 = &((&start)->val_chpl);
-  chpl_macro_tmp_621.locale = chpl_gen_getLocaleID();
-  chpl_macro_tmp_621.addr = _field_destructor_tmp_12;
-  T14 = chpl_macro_tmp_621;
+  chpl_macro_tmp_623.locale = chpl_gen_getLocaleID();
+  chpl_macro_tmp_623.addr = _field_destructor_tmp_12;
+  T14 = chpl_macro_tmp_623;
   deinit44(T14);
   return;
 }

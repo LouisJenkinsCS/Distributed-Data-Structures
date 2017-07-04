@@ -12,6 +12,10 @@ class FCHFunctor {
   proc this(ref data : dataType) {
     halt("Bad Functor (by Ref)...");
   }
+
+  proc this(data : dataType) where isClass(dataType) {
+    halt("Bad Functor...");
+  }
 }
 
 class FCHLocalNode {

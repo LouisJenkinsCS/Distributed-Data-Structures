@@ -49,11 +49,11 @@ static void _computeChunkStuff_chpl(int64_t maxTasks_chpl,
   chpl_bool call_tmp_chpl9;
   chpl_bool call_tmp_chpl10;
   chpl_bool call_tmp_chpl11;
-  chpl____wide__ref_range_int64_t_bounded_F chpl_macro_tmp_7200;
+  chpl____wide__ref_range_int64_t_bounded_F chpl_macro_tmp_7202;
   numElems_chpl = UINT64(1);
-  chpl_macro_tmp_7200.locale = (ranges_chpl).locale;
-  chpl_macro_tmp_7200.addr = (*((ranges_chpl).addr) + INT64(0));
-  call_tmp_chpl = chpl_macro_tmp_7200;
+  chpl_macro_tmp_7202.locale = (ranges_chpl).locale;
+  chpl_macro_tmp_7202.addr = (*((ranges_chpl).addr) + INT64(0));
+  call_tmp_chpl = chpl_macro_tmp_7202;
   call_tmp_chpl2 = length2(call_tmp_chpl);
   _ref_tmp__chpl = &numElems_chpl;
   *(_ref_tmp__chpl) *= ((uint64_t)(call_tmp_chpl2));
@@ -285,7 +285,7 @@ static int64_t _computeNumChunks_chpl3(int64_t numElems_chpl) {
   chpl____wide_locale call_tmp_chpl3 = {CHPL_LOCALEID_T_INIT, NULL};
   int64_t tmp_chpl;
   int64_t call_tmp_chpl4;
-  chpl____wide__ref_int64_t chpl_macro_tmp_7201;
+  chpl____wide__ref_int64_t chpl_macro_tmp_7203;
   local_dataParMinGranularity_chpl = dataParMinGranularity;
   local_dataParIgnoreRunningTasks_chpl = dataParIgnoreRunningTasks;
   local_dataParTasksPerLocale_chpl = dataParTasksPerLocale;
@@ -294,9 +294,9 @@ static int64_t _computeNumChunks_chpl3(int64_t numElems_chpl) {
     _autoCopy_tmp__chpl = chpl_rt_buildLocaleID(chpl_nodeID, c_sublocid_any);
     call_tmp_chpl3 = chpl_localeID_to_locale(&_autoCopy_tmp__chpl);
     call_tmp_chpl2 = call_tmp_chpl3;
-    chpl_macro_tmp_7201.locale = (&call_tmp_chpl2)->locale;
-    chpl_macro_tmp_7201.addr = &(((&call_tmp_chpl2)->addr)->maxTaskPar);
-    chpl_gen_comm_get(((void*)(&tmp_chpl)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_7201).locale), INT64(0), INT32(0)), (chpl_macro_tmp_7201).addr, sizeof(int64_t), -1, COMMID(0), INT64(120), INT64(62));
+    chpl_macro_tmp_7203.locale = (&call_tmp_chpl2)->locale;
+    chpl_macro_tmp_7203.addr = &(((&call_tmp_chpl2)->addr)->maxTaskPar);
+    chpl_gen_comm_get(((void*)(&tmp_chpl)), chpl_nodeFromLocaleID(&((chpl_macro_tmp_7203).locale), INT64(0), INT32(0)), (chpl_macro_tmp_7203).addr, sizeof(int64_t), -1, COMMID(0), INT64(120), INT64(62));
     ret_chpl = tmp_chpl;
     goto _end__if_fn148_chpl;
   } else {

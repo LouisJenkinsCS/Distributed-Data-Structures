@@ -42,8 +42,8 @@ static void assert_chpl2(chpl_bool test_chpl,
   chpl____wide__ref_string tmp_chpl = {CHPL_LOCALEID_T_INIT, NULL};
   _ref_string _ref_tmp__chpl2 = NULL;
   chpl____wide__ref_string tmp_chpl2 = {CHPL_LOCALEID_T_INIT, NULL};
-  chpl____wide__ref_string chpl_macro_tmp_7202;
-  chpl____wide__ref_string chpl_macro_tmp_7203;
+  chpl____wide__ref_string chpl_macro_tmp_7204;
+  chpl____wide__ref_string chpl_macro_tmp_7205;
   local__str_literal_337_chpl /* "Cannot call .c_str() on a remote string" */ = _str_literal_337 /* "Cannot call .c_str() on a remote string" */;
   local__str_literal_47_chpl /* "assert failed - " */ = _str_literal_47 /* "assert failed - " */;
   call_tmp_chpl = (! test_chpl);
@@ -61,14 +61,14 @@ static void assert_chpl2(chpl_bool test_chpl,
     }
     chpl_error(((c_string)(((c_void_ptr)((&tmpstring_chpl)->buff)))), INT64(60), INT32(63));
     _ref_tmp__chpl = &tmpstring_chpl;
-    chpl_macro_tmp_7202.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_7202.addr = _ref_tmp__chpl;
-    tmp_chpl = chpl_macro_tmp_7202;
+    chpl_macro_tmp_7204.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_7204.addr = _ref_tmp__chpl;
+    tmp_chpl = chpl_macro_tmp_7204;
     deinit44(tmp_chpl);
     _ref_tmp__chpl2 = &call_tmp_chpl2;
-    chpl_macro_tmp_7203.locale = chpl_gen_getLocaleID();
-    chpl_macro_tmp_7203.addr = _ref_tmp__chpl2;
-    tmp_chpl2 = chpl_macro_tmp_7203;
+    chpl_macro_tmp_7205.locale = chpl_gen_getLocaleID();
+    chpl_macro_tmp_7205.addr = _ref_tmp__chpl2;
+    tmp_chpl2 = chpl_macro_tmp_7205;
     deinit44(tmp_chpl2);
   }
   return;

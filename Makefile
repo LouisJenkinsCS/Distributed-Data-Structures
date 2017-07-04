@@ -11,6 +11,7 @@ Benchmark:
 	chpl ${CHPLFLAGS} queues/Queue.chpl queues/local/SyncList.chpl queues/local/SyncQueue.chpl \
 	queues/local/CCQueue.chpl queues/distributed/DistributedFIFOQueue.chpl \
 	queues/distributed/DistributedQueue.chpl benchmark/benchmark.chpl misc/LocalAtomicObject.chpl \
+	queues/distributed/FCHQueue.chpl misc/FCHLock.chpl misc/Bitmap.chpl misc/GDT.chpl \
 	-o $(OUT) --main-module benchmark ${EXTRAFLAGS}
 
 # NQueens Benchmark
