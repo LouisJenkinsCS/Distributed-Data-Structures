@@ -12,7 +12,7 @@ use Time;
 // else prev.next = node;
 
 // Global Descriptor Table type
-config const GDT_NUM_ENTRIES = 64;
+config const GDT_NUM_ENTRIES = 1024;
 
 class GDT {
   type entryType;
@@ -29,15 +29,18 @@ class GDT {
   }
 
   inline proc read(descrIdx : uint) {
+    if descrIdx == 0 then halt("Descriptor is 0!");
     return gdtEntries[(descrIdx >> 32) : int][(descrIdx & 0xFFFFFFFF) : int];
   }
 
   inline proc write(descrIdx : uint, data : entryType) {
+    if descrIdx == 0 then halt("Descriptor is 0!");
     gdtEntries[(descrIdx >> 32) : int][(descrIdx & 0xFFFFFFFF) : int] = data;
   }
 
   inline proc unregister(descrIdx : uint) {
-    gdtBitmap[descrIdx >> 32].clear((descrIdx & 0xFFFFFFFF) - 1);
+    if descrIdx == 0 then halt("Descriptor is 0!");
+    gdtBitmap[(descrIdx >> 32) : int].clear((descrIdx & 0xFFFFFFFF) - 1);
   }
 }
 

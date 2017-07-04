@@ -5,13 +5,13 @@ record Bitmap {
 
   proc clear(idx) {
     var _nBits = nBits$;
-    bitmap[idx / 64] = bitmap[idx / 64] & ~(1 << ((idx - 1) % 64));
+    bitmap[(idx / 64) : int] = bitmap[(idx / 64) : int] & ~(1 << ((idx : int - 1) % 64));
     nBits$ = _nBits;
   }
 
   inline proc resize(currBits) {
     var newBits = currBits * 2;
-    bitmapSpace = { 1 .. (currBits / 64) : int };
+    bitmapSpace = { 0 .. ((currBits - 1) / 64) : int };
   }
 
   proc next() {
