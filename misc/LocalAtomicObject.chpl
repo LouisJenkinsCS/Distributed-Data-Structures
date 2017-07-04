@@ -7,6 +7,14 @@ record LocalAtomicObject {
     return __primitive("cast", objType, _atomicVar.read());
   }
 
+  inline proc compareExchange(expectedObj:objType, newObj:objType) {
+    if boundsChecking then
+      if __primitive("is wide pointer", newObj) || __primitive("is wide pointer", expectedObj) then
+        halt("Attempt to write a wide pointer into LocalAtomicObject");
+
+    return _atomicVar.compareExchangeStrong(__primitive("cast", atomicType, expectedObj), __primitive("cast", atomicType, newObj));
+  }
+
   inline proc write(newObj:objType) {
     if boundsChecking then
       if __primitive("is wide pointer", newObj) then
@@ -27,6 +35,11 @@ record LocalAtomicObject {
   proc write(newObj) {
     compilerError("Incompatible object type in LocalAtomicObject.write: ",
         newObj.type);
+  }
+
+  proc compareExchange(expectedObj, newObj) {
+    compilerError("Incompatible object type in LocalAtomicObject.compareExchange: (",
+        expectedObj.type, ",", newObj.type, ")");
   }
 
   proc exchange(newObj) {
