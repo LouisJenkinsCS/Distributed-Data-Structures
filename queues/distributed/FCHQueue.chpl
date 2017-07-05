@@ -52,18 +52,35 @@ config const nElementForFCHQueue = 1000000;
 proc main() {
   writeln("Starting FCHQueue Proof-Of-Correctness Test ~ nElementForFCHQueue=", nElementForFCHQueue);
   var queue = new FCHQueue(int);
+  var counter : atomic int;
+  var expected = (nElementForFCHQueue * (nElementForFCHQueue + 1)) / 2;
 
-  for i in 1 .. nElementForFCHQueue {
+  forall i in 1 .. nElementForFCHQueue {
     queue.enqueue(i);
   }
 
-  for i in 1 .. nElementForFCHQueue {
-    var retval = queue.dequeue();
-    if retval[2] != i {
-      writeln("BAD RESULT! Expected ", i, ", Received ", retval);
-      return;
+  coforall loc in Locales do on loc {
+    var localeLocalCounter : atomic int;
+    coforall tid in 0 .. #here.maxTaskPar {
+      var taskLocalCounter : int;
+      while true {
+        var (present, elem) = queue.dequeue();
+        if !present {
+          break;
+        }
+
+        taskLocalCounter = taskLocalCounter + elem;
+      }
+      localeLocalCounter.add(taskLocalCounter);
     }
+    writeln(here, ": Counter=", localeLocalCounter.read());
+    counter.add(localeLocalCounter.read());
   }
 
-  writeln("PASSED!");
+  if counter.read() == expected {
+    writeln("PASSED TEST!");
+  } else {
+    writeln("FAILED TEST! Expected: ", expected, ", but received: ", counter.read());
+  }
+
 }
