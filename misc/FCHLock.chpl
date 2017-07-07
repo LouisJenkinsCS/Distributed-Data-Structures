@@ -5,6 +5,8 @@ use Time;
 
 /*
   The Flat-Combining Hierarichal Lock
+
+  A Work-In-Progress - Do Not Use!
 */
 
 class FCHFunctor {
@@ -24,7 +26,7 @@ class FCHLocalNode {
   var request : FCHFunctor(dataType);
   var wait : atomic bool;
   var completed : bool;
-  var next : LocalAtomicObject(FCHLocalNode(dataType));
+  var next : FCHLocalNode(dataType);
 };
 
 class FCHGlobalNode {
@@ -44,6 +46,7 @@ class FCHLock {
   var perLocaleDomain = perLocaleSpace dmapped ReplicatedDist();
   var publicationList : [perLocaleDomain] LocalAtomicObject(FCHLocalNode(data.type));
   var recycledCombinerNode : [perLocaleDomain] FCHGlobalNode;
+  var combinerStatus : atomic bool;
 
   /*
     Register ourselves as a potential combiner for our node.
@@ -111,78 +114,66 @@ class FCHLock {
 
 
   proc synchronize(request : FCHFunctor(data.type)) {
-    // Create our local node that contains our desired request and register ourselves...
-    var node = new FCHLocalNode(data.type);
-    node.request = request;
-    node.wait.write(true);
-    var prev = publicationList[0].exchange(node);
+    var counter = 0;
+    var nextNode = new FCHLocalNode(data.type);
+    nextNode.wait.write(true);
+    nextNode.completed = false;
 
-    // Not only request in the list?
-    if prev != nil {
-      // Append to list and wait
-      prev.next.write(node);
-      node.wait.waitFor(false);
+    // Register our dummy node so that the next task can add theirs safely,
+    // then fill out the node we assigned to use
+    var currNode = publicationList[0].exchange(nextNode);
+    currNode.request = request;
+    currNode.next = nextNode;
 
-      // We are served, and hence we are done...
-      if node.completed {
-        // TODO: Cleanup
-        return;
-      }
+    // Spin until we are finished...
+    currNode.wait.waitFor(false);
+
+    // If our operation is marked complete, we may safely reclaim it, as it is no
+    // longer being touched by the combiner thread
+    if currNode.completed {
+      delete currNode;
+      return;
     }
 
-    // We're either the only one in the list or our operation was not marked as
-    // 'complete' meaning we become eligible for the combiner thread of our node.
-    // Note: This is akin to entering a critical section...
-    // at this point we have obtained *global* combiner status.
-    var (combinerNode, combinerDescr) = waitForCombiner();
-    /*writeln(here, " got combiner status...");*/
-    var tmpNode = node;
-    var served = 0;
-    const maxServed = here.maxTaskPar;
-    var currTime = getCurrentTime();
-    var stopTime = currTime + FCHLockMaxTime;
+    while !combinerStatus.testAndSet() do chpl_task_yield();
 
-    while true {
-      served = served + 1;
+    // If we are not marked as complete, we *are* the combiner thread
+    var tmpNode = currNode;
+    var tmpNodeNext : FCHLocalNode(data.type);
+    const maxRequests = here.maxTaskPar * numLocales;
 
-      // Serve...
+    while (tmpNode.next != nil && counter < maxRequests) {
+      counter = counter + 1;
+      // Note: Ensures that we do not touch the current node after it is freed
+      // by the owning thread...
+      tmpNodeNext = tmpNode.next;
+
+      // Process...
       tmpNode.request(data);
+
+      // We are done with this one... Note that this uses an acquire barrier so
+      // that the owning task sees it as completed before wait is no longer true.
       tmpNode.completed = true;
       tmpNode.wait.write(false);
 
-      // Check # of requests left... If we have less than 2, we're done.
-      var tmpNext = tmpNode.next.read();
-      if tmpNext == nil || tmpNext.next.read() == nil || getCurrentTime() >= stopTime then break;
-      tmpNode = tmpNext;
+      tmpNode = tmpNodeNext;
     }
 
-    // Relinquish combiner thread status...
-    // Note: This is akin to exiting a critical section...
-    giveUpCombiner(combinerNode, combinerDescr);
-    // writeln(here, " given up combiner status after serving ", served, " requests...");
+    combinerStatus.write(false);
 
-    // Are we the last node?
-    var tmpNext = tmpNode.next.read();
-    if tmpNext == nil {
-      // Try to set the tail to nil
-      if publicationList[0].compareExchange(tmpNode, nil) {
-        // TODO: Cleanup
-        return;
-      }
+    // At this point, it means one thing: Either we are on the dummy node, on which
+    // case nothing happens, or we exceeded the number of requests we can do at once,
+    // meaning we wake up the next thread as the combiner.
+    tmpNode.wait.write(false);
+    delete currNode;
+  }
 
-      // At this point, someone is in the middle of adding themselves to the list...
-      // Spin until they are done...
-      while true {
-        tmpNext = tmpNode.next.read();
-        if tmpNext != nil then break;
-        chpl_task_yield();
+  proc FCHLock(data) {
+    forall loc in Locales {
+      on loc {
+        publicationList[0].write(new FCHLocalNode(data.type));
       }
     }
-
-    // We know we have somoene else in the list... set them as combiner...
-    tmpNext.wait.write(false);
-    // TODO: Cleanup
-    return;
   }
 }
 

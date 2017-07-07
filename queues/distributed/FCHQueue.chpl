@@ -2,6 +2,11 @@ use FCHLock;
 use Queue;
 use List;
 
+
+/*
+  A Work In Progress - Do Not Use!
+*/
+
 class EnqueueFunctor : FCHFunctor {
   type eltType;
   var elem : eltType;
