@@ -8,15 +8,13 @@ NUMA-aware.
 
 ## Queue Descriptions
 
-All performance testing is done on a 44 core Intel Haswell machine (w/ 24 processors per node).
+All performance testing is done on Intel Haswell architecture (w/ 24 processors per node).
 
 ## FIFO
 
-* Ensures FIFO ordering across multiple clusters
-* Enqueue operations scale well
-  * Bad under heavy contention due to Network Atomics
-* Dequeue operations do not scale
-  * Migrate to owning locale due to excess communication and synchronization
+Provides a strict FIFO ordering without sacrificing too much performance. The FIFO ordering
+is preserved across all nodes in a cluster, and employs a wait-free round-robin approach
+to work distribution that ensures fairness in memory, bandwidth, and computation.
 
 ### Performance
 
@@ -26,16 +24,13 @@ All performance testing is done on a 44 core Intel Haswell machine (w/ 24 proces
 
 #### Dequeue
 
-**Work In Progress**
+![](Results/DequeueFIFO.png)
 
 ## MPMC
 
-* Enqueue is communication free and scales very well
-* Dequeue is mostly communication free and scales very well
-  * Dequeue communications occur during work stealing
-* Employs Work Stealing algorithm to ensure that majority of operations may remain local
-* Does not ensure a global FIFO ordering, nor local due to work stealing.
-  * Possible to have FIFO ordering under certain circumstances...
+A queue which does not provide any FIFO ordering in favor of raw performance. An ideal
+backbone for a work queue, it minimizes any and all communications and employs work stealing
+to ensure work can be done, with best-effort for providing an even distribution of memory and computation.
 
 ### Features
 

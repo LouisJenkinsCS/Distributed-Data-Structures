@@ -1,7 +1,20 @@
-record LocalAtomicObject {
+use BlockDist;
+
+/*
+  Note: This does not work at all, do *not* use!
+*/
+record GlobalAtomicObject {
   type objType;
   type atomicType = uint(64);
   var _atomicVar: atomic atomicType;
+
+  var descriptorTableSpace = { 1 .. 1024 };
+
+
+  // TODO: Figure how to set wide pointer...
+  inline proc translate(obj:objType) : uint {
+
+  }
 
   inline proc read() {
     return __primitive("cast", objType, _atomicVar.read());
