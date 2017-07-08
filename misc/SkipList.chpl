@@ -1,5 +1,6 @@
 use Hash;
 use Random;
+use FlatObjectPool;
 
 class SkipListNode {
   type keyType;
@@ -8,52 +9,41 @@ class SkipListNode {
   var idx : uint;
   var forwardDom : domain(int);
   var forward : [forwardDom] SkipListNode(keyType);
-
-  proc SkipListNode(type keyType, level : int) {
-    forwardDom = { 1 .. level };
-  }
-}
-
-record SkipListMemoryPool {
-  type keyType;
-  var size : uint;
-  var pool : [{1 .. 1}] SkipListNode(keyType);
-
-  proc SkipListMemoryPool(type keyType) {
-    pool.clear();
-  }
-
-  proc allocNode() : SkipListNode(keyType) {
-    var node = new SkipListNode(keyType);
-    pool.push_back(node);
-    node.idx = pool.domain.last();
-    pool.push
-    return node;
-  }
-
-  proc deallocNode(node : SkipListNode(keyType)) {
-    var idx = node.idx;
-    poolDom.remove(idx);
-    delete node;
-  }
 }
 
 record SkipList {
   type keyType;
   var maxLevel = 4;
   var level = 1;
-  var header : SkipListNode(keyType) = new SkipListNode(keyType, level);
-  var alloc : func(SkipListNode(keyType));
+  var header : SkipListNode(keyType);
+  var memPool : FlatObjectPool(SkipListNode(keyType));
+
+  proc SkipList(type keyType) {
+    memPool = new FlatObjectPool(SkipListNode(keyType), lambda () { return new SkipListNode(keyType); });
+    header = makeNode(level);
+  }
 
   // RNG to create randomized level
   var randStr = makeRandomStream(real);
 
   inline proc randomLevel() {
-    var level = 1;
-    while randStr.getNext() < 0.5 && level < maxLevel {
-      level = level + 1;
+    var _level = 1;
+    while randStr.getNext() < 0.5 && _level < maxLevel {
+      _level = _level + 1;
     }
-    return level;
+    return _level;
+  }
+
+  // Recycle and clean before usage...
+  inline proc makeNode(_level, hash : uint = 0, key : keyType = nil) : SkipListNode(keyType) {
+    var (idx, node) = memPool.alloc();
+    node.idx = idx : uint;
+    node.hash = hash;
+    node.key = key;
+    node.forwardDom = { 1 .. maxLevel };
+    node.forward = nil;
+
+    return node;
   }
 
   proc insert(key : keyType) : SkipListNode(keyType) {
@@ -65,7 +55,7 @@ record SkipList {
     var currLevel = level;
 
     // Start at higher level first...
-    while currLevel > 1 {
+    while currLevel >= 1 {
       // Maintain same level so long ourHashKey > theirHashKey
       while currNode.forward[currLevel] != nil && currNode.forward[currLevel].hash < hashKey {
         currNode = currNode.forward[currLevel];
@@ -75,6 +65,7 @@ record SkipList {
       // However, because we are before them, that means that we would forward to them (if
       // we were to insert ourselves)
       update[currLevel] = currNode;
+      currLevel = currLevel - 1;
     }
 
     // At this point, we cannot traverse any further than the bottom level.
@@ -97,6 +88,48 @@ record SkipList {
       level = newLevel;
     }
 
+    // Create new node and splice in
+    currNode = makeNode(newLevel, hashKey, key);
 
+    // Bridging the gap...
+    for i in 1 .. newLevel {
+      currNode.forward[i] = update[i].forward[i];
+      update[i].forward[i] = currNode;
+    }
+
+    return currNode;
   }
+}
+
+proc debugNode(node) {
+  writeln("(Key: ", node.hash, ", Idx: ", node.idx, ", Forward: {");
+  for fw in node.forward {
+    if fw != nil then writeln("\t(Key: ", fw.hash, ", Idx: ", fw.idx, ")");
+  }
+  writeln("}");
+}
+
+proc main() {
+  class Obj { var x = 1; }
+  var sl = new SkipList(Obj);
+
+  var arr : [{1 .. 10}] Obj;
+  var idx : [{1 .. 10}] uint;
+
+  for i in 1 .. 10 {
+    var obj = new Obj(i);
+    arr[i] = obj;
+    var node = sl.insert(obj);
+    idx[i] = node.idx;
+    debugNode(node);
+  }
+
+  forall ix in idx.domain {
+    var node = sl.memPool.access(idx[ix] : int);
+    var obj1 = node.key;
+    var obj2 = arr[ix : int];
+    writeln("Testing ", obj1, " to ", obj2);
+    assert(obj1 == obj2);
+  }
+  /*writeln(sl);*/
 }
