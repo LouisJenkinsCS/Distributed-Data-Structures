@@ -1,21 +1,34 @@
 use CyclicDist;
+use BigInteger;
 
+inline proc findSegment(n) {
+  var bit = 31;
+  while bit > 0 {
+    if n & (1 << bit) != 0 then break;
+    bit = bit - 1;
+  }
 
-extern proc chpl_wide_ptr_get_localeID(obj) : uint;
-
-class Obj { var x = 0; }
-
-record WidePtr {
-  var addr : uint;
-  var locId : uint(32);
+  return bit;
 }
 
-var dom : domain(uint);
-var descriptorTableDom = LocaleSpace dmapped Cyclic(startIdx=LocaleSpace.low);
-var descriptorTable : [descriptorTableDom] [dom] uint;
+inline proc findSegmentIndex(n) {
+  // If n is 1, then there is only one slot
+  if n == 1 {
+    return 0;
+  }
+
+  var mostSignificantBit = findSegment(n);
+  return n & ((1 << mostSignificantBit) - 1);
+}
+
+var bitmap = new bigint(0);
 
 
-var o1 = new Obj(1);
-var o2 = new Obj(2);
+for i in 0 .. 1000 {
+  var firstFreeBit = bitmap.scan0(0);
+  bitmap.setbit(firstFreeBit);
+  writeln("Bit: ", firstFreeBit, ", Segment: ", findSegment(firstFreeBit), ", Index: ", findSegmentIndex(firstFreeBit));
 
-writeln(o1 < o2);
+}
+
+/*writeln(bitmap : string);*/
