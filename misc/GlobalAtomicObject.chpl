@@ -11,18 +11,21 @@ record GlobalAtomicObject {
 
   var perLocaleDomain = LocaleSpace dmapped Cyclic(startIdx=LocaleSpace.low);
   var descriptorTables : [perLocaleDomain] SkipList(objType);
+  var descriptorTableLocks : [perLocaleDomain] sync bool;
 
   proc compress(obj:objType) : uint {
     if obj == nil then return 0;
 
     var retval : uint;
     on obj {
+      descriptorTableLocks[descriptorTableLocks.domain.localSubdomain().first] = true;
       var node = descriptorTables[descriptorTables.domain.localSubdomain().first].insert(obj);
       var localeId = here.id;
       if (localeId & 0xFFFFFFFF) != localeId then halt("LocaleID > 2^32");
       var idx = node.idx;
       if (idx & 0xFFFFFFFF) != idx then halt("Idx > 2^32");
       retval = localeId << 32 | idx;
+      descriptorTableLocks[descriptorTableLocks.domain.localSubdomain().first];
     }
 
     return retval;
@@ -47,12 +50,21 @@ record GlobalAtomicObject {
     return decompress(_atomicVar.exchange(compress(obj)));
   }
 
+  // TODO: Save time by comparing the actual objects, not just the hash... if both
+  // objects are remote, this is a *significant* cost.
+  //  var currDescr = _atomicVar.read();
+  //  var currObj = decompress(currDescr);
+  //  if currObj == expectedObj then _atomicVar.compareExchangeStrong(currDescr, compress(newObj));
   inline proc compareExchange(expectedObj:objType, newObj:objType) : bool {
     return _atomicVar.compareExchangeStrong(compress(expectedObj), compress(newObj));
   }
 
   inline proc _delete(obj:objType) {
-    if obj != nil then on obj do descriptorTables[descriptorTables.domain.localSubdomain().first].remove(obj);
+    if obj != nil then on obj {
+      descriptorTableLocks[descriptorTableLocks.domain.localSubdomain().first] = true;
+      descriptorTables[descriptorTables.domain.localSubdomain().first].remove(obj);
+      descriptorTableLocks[descriptorTableLocks.domain.localSubdomain().first];
+    }
   }
 }
 
