@@ -1,4 +1,5 @@
-use BlockDist;
+use CyclicDist;
+use SkipList;
 
 /*
   Note: This does not work at all, do *not* use!
@@ -8,75 +9,47 @@ record GlobalAtomicObject {
   type atomicType = uint(64);
   var _atomicVar: atomic atomicType;
 
-  var descriptorTableSpace = { 1 .. 1024 };
+  var perLocaleDomain = LocaleSpace dmapped Cyclic(startIdx=LocaleSpace.low);
+  var descriptorTables : [perLocaleDomain] SkipList(objType);
 
+  proc compress(obj:objType) : uint {
+    if obj == nil then return 0;
 
-  // TODO: Figure how to set wide pointer...
-  inline proc translate(obj:objType) : uint {
+    var retval : uint;
+    on obj {
+      var node = descriptorTables[descriptorTables.domain.localSubdomain().first].insert(obj);
+      var localeId = here.id;
+      if (localeId & 0xFFFFFFFF) != localeId then halt("LocaleID > 2^32");
+      var idx = node.idx;
+      if (idx & 0xFFFFFFFF) != idx then halt("Idx > 2^32");
+      retval = localeId << 32 | idx;
+    }
 
+    return retval;
   }
 
-  inline proc read() {
-    return __primitive("cast", objType, _atomicVar.read());
-  }
-
-  inline proc compareExchange(expectedObj:objType, newObj:objType) {
-    if boundsChecking then
-      if __primitive("is wide pointer", newObj) || __primitive("is wide pointer", expectedObj) then
-        halt("Attempt to write a wide pointer into LocalAtomicObject");
-
-    return _atomicVar.compareExchangeStrong(__primitive("cast", atomicType, expectedObj), __primitive("cast", atomicType, newObj));
-  }
-
-  inline proc write(newObj:objType) {
-    if boundsChecking then
-      if __primitive("is wide pointer", newObj) then
-        halt("Attempt to write a wide pointer into LocalAtomicObject");
-    _atomicVar.write(__primitive("cast", atomicType, newObj));
-  }
-
-  inline proc exchange(newObj:objType) {
-    if boundsChecking then
-      if __primitive("is wide pointer", newObj) then
-        halt("Attempt to exchange a wide pointer into LocalAtomicObject");
-
-    const curObj = _atomicVar.exchange(__primitive("cast", atomicType, newObj));
-    return __primitive("cast", objType, curObj);
-  }
-
-  // handle wrong types
-  proc write(newObj) {
-    compilerError("Incompatible object type in LocalAtomicObject.write: ",
-        newObj.type);
-  }
-
-  proc compareExchange(expectedObj, newObj) {
-    compilerError("Incompatible object type in LocalAtomicObject.compareExchange: (",
-        expectedObj.type, ",", newObj.type, ")");
-  }
-
-  proc exchange(newObj) {
-    compilerError("Incompatible object type in LocalAtomicObject.exchange: ",
-        newObj.type);
+  proc decompress(descr:uint) : objType {
+    if descr == 0 then return nil;
+    var localeId = descr >> 32;
+    var idx = descr & 0xFFFFFFFF;
+    return descriptorTables[localeId : int].memPool.access(idx : int).key;
   }
 }
 
-class Foo {
-  var x = 10;
-
-  proc print() {
-    writeln("Foo.x = ", x);
-  }
-}
 
 proc main() {
-  var tail: LocalAtomicObject(Foo);
-  var initNode = new Foo(x=20);
-  var newNode = new Foo(x=30);
+  class Obj { var x = 1; }
+  var arr : [{1..1}] Obj;
+  var globalAtomicObject = new GlobalAtomicObject(Obj);
+  for i in 1 .. 1 {
+    var obj = new Obj();
+    obj.x = i;
+    arr[i] = obj;
+  }
+  var obj = arr[1];
+  var descr = globalAtomicObject.compress(obj);
+  assert(descr != 0);
 
-  tail.write(initNode);
-  tail.read().print();
-  var oldNode = tail.exchange(newNode);
-  oldNode.print();
-  tail.read().print();
+  var retval = globalAtomicObject.decompress(descr);
+  assert(retval == obj);
 }

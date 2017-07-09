@@ -2,6 +2,8 @@ use Hash;
 use Random;
 use FlatObjectPool;
 
+// TODO: Put this in GlobalAtomicObject module...
+// TODO: Remove any locks from inner levels
 class SkipListNode {
   type keyType;
   var hash : uint(64);
@@ -44,6 +46,49 @@ record SkipList {
     node.forward = nil;
 
     return node;
+  }
+
+  proc remove(key : keyType) {
+    // We hash the object to remove from the list. Note: We do not take into
+    // account the localeId, so the object *must* not be a wide pointer.
+    var hashKey = hash(key);
+    var update : [{1 .. maxLevel}] SkipListNode(keyType);
+    var currNode = header;
+    var currLevel = level;
+
+    // Start at higher level first...
+    while currLevel >= 1 {
+      // Maintain same level so long ourHashKey > theirHashKey
+      while currNode.forward[currLevel] != nil && currNode.forward[currLevel].hash < hashKey {
+        currNode = currNode.forward[currLevel];
+      }
+
+      // At this point, ourHashKey < theirHashKey meaning we can't travel along this level.
+      // However, because we are before them, that means that we would forward to them (if
+      // we were to insert ourselves)
+      update[currLevel] = currNode;
+      currLevel = currLevel - 1;
+    }
+
+    // At this point, we cannot traverse any further than the bottom level.
+    currNode = currNode.forward[1];
+    if currNode == nil || currNode.hash != hashKey {
+      return;
+    }
+
+    // It is a match, prepare to delete it by bridging the gap...
+    for i in 1 .. level {
+      if update[i].forward[i] != currNode then break;
+      update[i].forward[i] = currNode.forward[i];
+    }
+
+    // Recycle node
+    memPool.dealloc(currNode.idx);
+
+    // If we are the highest node in the list, then we can reduce it.
+    while level > 1 && header.forward[level] == nil {
+      level = level - 1;
+    }
   }
 
   proc insert(key : keyType) : SkipListNode(keyType) {

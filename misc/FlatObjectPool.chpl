@@ -10,7 +10,6 @@ class FlatObjectPool {
   type objType;
   var spawnFn : func(objType);
   var freeFn : func(objType, void);
-  var lock$ : sync bool;
   var bitmap : bigint;
   var segmentSpace = {1..32};
   var segments : [segmentSpace] FlatObjectPoolSegment(objType);
@@ -36,8 +35,6 @@ class FlatObjectPool {
   }
 
   proc alloc() : (int, objType) {
-    lock$ = true;
-
     // Find an open spot, but resize if one is not found...
     var firstFreeBit = bitmap.scan0(1) : int;
     bitmap.setbit(firstFreeBit);
@@ -56,15 +53,12 @@ class FlatObjectPool {
     if obj == nil then obj = spawnFn();
     // Get by value...
     var retval = obj;
-    lock$;
 
     return (firstFreeBit, retval);
   }
 
   proc dealloc(idx) {
-    lock$ = true;
     bitmap.clrbit(idx);
-    lock$;
   }
 
   // Access by index. This is safe because segments are not freed after allocation

@@ -1,5 +1,6 @@
 proc hash(obj) : uint where isClass(obj.type) {
-  var key = __primitive("cast", uint(64), obj);
+  var key : uint;
+  if __primitive("is wide pointer", obj) then key =  __primitive("cast", uint(64), __primitive("_wide_get_addr", obj)); else __primitive("cast", uint(64), obj);
   key = (~key) + (key << 21); // key = (key << 21) - key - 1;
   key = key ^ (key >> 24);
   key = (key + (key << 3)) + (key << 8); // key * 265
