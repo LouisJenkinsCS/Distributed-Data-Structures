@@ -144,6 +144,12 @@ record SkipList {
 
     return currNode;
   }
+
+  proc ~SkipList() {
+    // Deleting memory pool ensures all memory that has been allocated with it gets
+    // destroyed as well.
+    delete memPool;
+  }
 }
 
 proc debugNode(node) {

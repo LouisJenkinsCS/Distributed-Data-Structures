@@ -34,22 +34,81 @@ record GlobalAtomicObject {
     var idx = descr & 0xFFFFFFFF;
     return descriptorTables[localeId : int].memPool.access(idx : int).key;
   }
+
+  inline proc read() : objType {
+    return decompress(_atomicVar.read());
+  }
+
+  inline proc write(obj:objType) {
+    _atomicVar.write(compress(obj));
+  }
+
+  inline proc exchange(obj:objType) : objType {
+    return decompress(_atomicVar.exchange(compress(obj)));
+  }
+
+  inline proc compareExchange(expectedObj:objType, newObj:objType) : bool {
+    return _atomicVar.compareExchangeStrong(compress(expectedObj), compress(newObj));
+  }
+
+  inline proc _delete(obj:objType) {
+    if obj != nil then on obj do descriptorTables[descriptorTables.domain.localSubdomain().first].remove(obj);
+  }
 }
 
 
-proc main() {
-  class Obj { var x = 1; }
-  var arr : [{1..1}] Obj;
-  var globalAtomicObject = new GlobalAtomicObject(Obj);
-  for i in 1 .. 1 {
-    var obj = new Obj();
-    obj.x = i;
-    arr[i] = obj;
+proc multiLocaleTest() {
+  class D { var d : int; }
+  var arr : [{1..100}] D;
+  for i in 1 .. 100 {
+    on Locales[i % numLocales] do arr[i] = new D(i);
   }
-  var obj = arr[1];
-  var descr = globalAtomicObject.compress(obj);
-  assert(descr != 0);
 
-  var retval = globalAtomicObject.decompress(descr);
-  assert(retval == obj);
+  var x = new GlobalAtomicObject(D);
+  x.write(arr[1]);
+
+  for i in 1 .. 99 {
+    assert(x.read() == arr[i]);
+    var result = x.compareExchange(arr[i], arr[i+1]);
+    assert(result);
+    delete arr[i];
+  }
+}
+
+proc singleLocaleTest() {
+  class C { var c : int; }
+  var a = new C(1);
+  var b = new C(2);
+  var x = new GlobalAtomicObject(C); // atomic C
+  var result : bool;
+
+  x.write(a);
+  result = x.compareExchange(a, b);
+  assert(result);
+  assert(x.read() == b);
+
+  // Note that you can call 'delete' on the object while having it still be present
+  // in the descriptor table. This may be okay for most cases where memory is not
+  // an issue since reused addresses will hash to the same node and that node will
+  // already point to the valid object the user is attempting to insert. However if
+  // memory is an issue, one can call '_delete' to ensure that the node itself is removed
+  // and can be recycled for later use.
+  delete a;
+  delete b;
+
+  // Is Safe because we only use the pointer itself.
+  x._delete(a);
+  x._delete(b);
+
+  // As well, when GlobalAtomicObject goes out of scope, all nodes it had in use also
+  // get deleted...
+}
+
+proc main() {
+  writeln("Single Locale Test...");
+  singleLocaleTest();
+  writeln("Passed!");
+  writeln("Multi Locale Test...");
+  multiLocaleTest();
+  writeln("Passed!");
 }
