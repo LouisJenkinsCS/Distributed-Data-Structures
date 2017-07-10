@@ -2,7 +2,12 @@ use CyclicDist;
 use SkipList;
 
 /*
-  Note: This does not work at all, do *not* use!
+  Object that allows atomic operations on class instances. Each instance manages
+  it's own table which is used to store objects and creates descriptors that refer
+  to the index into the table over a 128-bit wide pointer. Currently will only work
+  for 2^32 Locales and has enough for 2^32 slots in the table. Only works on class
+  instances and is hashed by pointer, not by the value it holds, so each hash value
+  is guaranteed to be unique.
 */
 record GlobalAtomicObject {
   type objType;

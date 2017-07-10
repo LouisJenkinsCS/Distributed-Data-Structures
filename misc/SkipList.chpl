@@ -2,8 +2,6 @@ use Hash;
 use Random;
 use FlatObjectPool;
 
-// TODO: Put this in GlobalAtomicObject module...
-// TODO: Remove any locks from inner levels
 class SkipListNode {
   type keyType;
   var hash : uint(64);
@@ -182,5 +180,4 @@ proc main() {
     writeln("Testing ", obj1, " to ", obj2);
     assert(obj1 == obj2);
   }
-  /*writeln(sl);*/
 }
