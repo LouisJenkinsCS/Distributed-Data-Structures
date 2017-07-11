@@ -5,6 +5,8 @@ use DistributedFIFOQueue;
 use DistributedQueue;
 use SyncList;
 
+// TODO: Test combined performance (simulate operations per second) and overall time and number of boards
+
 /*
 Precomputed number of solutions...
 
