@@ -1,6 +1,10 @@
 use CyclicDist;
 use SkipList;
 
+extern type wide_ptr_t;
+extern type c_nodeid_t;
+extern proc chpl_return_wide_ptr_node(c_nodeid_t, c_void_ptr) : wide_ptr_t;
+
 /*
   Object that allows atomic operations on class instances. Each instance manages
   it's own table which is used to store objects and creates descriptors that refer
@@ -21,6 +25,16 @@ record GlobalAtomicObject {
   proc compress(obj:objType) : uint {
     if obj == nil then return 0;
 
+    // If we have less than 2^16 locales, we can perform a faster compression
+    // by packing the 48 usable bits of the virtual address with 16 bits of the
+    // locale/node id.
+    if numLocales & 0xFFFF == numLocales {
+      var locId = chpl_nodeFromLocaleID(__primitive("_wide_get_locale", obj)) : uint;
+      var addr = __primitive("cast", uint, __primitive("_wide_get_addr", obj));
+      return locId << 48 | addr & 0x0000ffffffffffff;
+    }
+
+    // Fallback: We use descriptor tables
     var retval : uint;
     on obj {
       descriptorTableLocks[descriptorTableLocks.domain.localSubdomain().first] = true;
@@ -38,6 +52,28 @@ record GlobalAtomicObject {
 
   proc decompress(descr:uint) : objType {
     if descr == 0 then return nil;
+
+
+    // If we have less than 2^16 locales, then we know we performed the
+    // faster compression method so we need to decompress it in the same way...
+    if numLocales & 0xFFFF == numLocales {
+      var locId = descr >> 48;
+      var addr = descr & 0x0000ffffffffffff;
+      var wideptr = chpl_return_wide_ptr_node(locId, __primitive("cast", c_void_ptr, addr));
+
+      // We've created the wide pointer, but unfortunately Chapel does not support
+      // the ability to cast it to the actual object, so we have to do some
+      // trickery to get it to work. What we do is we allocate a wide pointer
+      // the stack and memcpy our wideptr into the actual wide pointer.
+      var newObj : objType;
+      on Locales[here.id] do newObj = nil;
+
+      // Warning: If this is *not* a wide pointer, it will overwrite part of the stack.
+      // If it is, it works. Dangerous, but only way to do so at the moment.
+      c_memcpy(c_ptrTo(newObj), c_ptrTo(wideptr), 16);
+      return newObj;
+    }
+
     var localeId = descr >> 32;
     var idx = descr & 0xFFFFFFFF;
     return descriptorTables[localeId : int].memPool.access(idx : int).key;
