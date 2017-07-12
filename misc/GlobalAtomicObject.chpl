@@ -15,18 +15,37 @@
 */
 
 use CyclicDist;
-use SkipList;
+use Random;
+use BigInteger;
 
 // In the case where you want to use the descriptor table approach for testing or
 // because there's some architecture which the assumption that only 48 bits are used
 // for the virtual address space is incorrect, you can disable it here.
-param const usePointerCompression = true;
+config param usePointerCompression = true;
 
 
 // We require this to create a wide pointer after decompression.
 extern type wide_ptr_t;
 extern type c_nodeid_t;
 extern proc chpl_return_wide_ptr_node(c_nodeid_t, c_void_ptr) : wide_ptr_t;
+
+// Hashes a class instance by pointer. We ignore the locale id portion because
+// this is used for pointers that refer into our address space.
+proc hash(obj) : uint where isClass(obj.type) {
+  var key =  __primitive("cast", uint(64), __primitive("_wide_get_addr", obj));
+  key = (~key) + (key << 21); // key = (key << 21) - key - 1;
+  key = key ^ (key >> 24);
+  key = (key + (key << 3)) + (key << 8); // key * 265
+  key = key ^ (key >> 14);
+  key = (key + (key << 2)) + (key << 4); // key * 21
+  key = key ^ (key >> 28);
+  key = key + (key << 31);
+  return key;
+}
+
+proc hash(obj) {
+  halt("Obj to hash *must* be a class instance...");
+}
 
 
 /*
@@ -141,6 +160,281 @@ record GlobalAtomicObject {
       descriptorTableLocks[descriptorTableLocks.domain.localSubdomain().first] = true;
       descriptorTables[descriptorTables.domain.localSubdomain().first].remove(obj);
       descriptorTableLocks[descriptorTableLocks.domain.localSubdomain().first];
+    }
+  }
+}
+
+
+class SkipListNode {
+  type keyType;
+  var hash : uint(64);
+  var key : keyType;
+  var idx : uint;
+  var forwardDom : domain(int);
+  var forward : [forwardDom] SkipListNode(keyType);
+}
+
+/*
+  TODO: This needs to be made concurrent or else this will be the bottleneck
+  for our implementation. Hazard Pointers likely needed (this also would be a
+  viable example for a need of per-locale garbage collection. Perhaps make it
+  possible to declare a zone such that no wide-pointers can be generated and that
+  data cannot escape such a zone. It'd be very useful for lock-free/wait-free
+  data structures, and should make garbage collection possible if mark-and-sweep
+  stop-the-world is *only* for the task inside of the zone. Then again, hazard
+  pointers work too...)
+*/
+record SkipList {
+  type keyType;
+  var maxLevel = 4;
+  var level = 1;
+  var header : SkipListNode(keyType);
+  var memPool : FlatObjectPool(SkipListNode(keyType));
+
+  proc SkipList(type keyType) {
+    memPool = new FlatObjectPool(SkipListNode(keyType), lambda () { return new SkipListNode(keyType); });
+    header = makeNode(level);
+  }
+
+  // RNG to create randomized level
+  var randStr = makeRandomStream(real);
+
+  inline proc randomLevel() {
+    var _level = 1;
+    while randStr.getNext() < 0.5 && _level < maxLevel {
+      _level = _level + 1;
+    }
+    return _level;
+  }
+
+  // Recycle and clean before usage...
+  inline proc makeNode(_level, hash : uint = 0, key : keyType = nil) : SkipListNode(keyType) {
+    var (idx, node) = memPool.alloc();
+    node.idx = idx : uint;
+    node.hash = hash;
+    node.key = key;
+    node.forwardDom = { 1 .. maxLevel };
+    node.forward = nil;
+
+    return node;
+  }
+
+  proc remove(key : keyType) {
+    // We hash the object to remove from the list. Note: We do not take into
+    // account the localeId, so the object *must* not be a wide pointer.
+    var hashKey = hash(key);
+    var update : [{1 .. maxLevel}] SkipListNode(keyType);
+    var currNode = header;
+    var currLevel = level;
+
+    // Start at higher level first...
+    while currLevel >= 1 {
+      // Maintain same level so long ourHashKey > theirHashKey
+      while currNode.forward[currLevel] != nil && currNode.forward[currLevel].hash < hashKey {
+        currNode = currNode.forward[currLevel];
+      }
+
+      // At this point, ourHashKey < theirHashKey meaning we can't travel along this level.
+      // However, because we are before them, that means that we would forward to them (if
+      // we were to insert ourselves)
+      update[currLevel] = currNode;
+      currLevel = currLevel - 1;
+    }
+
+    // At this point, we cannot traverse any further than the bottom level.
+    currNode = currNode.forward[1];
+    if currNode == nil || currNode.hash != hashKey {
+      return;
+    }
+
+    // It is a match, prepare to delete it by bridging the gap...
+    for i in 1 .. level {
+      if update[i].forward[i] != currNode then break;
+      update[i].forward[i] = currNode.forward[i];
+    }
+
+    // Recycle node
+    memPool.dealloc(currNode.idx);
+
+    // If we are the highest node in the list, then we can reduce it.
+    while level > 1 && header.forward[level] == nil {
+      level = level - 1;
+    }
+  }
+
+  proc insert(key : keyType) : SkipListNode(keyType) {
+    // We hash the object to insert into the list. Note: We do not take into
+    // account the localeId, so the object *must* not be a wide pointer.
+    var hashKey = hash(key);
+    var update : [{1 .. maxLevel}] SkipListNode(keyType);
+    var currNode = header;
+    var currLevel = level;
+
+    // Start at higher level first...
+    while currLevel >= 1 {
+      // Maintain same level so long ourHashKey > theirHashKey
+      while currNode.forward[currLevel] != nil && currNode.forward[currLevel].hash < hashKey {
+        currNode = currNode.forward[currLevel];
+      }
+
+      // At this point, ourHashKey < theirHashKey meaning we can't travel along this level.
+      // However, because we are before them, that means that we would forward to them (if
+      // we were to insert ourselves)
+      update[currLevel] = currNode;
+      currLevel = currLevel - 1;
+    }
+
+    // At this point, we cannot traverse any further than the bottom level.
+    // Note that in this application, if it already exists then we can safely
+    // return it.
+    currNode = currNode.forward[1];
+    if currNode != nil && currNode.hash == hashKey {
+      return currNode;
+    }
+
+    // It doesn't exist (yet), so create one with a randomized level...
+    var newLevel = randomLevel();
+
+    // If the new level exceeds the current, we need to ensure that we are
+    // forwardable from the header...
+    if newLevel > level {
+      for i in level + 1 .. newLevel {
+        update[i] = header;
+      }
+      level = newLevel;
+    }
+
+    // Create new node and splice in
+    currNode = makeNode(newLevel, hashKey, key);
+
+    // Bridging the gap...
+    for i in 1 .. newLevel {
+      currNode.forward[i] = update[i].forward[i];
+      update[i].forward[i] = currNode;
+    }
+
+    return currNode;
+  }
+
+  proc ~SkipList() {
+    // Deleting memory pool ensures all memory that has been allocated with it gets
+    // destroyed as well.
+    delete memPool;
+  }
+}
+
+/*
+  Our memory pool...
+
+  In our implementation, we keep track of 32 segments that is managed by a
+  bitmap (hence the *need* for big integer). Initially, we start as empty and
+  expand readily on demand without ever really contracting (I.E freeing memory)
+  so once an index points to a segment, it will always refer to valid memory,
+  which is crucial to allowing reads to be wait-free. Allocating is as simple
+  as finding the first free bit, and using the index of that bit (*not* the value)
+  to locate the segment. Recycling is as simple as clearing the bit.
+
+  Segments are interesting in that they work extremely well with bitmaps and also
+  expands at a reasonable rate. To give an example, initially the size of the first
+  segment is 1 (2^1 - 1), the size of the second is 3 (2^2 - 1), the third is
+  7 (2^3 - 1), of which add up to less than 2^32. Not only do we get to nearly
+  double our size each time, we get to manage in-use memory in constant time,
+  and an index can easily index into the table without needing to do anything.
+
+  Also note that currently there is no bounds checking, and it is up to the user
+  to ensure that no more than 2^32 objects are added.
+
+  Potential Application: If there is a bounded number of indexes for a domain, you
+  can create segments ahead of time and use a similar allocation strategy. For example,
+  a 64-bit integer can use 64 segments in a similar fashion and allow concurrent
+  accesses during resizing. Iteration can iterate over all segments that are in use.
+  Just an idea... would work for distributions too.
+*/
+
+class FlatObjectPoolSegment {
+  type objType;
+  var size : int;
+  var data : [{0 .. size-1}] objType;
+}
+
+class FlatObjectPool {
+  type objType;
+  var spawnFn : func(objType); /* Creating from generic type workaround */
+  var freeFn : func(objType, void);
+  var bitmap : bigint;
+  var segmentSpace = {1..32};
+  var segments : [segmentSpace] FlatObjectPoolSegment(objType);
+
+  inline proc findSegment(n) {
+    var bit = 31;
+    while bit > 0 {
+      if n & (1 << bit) != 0 then break;
+      bit = bit - 1;
+    }
+
+    return bit;
+  }
+
+  inline proc findSegmentIndex(n) {
+    // If n is 1, then there is only one slot
+    if n == 1 {
+      return 0;
+    }
+
+    var mostSignificantBit = findSegment(n);
+    return n & ((1 << mostSignificantBit) - 1);
+  }
+
+  proc alloc() : (int, objType) {
+    // Find an open spot, but resize if one is not found...
+    var firstFreeBit = bitmap.scan0(1) : int;
+    bitmap.setbit(firstFreeBit);
+
+    var seg = findSegment(firstFreeBit) + 1;
+    var segIdx = findSegmentIndex(firstFreeBit);
+
+    // First-Touch Allocation
+    if segments[seg] == nil {
+        segments[seg] = new FlatObjectPoolSegment(objType, (1 << (seg - 1)));
+    }
+
+    ref obj = segments[seg].data[segIdx];
+
+    // Reuse if already allocated, otherwise allocate and use
+    if obj == nil then obj = spawnFn();
+    // Get by value...
+    var retval = obj;
+
+    return (firstFreeBit, retval);
+  }
+
+  proc dealloc(idx) {
+    bitmap.clrbit(idx);
+  }
+
+  // Access by index. This is safe because segments are not freed after allocation
+  // and so concurrent accesses will not invalidate a valid index.
+  proc access(idx) : objType {
+    return segments[findSegment(idx) + 1].data[findSegmentIndex(idx)];
+  }
+
+  proc FlatObjectPool(type objType, spawnFn = nil, freeFn = nil) {
+    segments[1] = new FlatObjectPool(objType, 1);
+  }
+
+  proc ~FlatObjectPool() {
+    for seg in segments {
+      if seg != nil {
+        for obj in seg.data {
+          if obj != nil {
+            if freeFn != nil {
+              freeFn(obj);
+            } else {
+              delete obj;
+            }
+          }
+        }
+      }
     }
   }
 }
