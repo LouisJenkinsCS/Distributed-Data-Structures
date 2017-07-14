@@ -21,7 +21,6 @@ config var isMPMC = false;
 config var isSync = false;
 config var isCCSynch = false;
 config var isList = false;
-config var isFCH = false;
 // Whether or not we log communications and per-locale information.
 config var logLocaleInfo = false;
 config var verboseLog = false;
@@ -32,7 +31,6 @@ use CCQueue;
 use DistributedFIFOQueue;
 use DistributedQueue;
 use SyncList;
-use FCHQueue;
 
 use Time;
 use Random;
@@ -48,10 +46,8 @@ inline proc getQueue(type eltType) : Queue(eltType) {
     return new CCQueue(eltType);
   } else if isList {
     return new SyncList(eltType);
-  } else if isFCH {
-    return new FCHQueue(eltType);
   } else {
-    halt("Requires one of the flags to be set: '--isFIFO', '--isMPMC', '--isSync', '--isList', or '--isCCSynch', or '--isFCH'");
+    halt("Requires one of the flags to be set: '--isFIFO', '--isMPMC', '--isSync', '--isList', or '--isCCSynch'");
   }
 }
 
