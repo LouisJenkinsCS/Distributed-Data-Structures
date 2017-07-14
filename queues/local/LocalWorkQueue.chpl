@@ -46,6 +46,7 @@ record LocalWorkQueueSegment {
 }
 
 class LocalWorkQueue : Queue {
+  // Place in own cache line
   var startIdxEnq : atomic uint;
   var startIdxDeq : atomic uint;
   var workStealer : atomic int;
@@ -54,6 +55,39 @@ class LocalWorkQueue : Queue {
   var segments : [maxParallelSegmentSpace] LocalWorkQueueSegment(eltType);
 
   const maxIterationsPerPhase = here.maxTaskPar;
+
+  /*
+    Enqueue...
+  */
+
+  proc enqueue(elt : eltType) {
+    var startIdx = startIdxEnq.fetchAdd(1) % here.maxTaskPar : uint;
+    var segmentIdx = enqueueAcquire(startIdx);
+    ref seg = segments[segmentIdx];
+    var block = seg.tailBlock;
+
+    // Full?
+    if block.idx > ELEMS_PER_BLOCK {
+      block.next = new LocalWorkQueueSegmentBlock(eltType);
+      seg.tailBlock = block.next;
+      block = block.next;
+    }
+
+    block.elems[block.idx] = elt;
+    block.idx = block.idx + 1;
+
+    seg.nElems.add(1);
+    seg.status.write(UNLOCKED);
+  }
+
+  proc enqueueAcquire(startIdx) : int {
+    var retval = enqueueAcquirePhase1(startIdx);
+    if retval == -1 {
+      retval = enqueueAcquirePhase2(startIdx);
+    }
+
+    return retval;
+  }
 
   // In Phase 1, we attempt to acquire the first bucket that is unlocked
   inline proc enqueueAcquirePhase1(startIdx) : int {
@@ -111,36 +145,117 @@ class LocalWorkQueue : Queue {
     halt("Broke out of phase 2 without getting segment...");
   }
 
-  proc enqueueAcquire(startIdx) : int {
-    var retval = enqueueAcquirePhase1(startIdx);
-    if retval == -1 {
-      retval = enqueueAcquirePhase2(startIdx);
-    }
 
-    return retval;
+  /*
+    Dequeue...
+  */
+
+  proc dequeue() : (bool, eltType) {
+    var startIdx = startIdxDeq.fetchAdd(1) % here.maxTaskPar : uint;
+
   }
 
-  proc enqueue(elt : eltType) {
-    var idx = startIdxEnq.fetchAdd(1) % here.maxTaskPar : uint;
-    const maxIterations = here.maxTaskPar;
+  // Phase 1: acquire unlocked bucket which contains elements
+  inline proc dequeueAcquirePhase1(startIdx) : int {
+    var idx = startIdx : int;
+    var maxIterations = here.maxTaskPar;
+    var iterations = 0;
 
-    var segmentIdx = enqueueAcquire(idx);
-    ref seg = segments[segmentIdx];
-    var block = seg.tailBlock;
+    // Find first non-empty free bucket
+    while iterations < maxIterations {
+      ref seg = segments[idx];
 
-    // Full?
-    if block.idx > ELEMS_PER_BLOCK {
-      block.next = new LocalWorkQueueSegmentBlock(eltType);
-      seg.tailBlock = block.next;
-      block = block.next;
+      // Attempt to acquire...
+      if seg.nElems.peek() != 0 && seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
+        return idx;
+      }
+
+      iterations = iterations + 1;
+      idx = (idx + 1) % here.maxTaskPar;
     }
 
-    block.elems[block.idx] = elt;
-    block.idx = block.idx + 1;
-
-    seg.nElems.add(1);
-    seg.status.write(UNLOCKED);
+    return -1;
   }
+
+  // Phase 2: acquire locked bucket which contains elements
+  inline proc dequeueAcquirePhase2(startIdx) : int {
+    var idx = startIdx : int;
+    var maxIterations = here.maxTaskPar;
+    var iterations = 0;
+
+    // Find first non-empty bucket
+    while iterations < maxIterations {
+      ref seg = segments[idx];
+
+      // Attempt to acquire...
+      while seg.nElems.read() != 0 {
+        var currStatus = seg.status.read();
+
+        select currStatus {
+          // Quick acquire
+          when UNLOCKED {
+            if seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
+              return idx;
+            }
+          }
+          // This segment is being stolen from. Assist the current stealer.
+          when VICTIM {
+            // TODO
+          }
+          // If someone else is stealing work, we add ourself as a potential helper
+          // to help speed this along, and hopefully we get an element for ourself.
+          when STEALING {
+            // TODO
+          }
+        }
+
+        // Backoff
+        chpl_task_yield();
+      }
+
+      iterations = iterations + 1;
+      idx = (idx + 1) % here.maxTaskPar;
+    }
+
+    return -1;
+  }
+}
+
+// Phase 3: Take any bucket whether it is locked or unlocked, empty or non-empty
+inline proc dequeueAcquirePhase3(startIdx) : int {
+  ref seg = segments[startIdx];
+
+  // Attempt to acquire...
+  while true {
+    var backoff = 0;
+    var currStatus = seg.status.read();
+
+    select currStatus {
+      // Quick acquire
+      when UNLOCKED {
+        if seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
+          return idx;
+        }
+      }
+      // This segment is being stolen from. Assist the current stealer.
+      when VICTIM {
+        // TODO
+        backoff = 0;
+      }
+      // If someone else is stealing work, we add ourself as a potential helper
+      // to help speed this along, and hopefully we get an element for ourself.
+      when STEALING {
+        // TODO
+        backoff = 0;
+      }
+    }
+
+    // Backoff to maximum...
+    if backoff == 0 then chpl_task_yield();
+    else sleep(max(1000, 2 ** backoff), TimeUnits.microseconds);
+  }
+
+  halt("Somehow exited loop in Phase 3...");
 }
 
 proc main() {
