@@ -51,6 +51,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+!.gitignore
+
 
 # Chapel Specific
 codegen/*
