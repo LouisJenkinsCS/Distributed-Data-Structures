@@ -15,6 +15,7 @@ class LocalWorkQueueSegmentBlock {
   type eltType;
   var idx = 1;
   var elems : ELEMS_PER_BLOCK * eltType;
+  var next : LocalWorkQueueSegmentBlock(eltType);
 }
 
 record LocalWorkQueueSegment {
@@ -23,8 +24,8 @@ record LocalWorkQueueSegment {
   var status : atomic uint;
 
   var blockSpace = { 0 .. 0 };
-  var blocks : [blockSpace] LocalWorkQueueSegmentBlock(eltType);
-  var bitmap : bigint;
+  var headBlock : LocalWorkQueueSegmentBlock(eltType);
+  var tailBlock : LocalWorkQueueSegmentBlock(eltType);
 
   // For when we are stealing work... helper threads may attempt to
   // help during a steal by setting one of the values from -1 to 0, and
@@ -39,15 +40,8 @@ record LocalWorkQueueSegment {
   var nElems : atomic uint;
 
   proc LocalWorkQueueSegment(type eltType) {
-    blocks[0] = new LocalWorkQueueSegmentBlock(eltType);
-  }
-
-  proc getBlockContaining(idx) : LocalWorkQueueSegmentBlock(eltType) {
-    var blockIdx = idx / ELEMS_PER_BLOCK;
-
-    if blockIdx > blockSpace.high then blockSpace = {0 .. max(1, blockIdx * 2)};
-    if blocks[blockIdx] == nil then blocks[blockIdx] = new LocalWorkQueueSegmentBlock(eltType);
-    return blocks[blockIdx];
+    headBlock = new LocalWorkQueueSegmentBlock(eltType);
+    tailBlock = headBlock;
   }
 }
 
@@ -132,13 +126,19 @@ class LocalWorkQueue : Queue {
 
     var segmentIdx = enqueueAcquire(idx);
     ref seg = segments[segmentIdx];
+    var block = seg.tailBlock;
 
-    var firstFreeBit = seg.bitmap.scan0(0) : int;
-    seg.bitmap.setbit(firstFreeBit);
-    var block = seg.getBlockContaining(firstFreeBit);
-    block.elems[firstFreeBit % ELEMS_PER_BLOCK + 1] = elt;
+    // Full?
+    if block.idx > ELEMS_PER_BLOCK {
+      block.next = new LocalWorkQueueSegmentBlock(eltType);
+      seg.tailBlock = block.next;
+      block = block.next;
+    }
+
+    block.elems[block.idx] = elt;
+    block.idx = block.idx + 1;
+
     seg.nElems.add(1);
-
     seg.status.write(UNLOCKED);
   }
 }
