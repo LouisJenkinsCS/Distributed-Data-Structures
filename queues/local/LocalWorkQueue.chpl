@@ -1,4 +1,6 @@
 use Queue;
+use Random;
+use Time;
 use BigInteger;
 
 const UNLOCKED : uint = 0;
@@ -7,14 +9,22 @@ const DEQUEUE : uint = 2;
 const STEALING : uint = 3;
 const VICTIM : uint = 4;
 
+config param ELEMS_PER_BLOCK = 1024;
+
+class LocalWorkQueueSegmentBlock {
+  type eltType;
+  var idx = 1;
+  var elems : ELEMS_PER_BLOCK * eltType;
+}
+
 record LocalWorkQueueSegment {
   type eltType;
 
   var status : atomic uint;
 
-  var segmentDataSpace = { 1 .. 1024 };
-  var segmentData : [segmentDataSpace] eltType;
-  var segmentDataBitmap : bigint;
+  var blockSpace = { 0 .. 0 };
+  var blocks : [blockSpace] LocalWorkQueueSegmentBlock(eltType);
+  var bitmap : bigint;
 
   // For when we are stealing work... helper threads may attempt to
   // help during a steal by setting one of the values from -1 to 0, and
@@ -27,6 +37,18 @@ record LocalWorkQueueSegment {
   // or not an operation should attempt this bucket. Also doubles as the helper work
   // stealing counter;
   var nElems : atomic uint;
+
+  proc LocalWorkQueueSegment(type eltType) {
+    blocks[0] = new LocalWorkQueueSegmentBlock(eltType);
+  }
+
+  proc getBlockContaining(idx) : LocalWorkQueueSegmentBlock(eltType) {
+    var blockIdx = idx / ELEMS_PER_BLOCK;
+
+    if blockIdx > blockSpace.high then blockSpace = {0 .. max(1, blockIdx * 2)};
+    if blocks[blockIdx] == nil then blocks[blockIdx] = new LocalWorkQueueSegmentBlock(eltType);
+    return blocks[blockIdx];
+  }
 }
 
 class LocalWorkQueue : Queue {
@@ -49,7 +71,7 @@ class LocalWorkQueue : Queue {
       ref seg = segments[idx];
 
       // Attempt to acquire...
-      if seg.status.read() == UNLOCKED && seg.status.compareExchangeStrong(UNLOCKED, ENQUEUE) {
+      if seg.status.compareExchangeStrong(UNLOCKED, ENQUEUE) {
         return idx;
       }
 
@@ -111,14 +133,10 @@ class LocalWorkQueue : Queue {
     var segmentIdx = enqueueAcquire(idx);
     ref seg = segments[segmentIdx];
 
-    if seg.nElems.read() == seg.segmentDataSpace.high {
-      var newSize = seg.segmentDataSpace.high * 2;
-      seg.segmentDataSpace = {1 .. newSize};
-    }
-
-    var firstFreeBit = seg.segmentDataBitmap.scan0(1) : int;
-    seg.segmentDataBitmap.setbit(firstFreeBit);
-    seg.segmentData[firstFreeBit] = elt;
+    var firstFreeBit = seg.bitmap.scan0(0) : int;
+    seg.bitmap.setbit(firstFreeBit);
+    var block = seg.getBlockContaining(firstFreeBit);
+    block.elems[firstFreeBit % ELEMS_PER_BLOCK + 1] = elt;
     seg.nElems.add(1);
 
     seg.status.write(UNLOCKED);
@@ -126,9 +144,41 @@ class LocalWorkQueue : Queue {
 }
 
 proc main() {
-  var queue = new LocalWorkQueue(int);
-  forall i in 1 .. 1000000 {
-    queue.enqueue(i);
+  var nJitter = 0;
+  var nComputations = 0;
+  var nElements = 1000000;
+  var nTrials = 8;
+  var enqueueTrialTime : [1 .. nTrials] real;
+
+  // Obtain average time for enqueue followed by dequeued...
+  for i in 1 .. nTrials {
+    var queue = new LocalWorkQueue(int);
+    // We only use one or the other, but we must declare both.
+    // TODO: Have both implement some parent 'Queue' class/interface?
+    var timer = new Timer();
+    timer.start();
+
+    coforall loc in Locales do on loc {
+      var iterations = nElements;
+
+      coforall tid in 0 .. #here.maxTaskPar {
+        var x : atomic int;
+        var randStr = makeRandomStream(int);
+        for j in 1 .. iterations / here.maxTaskPar {
+          queue.enqueue(j);
+          var nComps = nComputations + (if nJitter then (randStr.getNext() % nJitter) else 0);
+          for i in 1 .. nComps {
+            // Hopefully compiler doesn't throw away?
+            x.write(sin(i) : int);
+          }
+        }
+      }
+    }
+
+    timer.stop();
+    enqueueTrialTime[i] = nElements / timer.elapsed();
+    writeln(i, "/", nTrials, ": ", (+ reduce enqueueTrialTime) / i);
+    timer.clear();
+    delete queue;
   }
-  writeln(queue);
 }
