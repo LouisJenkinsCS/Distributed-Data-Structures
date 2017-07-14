@@ -16,11 +16,11 @@ config var nJitter = 0;
 // of elements per locale the same.
 config var weak = false;
 // Below are flags to determine which queue to test for...
-param config var isFIFO = false;
-param config var isMPMC = false;
-param config var isSync = false;
-param config var isCCSynch = false;
-param config var isList = false;
+config param isFIFO = false;
+config param isMPMC = false;
+config param isSync = false;
+config param isCCSynch = false;
+config param isList = false;
 // Whether or not we log communications and per-locale information.
 config var logLocaleInfo = false;
 config var verboseLog = false;
