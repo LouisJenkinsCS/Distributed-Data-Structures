@@ -53,6 +53,23 @@ record LocalWorkQueueSegment {
   inline proc isEmpty {
     return nElems.read() == 0;
   }
+
+  inline proc take {
+    if isEmpty then return (false, _defaultOf(eltType));
+
+    var elem = headBlock.elems[headBlock.idx];
+    headBlock.idx = headBlock.idx - 1;
+    nElems.sub(1);
+
+    // Fix list if we consumed last one...
+    if headBlock.idx == 0 {
+      var block = headBlock;
+      headBlock = headBlock.next;
+      delete block;
+    }
+
+    return (true, elem);
+  }
 }
 
 class LocalWorkQueue : Queue {
@@ -208,25 +225,13 @@ class LocalWorkQueue : Queue {
       ref seg = segments[idx];
 
       // Attempt to acquire...
-      while seg.nElems.read() != 0 {
-        var currStatus = seg.status.read();
-
-        select currStatus {
-          // Quick acquire
-          when UNLOCKED {
-            if seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
-              return idx;
-            }
-          }
-          // This segment is being stolen from. Assist the current stealer.
-          when VICTIM {
-            // TODO
-          }
-          // If someone else is stealing work, we add ourself as a potential helper
-          // to help speed this along, and hopefully we get an element for ourself.
-          when STEALING || STEALING_INIT {
-            // TODO
-          }
+      while !seg.isEmpty {
+        if seg.status.read() == UNLOCKED && seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
+          var (hasElem, elem) = seg.take;
+          seg.status.write(UNLOCKED);
+          if hasElem {
+            return (hasElem, elem);
+          }  
         }
 
         // Backoff
@@ -242,24 +247,39 @@ class LocalWorkQueue : Queue {
 
   // Phase 3: Take any bucket whether it is locked or unlocked, empty or non-empty
   inline proc dequeueAcquirePhase3(startIdx) : (bool, eltType) {
-    ref seg = segments[startIdx];
+    var idx : int = startIdx;
+    var backoff = 0;
 
     // Attempt to acquire...
     while true {
-      var backoff = 0;
+      ref seg = segments[idx];
       var currStatus = seg.status.read();
 
       select currStatus {
         // Quick acquire
         when UNLOCKED {
+          backoff = 0;
           if seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
-            return idx;
+            // Steal if empty... because we help if we are not the one set, we only
+            // know whether the queue is empty if we were the work stealer.
+            if seg.isEmpty {
+              var (_idx, hasElem, elem) = stealWork(idx);
+              if _idx == idx && !hasElem then return (false, _defaultOf(eltType));
+              else idx = _idx;
+              continue;
+            }
+
+            var retval = seg.take;
+            seg.status.write(UNLOCKED);
+            return retval;
           }
         }
-        // This segment is being stolen from. Assist the current stealer.
+        // This segment is being stolen from. Switch to that segment...
         when VICTIM {
-          // TODO
+          var currStealer = workStealer.read();
+          if currStealer != -1 then idx = currStealer;
           backoff = 0;
+          continue;
         }
         // If someone else is stealing work, we add ourself as a potential helper
         // to help speed this along, and hopefully we get an element for ourself.
@@ -268,11 +288,6 @@ class LocalWorkQueue : Queue {
 
           // We have our element...
           if hasElem then return (hasElem, elem);
-
-          // We don't have our element, but no element currently exists.
-          if seg.isEmpty {
-            return (false, _defaultOf(eltType));
-          }
           backoff = 0;
         }
       }
@@ -292,7 +307,7 @@ class LocalWorkQueue : Queue {
   // We have the lock but it is empty, try to set ourself as work stealer...
   // As our index can change based on whether or not we become the work stealer
   // or help someone else become the work stealer, we return our acquired index.
-  proc stealWork(idx) : (bool, eltType) {
+  proc stealWork(idx) : (int, bool, eltType) {
     ref seg = segments[idx];
 
     // If we set ourself as work stealer, we may proceed, otherwise if someone else
@@ -304,7 +319,8 @@ class LocalWorkQueue : Queue {
       var currStealer = workStealer.read();
       if currStealer != -1 {
         seg.status.write(UNLOCKED);
-        return helpStealWork(currStealer);
+        var (hasElem, elem) = helpStealWork(currStealer);
+        return (currStealer, hasElem, elem);
       }
     }
 
@@ -359,7 +375,7 @@ class LocalWorkQueue : Queue {
 
     // At this point, we have successfully stolen work. Furthermore, we have
     // stolen at least one element for ourself.
-    return (hasElem, elem);
+    return (idx, hasElem, elem);
   }
 
   proc helpStealWork(idx) : (bool, eltType) {
@@ -421,11 +437,13 @@ class LocalWorkQueue : Queue {
         continue;
       }
 
+      // Adjust index if it is full (went past end)
+      if otherSeg.headBlock.idx > here.maxTaskPar {
+        otherSeg.headBlock.idx = otherSeg.headBlock.idx - 1;
+      }
+
       if !hasElem {
-        // Steal an item... adjust index if it is full (went past end)
-        if otherSeg.headBlock.idx > here.maxTaskPar {
-          otherSeg.headBlock.idx = otherSeg.headBlock.idx - 1;
-        }
+        // Steal an item...
         (hasElem, elem) = (true, otherSeg.headBlock.elems[otherSeg.headBlock.idx]);
         otherSeg.headBlock.idx = otherSeg.headBlock.idx - 1;
         otherSeg.nElems.sub(1);
