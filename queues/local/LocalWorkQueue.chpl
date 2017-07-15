@@ -3,11 +3,22 @@ use Random;
 use Time;
 use BigInteger;
 
+
+// Segment statuses
 const UNLOCKED : uint = 0;
 const ENQUEUE : uint = 1;
 const DEQUEUE : uint = 2;
 const STEALING : uint = 3;
-const VICTIM : uint = 4;
+const STEALING_INIT : uint = 4;
+const VICTIM : uint = 5;
+
+// Work Stealing statuses
+const UNINITIALIZED : int = -2;
+const INITIALIZED : int = -1;
+const CLAIMED : int = 0;
+const FINISHED_WITH_NO_WORK : int = 1;
+const FINISHED_WITH_WORK : int = 2;
+
 
 config param ELEMS_PER_BLOCK = 1024;
 
@@ -23,7 +34,6 @@ record LocalWorkQueueSegment {
 
   var status : atomic uint;
 
-  var blockSpace = { 0 .. 0 };
   var headBlock : LocalWorkQueueSegmentBlock(eltType);
   var tailBlock : LocalWorkQueueSegmentBlock(eltType);
 
@@ -33,15 +43,15 @@ record LocalWorkQueueSegment {
   // The first part helps distribute work to tasks waiting and doing nothing, and the
   // last part helps us know when we can declare that work stealing is finished.
   var workStealingStatus : [{0 .. #here.maxTaskPar}] atomic int;
+  var workStolen : [{0 .. #here.maxTaskPar}] LocalWorkQueueSegmentBlock(eltType);
+  var workStealingIdx : atomic int;
 
   // Number of elements currently in the list to allow faster determinism of whether
-  // or not an operation should attempt this bucket. Also doubles as the helper work
-  // stealing counter;
+  // or not an operation should attempt this bucket.
   var nElems : atomic uint;
 
-  proc LocalWorkQueueSegment(type eltType) {
-    headBlock = new LocalWorkQueueSegmentBlock(eltType);
-    tailBlock = headBlock;
+  inline proc isEmpty {
+    return nElems.read() == 0;
   }
 }
 
@@ -56,6 +66,10 @@ class LocalWorkQueue : Queue {
 
   const maxIterationsPerPhase = here.maxTaskPar;
 
+  proc LocalWorkQueue(type eltType) {
+    workStealer.write(-1);
+  }
+
   /*
     Enqueue...
   */
@@ -65,6 +79,12 @@ class LocalWorkQueue : Queue {
     var segmentIdx = enqueueAcquire(startIdx);
     ref seg = segments[segmentIdx];
     var block = seg.tailBlock;
+
+    // Empty?
+    if block == nil then {
+      seg.tailBlock = new LocalWorkQueueSegmentBlock(eltType);
+      seg.headBlock = seg.tailBlock;
+    }
 
     // Full?
     if block.idx > ELEMS_PER_BLOCK {
@@ -130,7 +150,7 @@ class LocalWorkQueue : Queue {
           }
           // If someone is stealing, then that means that we'd be waiting for a while
           // anyway, so we may as well attempt to find a node with a shorter wait time.
-          when STEALING {
+          when STEALING || STEALING_INIT {
             break;
           }
         }
@@ -204,7 +224,7 @@ class LocalWorkQueue : Queue {
           }
           // If someone else is stealing work, we add ourself as a potential helper
           // to help speed this along, and hopefully we get an element for ourself.
-          when STEALING {
+          when STEALING || STEALING_INIT {
             // TODO
           }
         }
@@ -219,44 +239,220 @@ class LocalWorkQueue : Queue {
 
     return -1;
   }
-}
 
-// Phase 3: Take any bucket whether it is locked or unlocked, empty or non-empty
-inline proc dequeueAcquirePhase3(startIdx) : int {
-  ref seg = segments[startIdx];
+  // Phase 3: Take any bucket whether it is locked or unlocked, empty or non-empty
+  inline proc dequeueAcquirePhase3(startIdx) : (bool, eltType) {
+    ref seg = segments[startIdx];
 
-  // Attempt to acquire...
-  while true {
-    var backoff = 0;
-    var currStatus = seg.status.read();
+    // Attempt to acquire...
+    while true {
+      var backoff = 0;
+      var currStatus = seg.status.read();
 
-    select currStatus {
-      // Quick acquire
-      when UNLOCKED {
-        if seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
-          return idx;
+      select currStatus {
+        // Quick acquire
+        when UNLOCKED {
+          if seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
+            return idx;
+          }
+        }
+        // This segment is being stolen from. Assist the current stealer.
+        when VICTIM {
+          // TODO
+          backoff = 0;
+        }
+        // If someone else is stealing work, we add ourself as a potential helper
+        // to help speed this along, and hopefully we get an element for ourself.
+        when STEALING || STEALING_INIT {
+          var (hasElem, elem) = helpStealWork(startIdx);
+
+          // We have our element...
+          if hasElem then return (hasElem, elem);
+
+          // We don't have our element, but no element currently exists.
+          if seg.isEmpty {
+            return (false, _defaultOf(eltType));
+          }
+          backoff = 0;
         }
       }
-      // This segment is being stolen from. Assist the current stealer.
-      when VICTIM {
-        // TODO
-        backoff = 0;
-      }
-      // If someone else is stealing work, we add ourself as a potential helper
-      // to help speed this along, and hopefully we get an element for ourself.
-      when STEALING {
-        // TODO
-        backoff = 0;
+
+      // Backoff to maximum...
+      if backoff == 0 then chpl_task_yield();
+      else sleep(max(1000, 2 ** backoff), TimeUnits.microseconds);
+    }
+
+    halt("Somehow exited loop in Phase 3...");
+  }
+
+  /*
+    Work Stealing
+  */
+
+  // We have the lock but it is empty, try to set ourself as work stealer...
+  // As our index can change based on whether or not we become the work stealer
+  // or help someone else become the work stealer, we return our acquired index.
+  proc stealWork(idx) : (bool, eltType) {
+    ref seg = segments[idx];
+
+    // If we set ourself as work stealer, we may proceed, otherwise if someone else
+    // is set, we help them out instead...
+    while true {
+      if workStealer.compareExchangeStrong(-1, idx) then break;
+
+      // Someone else is set...
+      var currStealer = workStealer.read();
+      if currStealer != -1 {
+        seg.status.write(UNLOCKED);
+        return helpStealWork(currStealer);
       }
     }
 
-    // Backoff to maximum...
-    if backoff == 0 then chpl_task_yield();
-    else sleep(max(1000, 2 ** backoff), TimeUnits.microseconds);
+    // We are the current work stealer, so our responsibility is to initialize
+    // all work statuses and signal that we may begin our work stealing
+    for status in seg.workStealingStatus do status.write(INITIALIZED);
+    seg.workStealingIdx.write(0);
+    seg.status.write(STEALING_INIT);
+
+    // Help steal work with everyone else
+    var (hasElem, elem) = helpStealWork(idx);
+
+    // We are finished, all work stolen (if any) are now available...
+    // As work stealer, our next job is merge it all together...
+    for i in 0..#here.maxTaskPar {
+      // Spin until they are finished... if they finish but have no work, skip them
+      while seg.workStealingStatus[i].read() == CLAIMED then chpl_task_yield();
+      if i == idx || seg.workStealingStatus[i].read() != FINISHED_WITH_WORK then continue;
+
+      // TODO: Find a way copy data from one tuple to another that is faster
+      var blockElems = block.idx - 1;
+      seg.nElems.add(blockElems);
+
+      ref stolenBlock = seg.workStolen[i];
+      ref tailBlock = seg.tailBlock;
+      while stolenBlock.idx > 0 {
+        // If we haven't stolen an element by now, do so
+        if !hasElem {
+          elem = stolenBlock.elems[stolenBlock.idx];
+          hasElem = true;
+          stolenBlock.idx = stolenBlock.idx - 1;
+          continue;
+        }
+
+        if tailBlock.idx > ELEMS_PER_BLOCK {
+          tailBlock.next = new LocalWorkQueueSegmentBlock(eltType);
+          seg.tailBlock = tailBlock.next;
+          tailBlock = tailBlock.next;
+        }
+
+        tailBlock.elems[tailBlock.idx] = stolenBlock.elems[stolenBlock.idx];
+        stolenBlock.idx = stolenBlock.idx - 1;
+        tailBlock.idx = tailBlock.idx + 1;
+      }
+
+      delete stolenBlock;
+    }
+
+    // No longer work stealer
+    workStealer.write(-1);
+    seg.status.write(UNLOCKED);
+
+    // At this point, we have successfully stolen work. Furthermore, we have
+    // stolen at least one element for ourself.
+    return (hasElem, elem);
   }
 
-  halt("Somehow exited loop in Phase 3...");
+  proc helpStealWork(idx) : (bool, eltType) {
+    ref seg = segments[idx];
+
+    while true {
+      var currStatus = seg.status.read();
+
+      select currStatus {
+        // They are still initializing...
+        when STEALING {
+          // Do nothing...
+        }
+        // They are initialized, we can now attempt to help...
+        when STEALING_INIT {
+          break;
+        }
+        // We're not stealing work...
+        otherwise do return (false, _defaultOf(eltType));
+      }
+    }
+
+    var (hasElem, elem) : (bool, eltType);
+
+    // We obtain our index which tells us which segment we need to steal from
+    // It should be noted that we handle the edge cases where we get preempted long
+    // enough here that the current work stealing endeavor is over. In the case where
+    // work stealing is finished and the next has not started, 'ourIdx' will be greater
+    // than or equal to here.maxTaskPar, meaning that we would spin anyway... If the next
+    // work stealing endeavor has started, but it has not yet been initialized, then technically
+    // the counter would be below here.maxTaskPar, but the workStealingStatus would likely be
+    // 'FINISHED_WITH_WORK' or 'FINISHED_WITH_NO_WORK'. In the case, that it is neither then we have
+    // already setup everything anyway, and we can partake in the next work stealing.
+    while true {
+      var ourIdx = seg.workStealingIdx.fetchAdd(1);
+      ref wsStatus = seg.workStealingStatus[ourIdx];
+
+      if ourIdx >= here.maxTaskPar {
+        return (hasElem, elem);
+      }
+      if wsStatus.compareExchangeStrong(INITIALIZED, CLAIMED) == false {
+        return (hasElem, elem);
+      }
+      if ourIdx == idx then continue;
+
+      // Do our part by stealing work...
+      ref otherSeg = segments[ourIdx];
+      while !otherSeg.isEmpty {
+        if otherSeg.status.read() != UNLOCKED {
+          chpl_task_yield();
+        } else if otherSeg.status.compareExchangeStrong(UNLOCKED, VICTIM) {
+          break;
+        }
+      }
+
+      if otherSeg.isEmpty() {
+        wsStatus.write(FINISHED_WITH_NO_WORK);
+        otherSeg.status.write(UNLOCKED);
+        continue;
+      }
+
+      if !hasElem {
+        // Steal an item... adjust index if it is full (went past end)
+        if otherSeg.headBlock.idx > here.maxTaskPar {
+          otherSeg.headBlock.idx = otherSeg.headBlock.idx - 1;
+        }
+        (hasElem, elem) = (true, otherSeg.headBlock.elems[otherSeg.headBlock.idx]);
+        otherSeg.headBlock.idx = otherSeg.headBlock.idx - 1;
+        otherSeg.nElems.sub(1);
+
+        // Fix list if we consumed last one...
+        if otherSeg.headBlock.idx == 0 {
+          var block = otherSeg.headBlock;
+          otherSeg.headBlock = otherSeg.headBlock.next;
+          delete block;
+        }
+
+        if otherSeg.nElems.read() == 0 {
+          wsStatus.write(FINISHED_WITH_NO_WORK);
+          otherSeg.status.write(UNLOCKED);
+          continue;
+        }
+      }
+
+      // Report what has been stolen...
+      seg.workStolen[ourIdx] = otherSeg.headBlock;
+      otherSeg.headBlock = otherSeg.headBlock.next;
+      wsStatus.write(FINISHED_WITH_WORK);
+      otherSeg.status.write(UNLOCKED);
+    }
+  }
 }
+
 
 proc main() {
   var nJitter = 0;
