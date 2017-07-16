@@ -14,7 +14,7 @@
   is utilized to efficiently hash objects to their unique index.
 */
 
-use CyclicDist;
+use BlockDist;
 use Random;
 use BigInteger;
 
@@ -31,7 +31,7 @@ extern proc chpl_return_wide_ptr_node(c_nodeid_t, c_void_ptr) : wide_ptr_t;
 
 // Hashes a class instance by pointer. We ignore the locale id portion because
 // this is used for pointers that refer into our address space.
-proc hash(obj) : uint where isClass(obj.type) {
+inline proc hash(obj) : uint where isClass(obj.type) {
   var key =  __primitive("cast", uint(64), __primitive("_wide_get_addr", obj));
   key = (~key) + (key << 21); // key = (key << 21) - key - 1;
   key = key ^ (key >> 24);
@@ -56,16 +56,66 @@ proc hash(obj) {
   so will the memory managed by this object). The descriptor table will be cleaned
   up automatically when this goes out of scope.
 */
+
+const compressedAddrMask = 0x0000FFFFFFFFFFFF;
+const compressedLocaleIdMask = 0xFFFF;
+const tableLocaleIdMask = 0xFFFFFFFF;
+const tableIdxMask = 0xFFFFFFFF;
+const compressedLocIdOffset = 48;
+const tableLocIdOffset = 32;
+
 record GlobalAtomicObject {
   type objType;
-  var _atomicVar: atomic uint(64);
+  var _atomicVar : atomic uint(64);
 
   // We maintain a SkipList to manage memory (which is built on top of the descriptor
   // table itself). Currently, as the SkipList is not concurrent (requires Hazard Pointers
   // which requires thread-local storage, or task-local storage in this case).
-  var perLocaleDomain = LocaleSpace dmapped Cyclic(startIdx=LocaleSpace.low);
+  var perLocaleDomain = LocaleSpace dmapped Block(boundingBox=LocaleSpace);
   var descriptorTables : [perLocaleDomain] SkipList(objType);
   var descriptorTableLocks : [perLocaleDomain] sync bool;
+
+  // Only if number of locales fits within 16 bits...
+  inline proc shouldCompress {
+    return usePointerCompression && (numLocales & compressedLocaleIdMask == numLocales);
+  }
+
+  inline proc getLocaleId(obj) {
+    return chpl_nodeFromLocaleID(__primitive("_wide_get_locale", obj)) : uint;
+  }
+
+  inline proc getAddr(obj) {
+    return __primitive("cast", uint, __primitive("_wide_get_addr", obj));
+  }
+
+  inline proc ourLocaleIdx {
+    return perLocaleDomain.localSubdomain().first;
+  }
+
+  inline proc maxDescriptorTableLocaleCheck(locId) {
+    if (locId & tableLocaleIdMask) != locId {
+      halt("LocaleID: ", locId, " > 2^32");
+    }
+  }
+
+  inline proc maxDescriptorTableIndexCheck(idx) {
+    if (idx & tableIdxMask) != idx {
+      halt("Idx: ", idx, " > 2^32");
+    }
+  }
+
+  inline proc widePointerCheck(obj) {
+    if !__primitive("is wide pointer", obj) {
+      halt(
+        "Dummy object created was not a wide pointer!",
+        " Assumption: Inside a 'local' block"
+      );
+    }
+  }
+
+  inline proc uintToCVoidPtr(addr) {
+    return __primitive("cast", c_void_ptr, addr);
+  }
 
   /*
     Compresses an object into a descriptor.
@@ -73,29 +123,34 @@ record GlobalAtomicObject {
   proc compress(obj:objType) : uint {
     if obj == nil then return 0;
 
-    // If we have less than 2^16 locales, we can perform a faster compression
-    // by packing the 48 usable bits of the virtual address with 16 bits of the
-    // locale/node id.
-    if usePointerCompression && (numLocales & 0xFFFF == numLocales) {
-      var locId = chpl_nodeFromLocaleID(__primitive("_wide_get_locale", obj)) : uint;
-      var addr = __primitive("cast", uint, __primitive("_wide_get_addr", obj));
-      return locId << 48 | addr & 0x0000ffffffffffff;
+    // Perform a faster compression by packing the 48 usable bits of the virtual
+    // address with 16 bits of the locale/node id.
+    if shouldCompress {
+      var locId = getLocaleId(obj);
+      var addr = getAddr(obj);
+      return (locId << compressedLocIdOffset) | (addr & compressedAddrMask);
     }
 
     // Fallback: We use descriptor tables
-    var retval : uint;
+    var descriptor : uint;
     on obj {
-      descriptorTableLocks[descriptorTableLocks.domain.localSubdomain().first] = true;
-      var node = descriptorTables[descriptorTables.domain.localSubdomain().first].insert(obj);
-      var localeId = here.id;
-      if (localeId & 0xFFFFFFFF) != localeId then halt("LocaleID > 2^32");
+      // Lock
+      descriptorTableLocks[ourLocaleIdx] = true;
+
+      // The skip list returns the node, which contains the table index.
+      // We return a node instead of just the index for potential testing purposes.
+      var node = descriptorTables[ourLocaleIdx].insert(obj);
+      var locId = here.id;
+      maxDescriptorTableLocaleCheck(locId);
       var idx = node.idx;
-      if (idx & 0xFFFFFFFF) != idx then halt("Idx > 2^32");
-      retval = localeId << 32 | idx;
-      descriptorTableLocks[descriptorTableLocks.domain.localSubdomain().first];
+      maxDescriptorTableIndexCheck(idx);
+      descriptor = locId << compressedLocIdOffset | idx;
+
+      // Unlock
+      descriptorTableLocks[ourLocaleIdx];
     }
 
-    return retval;
+    return descriptor;
   }
 
   /*
@@ -107,10 +162,10 @@ record GlobalAtomicObject {
 
     // If we have less than 2^16 locales, then we know we performed the
     // faster compression method so we need to decompress it in the same way...
-    if usePointerCompression && (numLocales & 0xFFFF == numLocales) {
-      var locId = descr >> 48;
-      var addr = descr & 0x0000ffffffffffff;
-      var wideptr = chpl_return_wide_ptr_node(locId, __primitive("cast", c_void_ptr, addr));
+    if shouldCompress {
+      var locId = descr >> compressedLocIdOffset;
+      var addr = descr & compressedAddrMask;
+      var wideptr = chpl_return_wide_ptr_node(locId, uintToCVoidPtr(addr));
 
       // We've created the wide pointer, but unfortunately Chapel does not support
       // the ability to cast it to the actual object, so we have to do some
@@ -119,16 +174,17 @@ record GlobalAtomicObject {
       // have the same type.
       var newObj : objType;
       on Locales[here.id] do newObj = nil;
-
-      // Warning: If this is *not* a wide pointer, it will overwrite part of the stack.
-      // If it is, it works. Dangerous, but only way to do so at the moment.
+      widePointerCheck(newObj);
       c_memcpy(c_ptrTo(newObj), c_ptrTo(wideptr), 16);
+
       return newObj;
     }
 
-    var localeId = descr >> 32;
-    var idx = descr & 0xFFFFFFFF;
-    return descriptorTables[localeId : int].memPool.access(idx : int).key;
+    // Fallback: Descriptor table was used, and we can directly index into the
+    // the skip list's memory pool.
+    var locId = descr >> tableLocIdOffset;
+    var idx = descr & tableIdxMask;
+    return descriptorTables[locId : int].memPool.access(idx : int).key;
   }
 
   inline proc read() : objType {
@@ -164,17 +220,9 @@ record GlobalAtomicObject {
   }
 }
 
-
-class SkipListNode {
-  type keyType;
-  var hash : uint(64);
-  var key : keyType;
-  var idx : uint;
-  var forwardDom : domain(int);
-  var forward : [forwardDom] SkipListNode(keyType);
-}
-
 /*
+  Skip List implementation
+
   TODO: This needs to be made concurrent or else this will be the bottleneck
   for our implementation. Hazard Pointers likely needed (this also would be a
   viable example for a need of per-locale garbage collection. Perhaps make it
@@ -184,9 +232,19 @@ class SkipListNode {
   stop-the-world is *only* for the task inside of the zone. Then again, hazard
   pointers work too...)
 */
+
+param globalAtomicObjectSkipListMaxLevel = 4;
+
+class SkipListNode {
+  type keyType;
+  var hash : uint(64);
+  var key : keyType;
+  var idx : uint;
+  var forward : globalAtomicObjectSkipListMaxLevel * SkipListNode(keyType);
+}
+
 record SkipList {
   type keyType;
-  var maxLevel = 4;
   var level = 1;
   var header : SkipListNode(keyType);
   var memPool : FlatObjectPool(SkipListNode(keyType));
@@ -196,12 +254,10 @@ record SkipList {
     header = makeNode(level);
   }
 
-  // RNG to create randomized level
-  var randStr = makeRandomStream(real);
-
   inline proc randomLevel() {
+    var levelRNG = makeRandomStream(real);
     var _level = 1;
-    while randStr.getNext() < 0.5 && _level < maxLevel {
+    while levelRNG.getNext() < 0.5 && _level < globalAtomicObjectSkipListMaxLevel {
       _level = _level + 1;
     }
     return _level;
@@ -213,8 +269,7 @@ record SkipList {
     node.idx = idx : uint;
     node.hash = hash;
     node.key = key;
-    node.forwardDom = { 1 .. maxLevel };
-    node.forward = nil;
+    for i in 1 .. globalAtomicObjectSkipListMaxLevel do node.forward[i] = nil;
 
     return node;
   }
@@ -223,7 +278,7 @@ record SkipList {
     // We hash the object to remove from the list. Note: We do not take into
     // account the localeId, so the object *must* not be a wide pointer.
     var hashKey = hash(key);
-    var update : [{1 .. maxLevel}] SkipListNode(keyType);
+    var update : globalAtomicObjectSkipListMaxLevel * SkipListNode(keyType);
     var currNode = header;
     var currLevel = level;
 
@@ -266,7 +321,7 @@ record SkipList {
     // We hash the object to insert into the list. Note: We do not take into
     // account the localeId, so the object *must* not be a wide pointer.
     var hashKey = hash(key);
-    var update : [{1 .. maxLevel}] SkipListNode(keyType);
+    var update : globalAtomicObjectSkipListMaxLevel * SkipListNode(keyType);
     var currNode = header;
     var currLevel = level;
 
