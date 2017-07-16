@@ -144,7 +144,7 @@ record GlobalAtomicObject {
       maxDescriptorTableLocaleCheck(locId);
       var idx = node.idx;
       maxDescriptorTableIndexCheck(idx);
-      descriptor = locId << compressedLocIdOffset | idx;
+      descriptor = locId << tableLocIdOffset | idx;
 
       // Unlock
       descriptorTableLocks[ourLocaleIdx];

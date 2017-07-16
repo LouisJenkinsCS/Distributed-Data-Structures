@@ -29,4 +29,3 @@ x._delete(b);
 
 // As well, when GlobalAtomicObject goes out of scope, all nodes it had in use also
 // get deleted...
-writeln("PASSED!");
