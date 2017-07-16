@@ -1,16 +1,20 @@
 use Queue;
 use Random;
 use Time;
+use BlockDist;
 use BigInteger;
 
 // Segment statuses
 const UNLOCKED : uint = 0;
 const ENQUEUE : uint = 1;
 const DEQUEUE : uint = 2;
-const STEALING_INIT : uint = 3;
-const STEALING_WORK : uint = 4;
-const STEALING_MERGE : uint = 5;
-const VICTIM : uint = 6;
+const STEALING_LOCAL_INIT : uint = 3;
+const STEALING_LOCAL_WORK : uint = 4;
+const STEALING_GLOBAL_INIT : uint = 5;
+const STEALING_GLOBAL_WORK : uint 6;
+const STEALING_MERGE : uint = 7;
+const LOCAL_VICTIM : uint = 8;
+const GLOBAL_VICTIM : uint = 9;
 
 // Work Stealing statuses
 const UNINITIALIZED : int = -2;
@@ -23,20 +27,20 @@ const FINISHED_WITH_WORK : int = 2;
 config param ELEMS_PER_BLOCK = 1024;
 config param logMPMCQueue = false;
 
-class LocalWorkQueueSegmentBlock {
+class WorkQueueSegmentBlock {
   type eltType;
   var nElems : int;
   var elems : ELEMS_PER_BLOCK * eltType;
-  var next : LocalWorkQueueSegmentBlock(eltType);
+  var next : WorkQueueSegmentBlock(eltType);
 }
 
-record LocalWorkQueueSegment {
+record WorkQueueSegment {
   type eltType;
 
   var status : atomic uint;
 
-  var headBlock : LocalWorkQueueSegmentBlock(eltType);
-  var tailBlock : LocalWorkQueueSegmentBlock(eltType);
+  var headBlock : WorkQueueSegmentBlock(eltType);
+  var tailBlock : WorkQueueSegmentBlock(eltType);
 
   // For when we are stealing work... helper threads may attempt to
   // help during a steal by setting one of the values from -1 to 0, and
@@ -44,7 +48,7 @@ record LocalWorkQueueSegment {
   // The first part helps distribute work to tasks waiting and doing nothing, and the
   // last part helps us know when we can declare that work stealing is finished.
   var workStealingStatus : [{0 .. #here.maxTaskPar}] atomic int;
-  var workStolen : [{0 .. #here.maxTaskPar}] LocalWorkQueueSegmentBlock(eltType);
+  var workStolen : [{0 .. #here.maxTaskPar}] WorkQueueSegmentBlock(eltType);
   var workStealingIdx : atomic int;
 
   // Number of elements currently in the list to allow faster determinism of whether
@@ -75,18 +79,18 @@ record LocalWorkQueueSegment {
   }
 }
 
-class LocalWorkQueue : Queue {
+class WorkQueue : Queue {
   // Place in own cache line
   var startIdxEnq : atomic uint;
   var startIdxDeq : atomic uint;
   var workStealer : atomic int;
 
   var maxParallelSegmentSpace = {0 .. #here.maxTaskPar};
-  var segments : [maxParallelSegmentSpace] LocalWorkQueueSegment(eltType);
+  var segments : [maxParallelSegmentSpace] WorkQueueSegment(eltType);
 
   const maxIterationsPerPhase = here.maxTaskPar;
 
-  proc LocalWorkQueue(type eltType) {
+  proc WorkQueue(type eltType) {
     workStealer.write(-1);
   }
 
@@ -102,14 +106,14 @@ class LocalWorkQueue : Queue {
 
     // Empty?
     if block == nil then {
-      seg.tailBlock = new LocalWorkQueueSegmentBlock(eltType);
+      seg.tailBlock = new WorkQueueSegmentBlock(eltType);
       seg.headBlock = seg.tailBlock;
       block = seg.tailBlock;
     }
 
     // Full?
     if block.nElems == ELEMS_PER_BLOCK {
-      block.next = new LocalWorkQueueSegmentBlock(eltType);
+      block.next = new WorkQueueSegmentBlock(eltType);
       seg.tailBlock = block.next;
       block = block.next;
     }
@@ -346,7 +350,7 @@ class LocalWorkQueue : Queue {
     // all work statuses and signal that we may begin our work stealing
     for status in seg.workStealingStatus do status.write(INITIALIZED);
     seg.workStealingIdx.write(0);
-    seg.status.write(STEALING_WORK);
+    seg.status.write(STEALING_LOCAL_WORK);
 
     // Help steal work with everyone else
     var (hasElem, elem) = helpStealWork(idx);
@@ -378,7 +382,7 @@ class LocalWorkQueue : Queue {
         }
 
         if tailBlock.nElems == ELEMS_PER_BLOCK {
-          tailBlock.next = new LocalWorkQueueSegmentBlock(eltType);
+          tailBlock.next = new WorkQueueSegmentBlock(eltType);
           seg.tailBlock = tailBlock.next;
           tailBlock = tailBlock.next;
         }
@@ -391,6 +395,12 @@ class LocalWorkQueue : Queue {
       delete stolenBlock;
     }
 
+    // Check to see if we have actually stolen any work. (I.E: We haven't lifted any)
+    if !hasElem {
+      // Since we can verify that the queue is empty, we need to look elsewhere.
+
+    }
+
     // No longer work stealer
     workStealer.write(-1);
     seg.status.write(UNLOCKED);
@@ -398,6 +408,153 @@ class LocalWorkQueue : Queue {
     // At this point, we have successfully stolen work. Furthermore, we have
     // stolen at least one element for ourself.
     return (idx, hasElem, elem);
+  }
+
+  proc helpStealGlobalWork(idx) : (bool, eltType) {
+    ref seg = segments[idx : int];
+
+    while true {
+      var currStatus = seg.status.read();
+
+      select currStatus {
+        // They are still initializing...
+        when STEALING_GLOBAL_INIT {
+          // Do nothing...
+        }
+        // They are initialized, we can now attempt to help...
+        when STEALING_GLOBAL_WORK {
+          break;
+        }
+        // We're not stealing work (globally)...
+        otherwise do return (false, _defaultOf(eltType));
+      }
+    }
+
+    if logMPMCQueue then writeln("Helping steal work (globally) for Locale-segment #", here.id, "-", idx);
+    var (hasElem, elem) : (bool, eltType);
+    var stolenBlock = new WorkQueueSegmentBlock(eltType);
+
+    // Obtain our working index. If it is above the maximum allowed for concurrent
+    // helpers, we just return early in hope to find work elsewhere. It should be
+    // noted that the work stealer only resets the counter after reinitializing the
+    // segment's work stealing state. If we get preempted long enough to miss the
+    // current work stealing session, then it would have to be after the previous ended
+    // and the current has been initialized.
+    while true {
+      var ourIdx = seg.workStealingIdx.fetchAdd(1);
+      if ourIdx == idx then continue;
+      if ourIdx >= here.maxTaskPar {
+        return (hasElem, elem);
+      }
+      ref wsStatus = seg.workStealingStatus[ourIdx];
+      wsStatus.write(CLAIMED);
+
+      // When we steal globally, we take enough to fill one block. We begin at a
+      // randomized locale that is not our own (in order to reduce the chances of too
+      // many of our helper tasks hitting the same locale over and over again, depleting it).
+      var rand = makeRandomStream(int);
+      var localeIdx = rand.getNext() % (targetLocales.domain.high + 1);
+      var maxIterations = targetLocales.domain.high;
+      var iterations = 0;
+      var nElemsToSteal = ELEMS_PER_BLOCK;
+
+      while iterations < maxIterations {
+        var startSegmentIdx = rand.getNext() % targetLocales[localeIdx].maxTaskPar;
+
+        on targetLocales[localeIdx] {
+          // Localize some of the data at the beginning to avoid excessive communication
+          var segmentIdx = startSegmentIdx;
+          var (_hasElem, _elem) : (bool, eltType);
+          _hasElem = hasElem;
+          var stolenElems : ELEMS_PER_BLOCK * eltType;
+          var theirQueue = workQueues[workQueues.domain.subDomain().first];
+
+          var maxSegmentIterations = here.maxTaskPar;
+          var segmentIterations = 0;
+          // Search all segments...
+          while segmentIterations < maxSegmentIterations {
+            ref _seg = theirQueue.segments[segmentIdx];
+
+            // Attempt to acquire...
+            while !_seg.isEmpty {
+              if _seg.status.read() == UNLOCKED && _seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
+                var (__hasElem, __elem) = _seg.take;
+                if !_hasElem {
+                  _hasElem = __hasElem;
+                  _elem = __elem;
+                } else {
+                  stolenElem
+                }
+
+                _seg.status.write(UNLOCKED);
+                if hasElem {
+                  return (hasElem, elem);
+                }
+              }
+
+              // Backoff
+              chpl_task_yield();
+            }
+
+            segmentIterations = segmentIterations + 1;
+            segmentIdx = segmentIdx % here.maxTaskPar;
+          }
+        }
+
+        localeIdx = (localeIdx + 1) % (targetLocales.domain.high + 1);
+        iterations = iterations + 1;
+      }
+
+
+      // Do our part by stealing work...
+      ref otherSeg = segments[ourIdx];
+      while !otherSeg.isEmpty {
+        if otherSeg.status.read() != UNLOCKED {
+          chpl_task_yield();
+        } else if otherSeg.status.compareExchangeStrong(UNLOCKED, VICTIM) {
+          break;
+        }
+      }
+
+      if otherSeg.isEmpty {
+        wsStatus.write(FINISHED_WITH_NO_WORK);
+        otherSeg.status.write(UNLOCKED);
+        continue;
+      }
+
+      if !hasElem {
+        // Steal an item...
+        (hasElem, elem) = (true, otherSeg.headBlock.elems[otherSeg.headBlock.nElems]);
+        otherSeg.headBlock.nElems = otherSeg.headBlock.nElems - 1;
+        otherSeg.nElems.sub(1);
+        if logMPMCQueue then writeln("Lifted element ", elem, " from block stolen from segment #", ourIdx, " as helper for segment #", idx);
+
+        // Fix list if we consumed last one...
+        if otherSeg.headBlock.nElems == 0 {
+          var block = otherSeg.headBlock;
+          otherSeg.headBlock = otherSeg.headBlock.next;
+          delete block;
+        }
+
+        if otherSeg.isEmpty {
+          wsStatus.write(FINISHED_WITH_NO_WORK);
+          otherSeg.status.write(UNLOCKED);
+          continue;
+        }
+      }
+
+      // Report what has been stolen...
+      var nStolen = otherSeg.headBlock.nElems : uint;
+      seg.workStolen[ourIdx] = otherSeg.headBlock;
+      otherSeg.nElems.sub(nStolen);
+      otherSeg.headBlock = otherSeg.headBlock.next;
+      wsStatus.write(FINISHED_WITH_WORK);
+      otherSeg.status.write(UNLOCKED);
+
+      if logMPMCQueue then writeln("Finished stealing ", nStolen, " amounts of work for segment #", idx);
+    }
+
+    halt("Exited helpStealWork loop...");
   }
 
   proc helpStealWork(idx) : (bool, eltType) {
@@ -423,25 +580,21 @@ class LocalWorkQueue : Queue {
     if logMPMCQueue then writeln("Helping steal work for segment #", idx);
     var (hasElem, elem) : (bool, eltType);
 
-    // We obtain our index which tells us which segment we need to steal from
-    // It should be noted that we handle the edge cases where we get preempted long
-    // enough here that the current work stealing endeavor is over. In the case where
-    // work stealing is finished and the next has not started, 'ourIdx' will be greater
-    // than or equal to here.maxTaskPar, meaning that we would spin anyway... If the next
-    // work stealing endeavor has started, but it has not yet been initialized, then technically
-    // the counter would be below here.maxTaskPar, but the workStealingStatus would likely be
-    // 'FINISHED_WITH_WORK' or 'FINISHED_WITH_NO_WORK'. In the case, that it is neither then we have
-    // already setup everything anyway, and we can partake in the next work stealing.
     while true {
+      // Obtain our working index. If it is above the maximum allowed for concurrent
+      // helpers, we just return early in hope to find work elsewhere. It should be
+      // noted that the work stealer only resets the counter after reinitializing the
+      // segment's work stealing state. If we get preempted long enough to miss the
+      // current work stealing session, then it would have to be after the previous ended
+      // and the current has been initialized.
       var ourIdx = seg.workStealingIdx.fetchAdd(1);
       if ourIdx == idx then continue;
       if ourIdx >= here.maxTaskPar {
         return (hasElem, elem);
       }
       ref wsStatus = seg.workStealingStatus[ourIdx];
-      if wsStatus.compareExchangeStrong(INITIALIZED, CLAIMED) == false {
-        return (hasElem, elem);
-      }
+      wsStatus.write(CLAIMED);
+
 
       if logMPMCQueue then writeln("Assigned to steal work from segment #", ourIdx, " for segment #", idx);
 
@@ -497,11 +650,25 @@ class LocalWorkQueue : Queue {
   }
 }
 
+class DistributedWorkQueue : Queue {
+  var targetLocales : [] locale = Locales;
+  var perLocaleDomain = domain(1) dmapped Block(boundingBox=targetLocales.domain, targetLocales=targetLocales);
+  var workQueues : [perLocaleDomain] WorkQueue(eltType);
+
+  proc DistributedWorkQueue(type eltType) {
+    forall loc in Locales {
+      on loc {
+        workQueues[workQueues.domain.subDomain().first] = new WorkQueue(eltType);
+      }
+    }
+  }
+}
+
 proc proof_of_correctness() {
   var nElementsForMPMC = 1000000;
   writeln("Starting MPMCQueue Proof of Correctness (Work Depletion) Test ~ nElementsForMPMC: ", nElementsForMPMC);
 
-  var queue = new LocalWorkQueue(int);
+  var queue = new WorkQueue(int);
   var counter : atomic int;
   var expected = (nElementsForMPMC * (nElementsForMPMC + 1)) / 2;
 
@@ -545,7 +712,7 @@ proc benchmark() {
 
   // Obtain average time for enqueue followed by dequeued...
   for i in 1 .. nTrials {
-    var queue = new LocalWorkQueue(int);
+    var queue = new WorkQueue(int);
     // We only use one or the other, but we must declare both.
     // TODO: Have both implement some parent 'Queue' class/interface?
     var timer = new Timer();
