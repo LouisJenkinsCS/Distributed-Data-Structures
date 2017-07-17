@@ -12,7 +12,7 @@ class iterExample {
     lock$ = true;
     writeln("Start");
     var raii : RAII;
-    for i in 1 .. 10 {
+    forall i in 1 .. 1 {
       yield i;
     }
     raii.str = "Done";
@@ -34,6 +34,5 @@ proc main() {
     break;
   }
 
-  forall i in 1 .. 1000 do continue;
   writeln("In Main");
 }

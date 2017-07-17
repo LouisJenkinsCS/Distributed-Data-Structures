@@ -361,7 +361,7 @@ class WorkQueue : Queue {
     // As work stealer, our next job is merge it all together...
     for i in 0..#here.maxTaskPar {
       // Spin until they are finished... if they finish but have no work, skip them
-      while seg.workStealingStatus[i].read() == CLAIMED do chpl_task_yield();
+      while seg.workStealingStatus[i].read() <= CLAIMED do chpl_task_yield();
       if i == idx || seg.workStealingStatus[i].read() != FINISHED_WITH_WORK then continue;
 
       // TODO: Find a way copy data from one tuple to another that is faster
