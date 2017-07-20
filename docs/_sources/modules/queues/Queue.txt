@@ -19,44 +19,6 @@ Queue
    any ordering whatsoever and aims to satiate the desire for high performance. Furthermore,
    we offer two further variants for each: a local version that is optimized for a single locale,
    and a distributed version that is optimized for multiple locales.
-   
-   A queue may also be 'frozen', in which it becomes immutable. A queue that is immutable
-   offers different semantics to one that is mutable; iteration no longer consumes elements,
-   allowing for reduction, mapping, and zipping operations with the benefit of parallel-safety,
-   as well as making it a proper source for concatenation with other queues.
-   A queue may be concatenated with many different sources, from queues, to arrays, to arbitrary
-   objects that support serial iteration, which append the other source's elements with
-   itself. As well, for queues that are bounded, we have an optional (but default)
-   transactional approach to adding elements: either all elements are added, or none are
-   (with exceptions).
-   
-   If the queue is unbounded, it will always succeed with concatenation,
-   but if the queue is bounded it may return false if not enough space is
-   available. If the operation is 'transactional', then if there is not enough
-   space, none of the elements are added to the queue; if the operation is not
-   transactional, it will add as many elements as possible
-   
-   Open Question: Queue concatenation semantics...
-   
-   .. code-block:: chapel
-   
-     // FIFO queue with capacity of one item...
-     var q1 : Queue(int) = makeBoundedFIFO(1);
-     // Adds the element '1' to the queue...
-     q1 += 1;
-     // Ensures we do not consume it when we concatenate in next step
-     q1.freeze();
-     // Constructs a new queue that inherits the bounded property of the source queue.
-     // Since the elements exceeds the max boundary of the original queue, the bounds
-     // of q2 will be 5. Furthermore, the queue will be frozen after creation.
-     // Note that, in this way, if we had nice inheritence for records we could easily
-     // manage creation of multiple queues like this. What if we had C++ rvalue move-constructors
-     // as well to make stuff like this efficient?
-     var q2 = q1 + (2,3,4,5);
-     // Can also be: + reduce (q1 + 1 + (2,3,4,5))
-     // But the above requires memory management of the temporary queue created midway.
-     var result = + reduce q2;
-   
 
 
    .. attribute:: type eltType
@@ -65,47 +27,53 @@ Queue
       The type of the element.
       
 
-   .. method:: proc enqueue(elts: eltType ...?nElts, transactional: bool = true): (bool, int)
+   .. method:: proc enqueue(elts: eltType ...?nElts): (bool, int)
 
       
       Adds all elements to the queue, if successful. Elements are added in the
       order they are passed.
       
+      If the queue is unbounded, it will always succeed with concatenation,
+      but if the queue is bounded it may return false if not enough space is
+      available.
+      
+      :arg elts: Tuple of elements
+      :type elts: :type:`eltType`
       :returns: If the enqueue is successful, and how many elements are added.
-      :rtype: (bool, int)
+      :rtype: :type:`(bool, int)`
       
 
-   .. method:: proc enqueue(elts: [?n] eltType, transactional: bool = true): (bool, int)
+   .. method:: proc enqueue(elts: [?n] eltType): (bool, int)
 
       
-      Adds all elements to the queue. Elements are added in the
-      order they in the array.
+      Adds all elements to the queue. Elements are added in the order they in the array.
+      See the first :proc:`enqueue` for more details.
       
       :returns: If the enqueue is successful, and how many elements are added.
-      :rtype: (bool, int)
+      :rtype: :type:`(bool, int)`
       
 
-   .. method:: proc enqueue(queue: Queue(eltType), transactional: bool = true): bool
+   .. method:: proc enqueue(queue: Queue(eltType)): (bool, int)
 
       
       Adds all elements to the queue. Elements are added in a more optimized way
-      depending on the underlying type of the queue, and maintain the weakest ordering
-      of both queues.
+      depending on the underlying type of the queue, and maintain :attr:`this` ordering.
+      See the first :proc:`enqueue` for more details.
       
       :returns: If the enqueue is successful, and how many elements are added.
-      :rtype: (bool, int)
+      :rtype: :type:`(bool, int)`
       
 
-   .. method:: proc enqueue(iterObj, transactional: bool = true): bool
+   .. method:: proc enqueue(iterObj): (bool, int)
 
       
       Adds all elements yielded by the `iterObj`. In the case where not all
       elements can be added, then it is up to the user to be able to 'replay'
       elements not consumed and dropped. Elements are added in the order they are
-      yielded.
+      yielded. See the first :proc:`enqueue` for more details.
       
       :returns: If the enqueue is successful, and how many elements are added.
-      :rtype: (bool, int)
+      :rtype: :type:`(bool, int)`
       
 
    .. method:: proc dequeue(): (bool, eltType)
@@ -114,7 +82,7 @@ Queue
       Remove an element from thr queue.
       
       :returns: If the queue is not empty and the item taken if any.
-      :rtype: (bool, eltType)
+      :rtype: :type:`(bool, int)`
       
 
    .. method:: proc dequeue(nElems): (int, AppendExpr.Call08)
@@ -123,7 +91,7 @@ Queue
       Remove at most `nElems` elements from the queue.
       
       :returns: If the queue is not empty and an array of items taken, if any.
-      :rtype: (bool, [?n] eltType)
+      :rtype: :type:`(bool, [?n] eltType)`
       
 
    .. method:: proc freeze(): bool
@@ -132,7 +100,7 @@ Queue
       Freezes the queue, making it immutable, if supported.
       
       :returns: If it is a supported operation.
-      :rtype: bool
+      :rtype: :type:`bool`
       
 
    .. method:: proc unfreeze(): bool
@@ -141,47 +109,33 @@ Queue
       Unfreezes the queue, making it mutable, if supported.
       
       :returns: If it is a supported operation.
-      :rtype: bool
+      :rtype: :type:`bool`
       
 
-   .. method:: proc +=(elt: eltType ...?nElts): bool
+   .. method:: proc isFrozen(): bool
 
       
-      Alias for enqueue.
+      Determines if the queue is frozen (immutable).
       
-
-   .. method:: proc +=(queue: Queue(eltType))
-
-      
-      Alias for enqueue.
-      
-
-   .. method:: proc +(elt: eltType ...?nElts)
-
-      
-      Feedback needed...
-      
-
-   .. method:: proc +(queue: Queue(eltType))
-
-      
-      Feedback needed...
+      :returns: If queue is frozen
+      :rtype: :type:`bool`
       
 
    .. itermethod:: iter these()
 
       
-      Iterates over all elements in the queue. If the queue is frozen, then iteration
-      is read-only in that it will iterate over all elements without consuming them;
-      a normal iteration is equivalent to a more optimized sequence of dequeue operation.
+      If the queue is frozen, iteration will iterate over all elements in the list
+      without consuming them. If the queue is unfrozen, then iteration will consume
+      all elements in the list equivalent to a highly optimized sequence of dequeues.
+      
+      :yields: Elements in the queue.
+      :ytype: :type:`eltType`
       
 
 .. class:: QueueFactory
 
    .. method:: proc makeDistributedBoundedFIFO(type eltType, maxElems: uint = 0, targetLocales: [] locale = Locales): Queue(eltType)
 
-      
-      (WIP - In Planning)
       
       Creates a distributed bounded strict First-In-First-Out Queue.
       
@@ -191,20 +145,18 @@ Queue
       :type maxElems: uint
       
       :arg targetLocales: Locales to distribute across.
-      :type targetLocales: [] locales
+      :type targetLocales: :type:`[] locales`
       
 
    .. method:: proc makeBoundedFIFO(type eltType, maxElems: uint = 0): Queue(eltType)
 
-      
-      (WIP - In Planning)
       
       Creates a local bounded strict First-In-First-Out Queue.
       
       :type eltType: Element type
       
       :arg maxElems: Maximum number of elements in the queue; halts if value is 0.
-      :type maxElems: uint
+      :type maxElems: :type:`uint`
       
 
    .. method:: proc makeDistributedUnboundedFIFO(type eltType, targetLocales: [] locale = Locales): Queue(eltType)
@@ -215,7 +167,7 @@ Queue
       :type eltType: Element type
       
       :arg targetLocales: Locales to distribute across.
-      :type targetLocales: [] locales
+      :type targetLocales: :type:`[] locales`
       
 
    .. method:: proc makeUnboundedFIFO(type eltType): Queue(eltType)
@@ -226,7 +178,7 @@ Queue
       :type eltType: Element type
       
 
-   .. method:: proc makeDistributedWorkQueue(type eltType, targetLocales: [] locale = Locales): Queue(eltType)
+   .. method:: proc makeDistributedBalancedQueue(type eltType, targetLocales: [] locale = Locales): Queue(eltType)
 
       
       Creates a distributed work stealing unbounded queue.
@@ -234,10 +186,10 @@ Queue
       :type eltType: Element type
       
       :arg targetLocales: Locales to distribute across.
-      :type targetLocales: [] locales
+      :type targetLocales: :type:`[] locales`
       
 
-   .. method:: proc makeWorkQueue(type eltType): Queue(eltType)
+   .. method:: proc makeBalancedQueue(type eltType): Queue(eltType)
 
       
       Creates a distributed work stealing unbounded queue.
@@ -245,6 +197,6 @@ Queue
       :type eltType: Element type
       
       :arg targetLocales: Locales to distribute across.
-      :type targetLocales: [] locales
+      :type targetLocales: :type:`[] locales`
       
 

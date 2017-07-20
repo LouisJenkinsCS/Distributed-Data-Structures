@@ -144,39 +144,6 @@ be expected of a Queue, and the second being a &#8216;Work&#8217; Queue, which d
 any ordering whatsoever and aims to satiate the desire for high performance. Furthermore,
 we offer two further variants for each: a local version that is optimized for a single locale,
 and a distributed version that is optimized for multiple locales.</p>
-<p>A queue may also be &#8216;frozen&#8217;, in which it becomes immutable. A queue that is immutable
-offers different semantics to one that is mutable; iteration no longer consumes elements,
-allowing for reduction, mapping, and zipping operations with the benefit of parallel-safety,
-as well as making it a proper source for concatenation with other queues.
-A queue may be concatenated with many different sources, from queues, to arrays, to arbitrary
-objects that support serial iteration, which append the other source&#8217;s elements with
-itself. As well, for queues that are bounded, we have an optional (but default)
-transactional approach to adding elements: either all elements are added, or none are
-(with exceptions).</p>
-<p>If the queue is unbounded, it will always succeed with concatenation,
-but if the queue is bounded it may return false if not enough space is
-available. If the operation is &#8216;transactional&#8217;, then if there is not enough
-space, none of the elements are added to the queue; if the operation is not
-transactional, it will add as many elements as possible</p>
-<p>Open Question: Queue concatenation semantics...</p>
-<div class="highlight-chapel"><div class="highlight"><pre><span></span><span class="c1">// FIFO queue with capacity of one item...</span>
-<span class="kd">var</span> <span class="nx">q1</span> <span class="p">:</span> <span class="nx">Queue</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">=</span> <span class="nx">makeBoundedFIFO</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-<span class="c1">// Adds the element &#39;1&#39; to the queue...</span>
-<span class="nx">q1</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="c1">// Ensures we do not consume it when we concatenate in next step</span>
-<span class="nx">q1</span><span class="p">.</span><span class="nx">freeze</span><span class="p">();</span>
-<span class="c1">// Constructs a new queue that inherits the bounded property of the source queue.</span>
-<span class="c1">// Since the elements exceeds the max boundary of the original queue, the bounds</span>
-<span class="c1">// of q2 will be 5. Furthermore, the queue will be frozen after creation.</span>
-<span class="c1">// Note that, in this way, if we had nice inheritence for records we could easily</span>
-<span class="c1">// manage creation of multiple queues like this. What if we had C++ rvalue move-constructors</span>
-<span class="c1">// as well to make stuff like this efficient?</span>
-<span class="kd">var</span> <span class="nx">q2</span> <span class="o">=</span> <span class="nx">q1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">);</span>
-<span class="c1">// Can also be: + reduce (q1 + 1 + (2,3,4,5))</span>
-<span class="c1">// But the above requires memory management of the temporary queue created midway.</span>
-<span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="o">+</span> <span class="k">reduce</span> <span class="nx">q2</span><span class="p">;</span>
-</pre></div>
-</div>
 <dl class="attribute">
 <dt id="Queue.Queue.eltType">
 <em class="property">type </em><code class="descname">eltType</code><a class="headerlink" href="#Queue.Queue.eltType" title="Permalink to this definition">¶</a></dt>
@@ -185,16 +152,21 @@ transactional, it will add as many elements as possible</p>
 
 <dl class="method">
 <dt id="Queue.Queue.enqueue">
-<em class="property">proc </em><code class="descname">enqueue</code><span class="sig-paren">(</span><em>elts: eltType ...?nElts</em>, <em>transactional: bool = true</em><span class="sig-paren">)</span>: (bool, int)<a class="headerlink" href="#Queue.Queue.enqueue" title="Permalink to this definition">¶</a></dt>
+<em class="property">proc </em><code class="descname">enqueue</code><span class="sig-paren">(</span><em>elts: eltType ...?nElts</em><span class="sig-paren">)</span>: (bool, int)<a class="headerlink" href="#Queue.Queue.enqueue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds all elements to the queue, if successful. Elements are added in the
 order they are passed.</p>
+<p>If the queue is unbounded, it will always succeed with concatenation,
+but if the queue is bounded it may return false if not enough space is
+available.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If the enqueue is successful, and how many elements are added.</td>
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>elts</strong> : <a class="reference internal" href="#Queue.Queue.eltType" title="Queue.Queue.eltType"><code class="xref chpl chpl-type docutils literal"><span class="pre">eltType</span></code></a> &#8211; Tuple of elements</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, int)</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">If the enqueue is successful, and how many elements are added.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">(bool,</span> <span class="pre">int)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -202,16 +174,16 @@ order they are passed.</p>
 
 <dl class="method">
 <dt>
-<em class="property">proc </em><code class="descname">enqueue</code><span class="sig-paren">(</span><em>elts: [?n] eltType</em>, <em>transactional: bool = true</em><span class="sig-paren">)</span>: (bool, int)</dt>
-<dd><p>Adds all elements to the queue. Elements are added in the
-order they in the array.</p>
+<em class="property">proc </em><code class="descname">enqueue</code><span class="sig-paren">(</span><em>elts: [?n] eltType</em><span class="sig-paren">)</span>: (bool, int)</dt>
+<dd><p>Adds all elements to the queue. Elements are added in the order they in the array.
+See the first <a class="reference internal" href="#Queue.Queue.enqueue" title="Queue.Queue.enqueue"><code class="xref chpl chpl-proc docutils literal"><span class="pre">enqueue</span></code></a> for more details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If the enqueue is successful, and how many elements are added.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, int)</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">(bool,</span> <span class="pre">int)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -219,17 +191,17 @@ order they in the array.</p>
 
 <dl class="method">
 <dt>
-<em class="property">proc </em><code class="descname">enqueue</code><span class="sig-paren">(</span><em>queue: Queue(eltType)</em>, <em>transactional: bool = true</em><span class="sig-paren">)</span>: bool</dt>
+<em class="property">proc </em><code class="descname">enqueue</code><span class="sig-paren">(</span><em>queue: Queue(eltType)</em><span class="sig-paren">)</span>: (bool, int)</dt>
 <dd><p>Adds all elements to the queue. Elements are added in a more optimized way
-depending on the underlying type of the queue, and maintain the weakest ordering
-of both queues.</p>
+depending on the underlying type of the queue, and maintain <code class="xref chpl chpl-attr docutils literal"><span class="pre">this</span></code> ordering.
+See the first <a class="reference internal" href="#Queue.Queue.enqueue" title="Queue.Queue.enqueue"><code class="xref chpl chpl-proc docutils literal"><span class="pre">enqueue</span></code></a> for more details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If the enqueue is successful, and how many elements are added.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, int)</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">(bool,</span> <span class="pre">int)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -237,18 +209,18 @@ of both queues.</p>
 
 <dl class="method">
 <dt>
-<em class="property">proc </em><code class="descname">enqueue</code><span class="sig-paren">(</span><em>iterObj</em>, <em>transactional: bool = true</em><span class="sig-paren">)</span>: bool</dt>
+<em class="property">proc </em><code class="descname">enqueue</code><span class="sig-paren">(</span><em>iterObj</em><span class="sig-paren">)</span>: (bool, int)</dt>
 <dd><p>Adds all elements yielded by the <cite>iterObj</cite>. In the case where not all
 elements can be added, then it is up to the user to be able to &#8216;replay&#8217;
 elements not consumed and dropped. Elements are added in the order they are
-yielded.</p>
+yielded. See the first <a class="reference internal" href="#Queue.Queue.enqueue" title="Queue.Queue.enqueue"><code class="xref chpl chpl-proc docutils literal"><span class="pre">enqueue</span></code></a> for more details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If the enqueue is successful, and how many elements are added.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, int)</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">(bool,</span> <span class="pre">int)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -264,7 +236,7 @@ yielded.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If the queue is not empty and the item taken if any.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, eltType)</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">(bool,</span> <span class="pre">int)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -280,7 +252,7 @@ yielded.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If the queue is not empty and an array of items taken, if any.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(bool, [?n] eltType)</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">(bool,</span> <span class="pre">[?n]</span> <span class="pre">eltType)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -296,7 +268,7 @@ yielded.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If it is a supported operation.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">bool</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -312,42 +284,44 @@ yielded.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If it is a supported operation.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">bool</span></code></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt>
-<code class="descname">proc +=(elt: eltType ...?nElts): bool</code></dt>
-<dd><p>Alias for enqueue.</p>
-</dd></dl>
-
-<dl class="method">
-<dt>
-<code class="descname">proc +=(queue: Queue(eltType))</code></dt>
-<dd><p>Alias for enqueue.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="Queue.Queue.+">
-<em class="property">proc </em><code class="descname">+</code><span class="sig-paren">(</span><em>elt: eltType ...?nElts</em><span class="sig-paren">)</span><a class="headerlink" href="#Queue.Queue.+" title="Permalink to this definition">¶</a></dt>
-<dd><p>Feedback needed...</p>
-</dd></dl>
-
-<dl class="method">
-<dt>
-<em class="property">proc </em><code class="descname">+</code><span class="sig-paren">(</span><em>queue: Queue(eltType)</em><span class="sig-paren">)</span></dt>
-<dd><p>Feedback needed...</p>
+<dt id="Queue.Queue.isFrozen">
+<em class="property">proc </em><code class="descname">isFrozen</code><span class="sig-paren">(</span><span class="sig-paren">)</span>: bool<a class="headerlink" href="#Queue.Queue.isFrozen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the queue is frozen (immutable).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If queue is frozen</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">bool</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="itermethod">
 <dt id="Queue.Queue.these">
 <em class="property">iter </em><code class="descname">these</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Queue.Queue.these" title="Permalink to this definition">¶</a></dt>
-<dd><p>Iterates over all elements in the queue. If the queue is frozen, then iteration
-is read-only in that it will iterate over all elements without consuming them;
-a normal iteration is equivalent to a more optimized sequence of dequeue operation.</p>
+<dd><p>If the queue is frozen, iteration will iterate over all elements in the list
+without consuming them. If the queue is unfrozen, then iteration will consume
+all elements in the list equivalent to a highly optimized sequence of dequeues.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body">Elements in the queue.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Yield type:</th><td class="field-body"><a class="reference internal" href="#Queue.Queue.eltType" title="Queue.Queue.eltType"><code class="xref chpl chpl-type docutils literal"><span class="pre">eltType</span></code></a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -358,15 +332,14 @@ a normal iteration is equivalent to a more optimized sequence of dequeue operati
 <dd><dl class="method">
 <dt id="Queue.QueueFactory.makeDistributedBoundedFIFO">
 <em class="property">proc </em><code class="descname">makeDistributedBoundedFIFO</code><span class="sig-paren">(</span><em>type eltType</em>, <em>maxElems: uint = 0</em>, <em>targetLocales: [] locale = Locales</em><span class="sig-paren">)</span>: Queue(eltType)<a class="headerlink" href="#Queue.QueueFactory.makeDistributedBoundedFIFO" title="Permalink to this definition">¶</a></dt>
-<dd><p>(WIP - In Planning)</p>
-<p>Creates a distributed bounded strict First-In-First-Out Queue.</p>
+<dd><p>Creates a distributed bounded strict First-In-First-Out Queue.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
 <li><strong>maxElems</strong> : <em>uint</em> &#8211; Maximum number of elements in the queue; halts if value is 0.</li>
-<li><strong>targetLocales</strong> : <em>[] locales</em> &#8211; Locales to distribute across.</li>
+<li><strong>targetLocales</strong> : <code class="xref chpl chpl-type docutils literal"><span class="pre">[]</span> <span class="pre">locales</span></code> &#8211; Locales to distribute across.</li>
 </ul>
 </td>
 </tr>
@@ -377,13 +350,12 @@ a normal iteration is equivalent to a more optimized sequence of dequeue operati
 <dl class="method">
 <dt id="Queue.QueueFactory.makeBoundedFIFO">
 <em class="property">proc </em><code class="descname">makeBoundedFIFO</code><span class="sig-paren">(</span><em>type eltType</em>, <em>maxElems: uint = 0</em><span class="sig-paren">)</span>: Queue(eltType)<a class="headerlink" href="#Queue.QueueFactory.makeBoundedFIFO" title="Permalink to this definition">¶</a></dt>
-<dd><p>(WIP - In Planning)</p>
-<p>Creates a local bounded strict First-In-First-Out Queue.</p>
+<dd><p>Creates a local bounded strict First-In-First-Out Queue.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>maxElems</strong> : <em>uint</em> &#8211; Maximum number of elements in the queue; halts if value is 0.</td>
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>maxElems</strong> : <code class="xref chpl chpl-type docutils literal"><span class="pre">uint</span></code> &#8211; Maximum number of elements in the queue; halts if value is 0.</td>
 </tr>
 </tbody>
 </table>
@@ -397,7 +369,7 @@ a normal iteration is equivalent to a more optimized sequence of dequeue operati
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>targetLocales</strong> : <em>[] locales</em> &#8211; Locales to distribute across.</td>
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>targetLocales</strong> : <code class="xref chpl chpl-type docutils literal"><span class="pre">[]</span> <span class="pre">locales</span></code> &#8211; Locales to distribute across.</td>
 </tr>
 </tbody>
 </table>
@@ -416,28 +388,28 @@ a normal iteration is equivalent to a more optimized sequence of dequeue operati
 </dd></dl>
 
 <dl class="method">
-<dt id="Queue.QueueFactory.makeDistributedWorkQueue">
-<em class="property">proc </em><code class="descname">makeDistributedWorkQueue</code><span class="sig-paren">(</span><em>type eltType</em>, <em>targetLocales: [] locale = Locales</em><span class="sig-paren">)</span>: Queue(eltType)<a class="headerlink" href="#Queue.QueueFactory.makeDistributedWorkQueue" title="Permalink to this definition">¶</a></dt>
+<dt id="Queue.QueueFactory.makeDistributedBalancedQueue">
+<em class="property">proc </em><code class="descname">makeDistributedBalancedQueue</code><span class="sig-paren">(</span><em>type eltType</em>, <em>targetLocales: [] locale = Locales</em><span class="sig-paren">)</span>: Queue(eltType)<a class="headerlink" href="#Queue.QueueFactory.makeDistributedBalancedQueue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a distributed work stealing unbounded queue.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>targetLocales</strong> : <em>[] locales</em> &#8211; Locales to distribute across.</td>
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>targetLocales</strong> : <code class="xref chpl chpl-type docutils literal"><span class="pre">[]</span> <span class="pre">locales</span></code> &#8211; Locales to distribute across.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="Queue.QueueFactory.makeWorkQueue">
-<em class="property">proc </em><code class="descname">makeWorkQueue</code><span class="sig-paren">(</span><em>type eltType</em><span class="sig-paren">)</span>: Queue(eltType)<a class="headerlink" href="#Queue.QueueFactory.makeWorkQueue" title="Permalink to this definition">¶</a></dt>
+<dt id="Queue.QueueFactory.makeBalancedQueue">
+<em class="property">proc </em><code class="descname">makeBalancedQueue</code><span class="sig-paren">(</span><em>type eltType</em><span class="sig-paren">)</span>: Queue(eltType)<a class="headerlink" href="#Queue.QueueFactory.makeBalancedQueue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a distributed work stealing unbounded queue.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>targetLocales</strong> : <em>[] locales</em> &#8211; Locales to distribute across.</td>
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>targetLocales</strong> : <code class="xref chpl chpl-type docutils literal"><span class="pre">[]</span> <span class="pre">locales</span></code> &#8211; Locales to distribute across.</td>
 </tr>
 </tbody>
 </table>
