@@ -27,26 +27,34 @@ use LocalAtomicObject;
   the employment for GlobalAtomicObject.
 */
 
-// Segment statuses
+/*
+  Below are segment statuses, which is a way to make visible to outsiders the
+  current ongoing operation.
+*/
+// Free to contest
 const UNLOCKED : uint = 0;
+// These are normal operations which are for more-verbose debugging purposes.
 const ENQUEUE : uint = 1;
 const DEQUEUE : uint = 2;
-const STEALING_LOCAL_INIT : uint = 3;
-const STEALING_LOCAL_WORK : uint = 4;
-const STEALING_GLOBAL_INIT : uint = 5;
-const STEALING_GLOBAL_WORK : uint 6;
-const STEALING_MERGE : uint = 7;
-const LOCAL_VICTIM : uint = 8;
-const GLOBAL_VICTIM : uint = 9;
+// The work stealer is initializing fields for work stealing, and will be ready soon.
+const STEALING_INIT : uint = 3;
+// The work stealer is currently stealing work, and may require assistance.
+const STEALING_WORK : uint = 4;
+// The work stealer is currently merging work that is stolen, and no longer requires assistance.
+const STEALING_MERGE : uint = 5;
 
-// Work Stealing statuses
-const UNINITIALIZED : int = -2;
+/*
+  Below are statuses specific work queue segment slots.
+*/
+// The work stealer has reinitialized the slot for use.
 const INITIALIZED : int = -1;
-const CLAIMED : int = 0;
-const FINISHED_WITH_NO_WORK : int = 1;
-const FINISHED_WITH_WORK : int = 2;
+// A helper task has finished but has not found any work...
+const FINISHED_WITH_NO_WORK : int = 0;
+// A helper task has finished with work.
+const FINISHED_WITH_WORK : int = 1;
 
 
+// The amount of elements per unroll block; defines the tuple size.
 config param ELEMS_PER_BLOCK = 1024;
 config param logMPMCQueue = false;
 
