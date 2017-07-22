@@ -3,12 +3,28 @@ use Random;
 use Time;
 use BlockDist;
 use BigInteger;
+use LocalAtomicObject;
 
 /*
-  This is a highly parallel work queue that segments the queue on each node into
-  'here.maxTaskPar' segments to maximize potential parallelism. This data structure
-  allows us to attempt both best-case, average-case, and worst-case scenarios by
-  making multiple 'passes' over each segments.
+  A highly parallel segmented queue. Each node gets its own queue, and in each queue
+  its segmented into 'here.maxTaskPar' segments. Segments allow for actual parallelism
+  while operating on the queue in that it enables us to manage 'best-case', 'average-case',
+  and 'worst-case' scenarios by making multiple passes over each segment. Examples
+  of 'best-case' scenarios would be when a segment is unlocked. 'average-case' would be
+  when any unlocked/locked segment, and so on.
+
+  This queue employs work stealing, where after multiple failed passes over the
+  segments in the queue we attempt to steal work from other queues. Work stealing
+  employs a nice helper algorithm where any task performing dequeue operations,
+  after also making multiple failed consecutive passes over the queue,
+  will enlist their help in terms of finding elements from other nodes.
+
+  TODO/BUG: Global work stealing is non-deterministic in terms of whether or not
+  the queue is empty. If we process a node and they steal from another node ahead
+  of us, then we skip over it as if the queue is empty when it really isn't. Its
+  possible a rather large amount has been stolen as well, which makes this extremely
+  problematic. Requires a better global synchronization scheme, definitely need
+  the employment for GlobalAtomicObject.
 */
 
 // Segment statuses
@@ -70,6 +86,10 @@ record WorkQueueSegment {
     return status.compareExchangeStrong(UNLOCKED, newStatus);
   }
 
+  inline proc releaseStatus() {
+    status.write(UNLOCKED);
+  }
+
   // TODO: Increase efficiency of bulk taking
   iter proc takeElements(nElems) {
     while true {
@@ -122,15 +142,34 @@ record WorkQueueSegment {
 }
 
 class WorkQueue : Queue {
-  // Place in own cache line
+  /*
+    Helps evenly distribute and balance placement of elements in a best-effort
+    round-robin approach. In the case where we have parallel enqueues or dequeues,
+    they are less likely overlap with each other. Furthermore, it increases our
+    chance to find our 'ideal' segment.
+  */
   var startIdxEnq : atomic uint;
   var startIdxDeq : atomic uint;
+
+  /*
+    We only allow one segment to be nominated as the 'work stealer' for our queue.
+    This reduces the complexity of having to manage multiple work stealing segments
+    while also providing more concurrency through work stealing.
+  */
   var workStealer : atomic int;
 
   var maxParallelSegmentSpace = {0 .. #here.maxTaskPar};
   var segments : [maxParallelSegmentSpace] WorkQueueSegment(eltType);
 
   const maxIterationsPerPhase = here.maxTaskPar;
+
+  inline nextStartIdxEnq {
+    return (startIdxEnq.fetchAdd(1) % here.maxTaskPar : uint) : int;
+  }
+
+  inline nextStartIdxDeq {
+    return (startIdxDeq.fetchAdd(1) % here.maxTaskPar : uint) : int;
+  }
 
   proc WorkQueue(type eltType) {
     workStealer.write(-1);
@@ -141,31 +180,11 @@ class WorkQueue : Queue {
   */
 
   proc enqueue(elt : eltType) {
-    var startIdx = startIdxEnq.fetchAdd(1) % here.maxTaskPar : uint;
+    var startIdx = nextStartIdxEnq;
     var segmentIdx = enqueueAcquire(startIdx);
-    ref seg = segments[segmentIdx];
-    var block = seg.tailBlock;
-
-    // Empty?
-    if block == nil then {
-      seg.tailBlock = new WorkQueueSegmentBlock(eltType);
-      seg.headBlock = seg.tailBlock;
-      block = seg.tailBlock;
-    }
-
-    // Full?
-    if block.nElems == ELEMS_PER_BLOCK {
-      block.next = new WorkQueueSegmentBlock(eltType);
-      seg.tailBlock = block.next;
-      block = block.next;
-    }
-
-    block.nElems = block.nElems + 1;
-    block.elems[block.nElems] = elt;
-
-
-    seg.nElems.add(1);
-    seg.status.write(UNLOCKED);
+    ref segment = segments[segmentIdx];
+    segment.addElements(elt);
+    segment.releaseStatus();
   }
 
   proc enqueueAcquire(startIdx) : int {
@@ -173,8 +192,11 @@ class WorkQueue : Queue {
     var iterations = 0;
 
     /*
-      In the first pass over each segment, we look for the 'best-case' scenario where
-      we can find a segment that is unlocked and attempt to acquire it.
+      Pass 1: Best Case
+
+      Find a segment that is unlocked and attempt to acquire it. As we are adding
+      elements, we don't care how many elements there are, just that we find
+      some place to add ours.
     */
     while iterations < maxIterationsPerPhase {
       ref segment = segments[idx];
@@ -192,11 +214,12 @@ class WorkQueue : Queue {
     idx = startIdx : int;
 
     /*
-      Look for the 'average-case' scenario, where we find any segment (locked or unlocked)
-      and make an attempt to acquire it. If the segment is actively 'work stealing'
-      then we skip over it to minimize the excessive wait-time; given that there
-      can be only *one* work-stealer for a node, we know we'll find a better one
-      nearby.
+      Pass 2: Average Case
+
+      Find any segment (locked or unlocked) and make an attempt to acquire it.
+      If the segment is actively 'work stealing' then we skip over it to minimize
+      the excessive wait-time; given that there can be only *one* work-stealer
+      for a node, we know we'll find a better one nearby.
     */
     while true {
       ref segment = segments[idx];
@@ -232,8 +255,38 @@ class WorkQueue : Queue {
     Dequeue...
   */
 
+
   proc dequeue() : (bool, eltType) {
-    var startIdx = startIdxDeq.fetchAdd(1) % here.maxTaskPar : uint;
+    var startIdx = nextStartIdxDeq;
+    var idx = startIdx;
+    var iterations = 0;
+
+    /*
+      Pass 1: Best Case
+
+      Find the first bucket that is both unlocked and contains elements. 
+    */
+    while iterations < maxIterationsPerPhase {
+      ref segment = segments[idx];
+
+      // Attempt to acquire...
+      if !segment.isEmpty && segment.acquireWithStatus(DEQUEUE) {
+        var (hasElem, elem) : (bool, eltType);
+        for elt in segment.takeElements(1) do (hasElem, elem) = (true, elt);
+
+        if hasElem {
+          return (hasElem, elem);
+        }
+      }
+
+      iterations = iterations + 1;
+      idx = (idx + 1) % here.maxTaskPar;
+    }
+
+    idx = startIdx;
+    iterations = 0;
+
+
 
     var (hasElem, elem) = dequeueAcquirePhase1(startIdx);
     if !hasElem then (hasElem, elem) = dequeueAcquirePhase2(startIdx);
