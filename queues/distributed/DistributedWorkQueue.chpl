@@ -57,6 +57,13 @@ class WorkQueueSegmentBlock {
   var next : WorkQueueSegmentBlock(eltType);
 }
 
+record WorkQueueSegmentSlot {
+  type eltType;
+
+  var status : atomic int;
+  var block : WorkQueueSegmentBlock(eltType);
+}
+
 record WorkQueueSegment {
   type eltType;
 
@@ -65,14 +72,28 @@ record WorkQueueSegment {
   var headBlock : WorkQueueSegmentBlock(eltType);
   var tailBlock : WorkQueueSegmentBlock(eltType);
 
-  // For when we are stealing work... helper threads may attempt to
-  // help during a steal by setting one of the values from -1 to 0, and
-  // when they are finished they may set it to 1 indicating that they are finished.
-  // The first part helps distribute work to tasks waiting and doing nothing, and the
-  // last part helps us know when we can declare that work stealing is finished.
-  var workStealingStatus : [{0 .. #here.maxTaskPar}] atomic int;
-  var workStolen : [{0 .. #here.maxTaskPar}] WorkQueueSegmentBlock(eltType);
-  var workStealingIdx : atomic int;
+  /*
+    Fields specific to work stealing for this segment (given 'ws' prefix).
+    A helper must first 'register' themselves in our status table, which keeps
+    track of which cells are currently taken and which are not. In work stealing,
+    we attempt to steal MAX_ELEMS * here.maxTaskPar elements, but never assign
+    more than one task to a given node.
+  */
+
+  // Number of potential helpers. We don't want more workers than there are nodes.
+  const wsNumSlots = min(numLocales - 1, here.maxTaskPar);
+
+  // A randomly chosen offset we begin stealing at. Needed to prevent starvation
+  // of nodes inherent in choosing some arbitrary fixed startpoint.
+  var wsStartOffset : int;
+
+  // Used to atomically obtain a slot. A task knows they have a slot if it in
+  // [0, wsNumSlots). If it is outside of this range, then all slots are filled
+  // or this work stealing session is over before the next is initialized.
+  var wsSlotsTaken : atomic int;
+
+  // Slots which keep track of data stolen as well as the current status of the helper task.
+  var wsSlots : [{0..#wsNumSlots}] WorkQueueSegmentSlot(eltType);
 
   // Number of elements currently in the list to allow faster determinism of whether
   // or not an operation should attempt this bucket.
