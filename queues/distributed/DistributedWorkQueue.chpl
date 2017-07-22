@@ -4,6 +4,13 @@ use Time;
 use BlockDist;
 use BigInteger;
 
+/*
+  This is a highly parallel work queue that segments the queue on each node into
+  'here.maxTaskPar' segments to maximize potential parallelism. This data structure
+  allows us to attempt both best-case, average-case, and worst-case scenarios by
+  making multiple 'passes' over each segments.
+*/
+
 // Segment statuses
 const UNLOCKED : uint = 0;
 const ENQUEUE : uint = 1;
@@ -56,26 +63,61 @@ record WorkQueueSegment {
   var nElems : atomic uint;
 
   inline proc isEmpty {
-    /*if nElems.read() == 0 && (headBlock != nil || tailBlock != nil) then halt("nElems is 0 but tail/head is not nil! tailBlock: ", tailBlock, ", headBlock: ", headBlock);*/
-    /*if (headBlock == nil || tailBlock != nil) && nElems.read() != 0 then halt("nElems is not 0, but tail/head is nil! nElems: ", nElems);*/
     return nElems.read() == 0;
   }
 
-  inline proc take {
-    if isEmpty then return (false, _defaultOf(eltType));
+  inline proc acquireWithStatus(newStatus) {
+    return status.compareExchangeStrong(UNLOCKED, newStatus);
+  }
 
-    var elem = headBlock.elems[headBlock.nElems];
-    headBlock.nElems = headBlock.nElems - 1;
-    nElems.sub(1);
+  // TODO: Increase efficiency of bulk taking
+  iter proc takeElements(nElems) {
+    while true {
+      if isEmpty {
+        return;
+      }
 
-    // Fix list if we consumed last one...
-    if headBlock.nElems == 0 {
-      var block = headBlock;
-      headBlock = headBlock.next;
-      delete block;
+      var elem = headBlock.elems[headBlock.nElems];
+      headBlock.nElems = headBlock.nElems - 1;
+      nElems.sub(1);
+
+      // Fix list if we consumed last one...
+      if headBlock.nElems == 0 {
+        var block = headBlock;
+        headBlock = headBlock.next;
+        delete block;
+      }
+
+      yield elem;
+    }
+  }
+
+  // TODO: Increase efficiency of bulk adding
+  proc addElements(elts) {
+    var block = tailBlock;
+
+    // Empty?
+    if block == nil then {
+      tailBlock = new WorkQueueSegmentBlock(eltType);
+      headBlock = tailBlock;
+      block = tailBlock;
     }
 
-    return (true, elem);
+    for elt in elts {
+      // Full?
+      if block.nElems == ELEMS_PER_BLOCK {
+        block.next = new WorkQueueSegmentBlock(eltType);
+        tailBlock = block.next;
+        block = block.next;
+      }
+
+      block.nElems = block.nElems + 1;
+      block.elems[block.nElems] = elt;
+
+      // We update the count in each iteration to increase the visibility of this
+      // operation (as dequeue operations would skip over us during 2nd pass)
+      nElems.add(1);
+    }
   }
 }
 
@@ -127,25 +169,18 @@ class WorkQueue : Queue {
   }
 
   proc enqueueAcquire(startIdx) : int {
-    var retval = enqueueAcquirePhase1(startIdx);
-    if retval == -1 {
-      retval = enqueueAcquirePhase2(startIdx);
-    }
-
-    return retval;
-  }
-
-  // In Phase 1, we attempt to acquire the first bucket that is unlocked
-  proc enqueueAcquirePhase1(startIdx) : int {
     var idx = startIdx : int;
     var iterations = 0;
 
-    // Find first free bucket
+    /*
+      In the first pass over each segment, we look for the 'best-case' scenario where
+      we can find a segment that is unlocked and attempt to acquire it.
+    */
     while iterations < maxIterationsPerPhase {
-      ref seg = segments[idx];
+      ref segment = segments[idx];
 
       // Attempt to acquire...
-      if seg.status.compareExchangeStrong(UNLOCKED, ENQUEUE) {
+      if segment.status.compareExchangeStrong(UNLOCKED, ENQUEUE) {
         return idx;
       }
 
@@ -153,24 +188,26 @@ class WorkQueue : Queue {
       idx = (idx + 1) % here.maxTaskPar;
     }
 
-    return -1;
-  }
+    iterations = 0;
+    idx = startIdx : int;
 
-  // In Phase 2, we attempt to acquire the first bucket that is locked...
-  proc enqueueAcquirePhase2(startIdx) : int {
-    var idx = startIdx : int;
-
-    // Find first free bucket
+    /*
+      Look for the 'average-case' scenario, where we find any segment (locked or unlocked)
+      and make an attempt to acquire it. If the segment is actively 'work stealing'
+      then we skip over it to minimize the excessive wait-time; given that there
+      can be only *one* work-stealer for a node, we know we'll find a better one
+      nearby.
+    */
     while true {
-      ref seg = segments[idx];
+      ref segment = segments[idx];
 
       // Attempt to acquire...
       while true {
-        var currStatus = seg.status.read();
+        var currStatus = segment.status.read();
 
         select currStatus {
           when UNLOCKED do {
-            if seg.status.compareExchangeStrong(UNLOCKED, ENQUEUE) {
+            if segment.status.compareExchangeStrong(UNLOCKED, ENQUEUE) {
               return idx;
             }
           }
@@ -188,9 +225,8 @@ class WorkQueue : Queue {
       idx = (idx + 1) % here.maxTaskPar;
     }
 
-    halt("Broke out of phase 2 without getting segment...");
+    halt("Almost exited enqueueAcquire before getting a segment...");
   }
-
 
   /*
     Dequeue...
