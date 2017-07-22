@@ -86,6 +86,14 @@ record WorkQueueSegment {
     return status.compareExchangeStrong(UNLOCKED, newStatus);
   }
 
+  inline proc isUnlocked {
+    return status.read() == UNLOCKED;
+  }
+
+  inline proc currentStatus {
+    return status.read();
+  }
+
   inline proc releaseStatus() {
     status.write(UNLOCKED);
   }
@@ -181,13 +189,6 @@ class WorkQueue : Queue {
 
   proc enqueue(elt : eltType) {
     var startIdx = nextStartIdxEnq;
-    var segmentIdx = enqueueAcquire(startIdx);
-    ref segment = segments[segmentIdx];
-    segment.addElements(elt);
-    segment.releaseStatus();
-  }
-
-  proc enqueueAcquire(startIdx) : int {
     var idx = startIdx : int;
     var iterations = 0;
 
@@ -202,8 +203,10 @@ class WorkQueue : Queue {
       ref segment = segments[idx];
 
       // Attempt to acquire...
-      if segment.status.compareExchangeStrong(UNLOCKED, ENQUEUE) {
-        return idx;
+      if segment.acquireWithStatus(ENQUEUE) {
+        segment.addElements(elt);
+        segment.releaseStatus();
+        return;
       }
 
       iterations = iterations + 1;
@@ -224,14 +227,14 @@ class WorkQueue : Queue {
     while true {
       ref segment = segments[idx];
 
-      // Attempt to acquire...
       while true {
-        var currStatus = segment.status.read();
-
-        select currStatus {
+        select segment.currentStatus {
+          // Quick acquire...
           when UNLOCKED do {
-            if segment.status.compareExchangeStrong(UNLOCKED, ENQUEUE) {
-              return idx;
+            if segment.acquireWithStatus(ENQUEUE) {
+              segment.addElements(elt);
+              segment.releaseStatus();
+              return;
             }
           }
           // If someone is stealing, then that means that we'd be waiting for a while
@@ -241,7 +244,6 @@ class WorkQueue : Queue {
           when STEALING_MERGE do break;
         }
 
-        // TODO: Implement exponential backoff + yielding
         chpl_task_yield();
       }
 
@@ -264,7 +266,9 @@ class WorkQueue : Queue {
     /*
       Pass 1: Best Case
 
-      Find the first bucket that is both unlocked and contains elements. 
+      Find the first bucket that is both unlocked and contains elements. This is
+      extremely helpful in the case where we have a good distribution of elements
+      in each segment.
     */
     while iterations < maxIterationsPerPhase {
       ref segment = segments[idx];
@@ -273,6 +277,7 @@ class WorkQueue : Queue {
       if !segment.isEmpty && segment.acquireWithStatus(DEQUEUE) {
         var (hasElem, elem) : (bool, eltType);
         for elt in segment.takeElements(1) do (hasElem, elem) = (true, elt);
+        segment.releaseStatus();
 
         if hasElem {
           return (hasElem, elem);
@@ -286,56 +291,23 @@ class WorkQueue : Queue {
     idx = startIdx;
     iterations = 0;
 
+    /*
+      Pass 2: Average Case
 
-
-    var (hasElem, elem) = dequeueAcquirePhase1(startIdx);
-    if !hasElem then (hasElem, elem) = dequeueAcquirePhase2(startIdx);
-    if !hasElem then (hasElem, elem) = dequeueAcquirePhase3(startIdx);
-
-    return (hasElem, elem);
-  }
-
-  // Phase 1: acquire unlocked bucket which contains elements
-  proc dequeueAcquirePhase1(startIdx) : (bool, eltType) {
-    var idx = startIdx : int;
-    var maxIterations = here.maxTaskPar;
-    var iterations = 0;
-
-    // Find first non-empty free bucket
+      Find the first bucket containing elements. We don't care if it is locked
+      or unlocked this time, just that it contains elements; this handles majority
+      of cases where we have elements anywhere in any segment.
+    */
     while iterations < maxIterations {
-      ref seg = segments[idx];
+      ref segment = segments[idx];
 
       // Attempt to acquire...
-      if !seg.isEmpty && seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
-        var (hasElem, elem) = seg.take;
-        seg.status.write(UNLOCKED);
-        if hasElem {
-          return (hasElem, elem);
-        }
-      }
+      while !segment.isEmpty {
+        if segment.isUnlocked && segment.acquireWithStatus(DEQUEUE) {
+          var (hasElem, elem) : (bool, eltType);
+          for elt in segment.takeElements(1) do (hasElem, elem) = (true, elt);
+          segment.releaseStatus();
 
-      iterations = iterations + 1;
-      idx = (idx + 1) % here.maxTaskPar;
-    }
-
-    return (false, _defaultOf(eltType));
-  }
-
-  // Phase 2: acquire locked bucket which contains elements
-  proc dequeueAcquirePhase2(startIdx) : (bool, eltType) {
-    var idx = startIdx : int;
-    var maxIterations = here.maxTaskPar;
-    var iterations = 0;
-
-    // Find first non-empty bucket
-    while iterations < maxIterations {
-      ref seg = segments[idx];
-
-      // Attempt to acquire...
-      while !seg.isEmpty {
-        if seg.status.read() == UNLOCKED && seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
-          var (hasElem, elem) = seg.take;
-          seg.status.write(UNLOCKED);
           if hasElem {
             return (hasElem, elem);
           }
@@ -349,46 +321,60 @@ class WorkQueue : Queue {
       idx = (idx + 1) % here.maxTaskPar;
     }
 
-    return (false, _defaultOf(eltType));
-  }
+    idx = startIdx;
 
-  // Phase 3: Take any bucket whether it is locked or unlocked, empty or non-empty
-  proc dequeueAcquirePhase3(startIdx) : (bool, eltType) {
-    var idx = startIdx : int;
+    /*
+      Pass 3: Worst Case
+
+      After two full iterations, we're sure the queue is full at this point, so we
+      can attempt to steal work from other nodes. In this pass, we find *any* segment
+      and if it is empty, we attempt to become the work-stealer; if someone else is the
+      current work stealer we assist them instead and lift an element for ourselves.
+
+      Furthermore, in this phase we loop indefinitely until we are 100% certain it is
+      empty or we get an item, so introduce some backoff here.
+    */
     var backoff = 0;
-
-    // Attempt to acquire...
     while true {
-      ref seg = segments[idx];
-      if logMPMCQueue then writeln("Polling on segment #", idx);
-      var currStatus = seg.status.read();
+      ref segment = segments[idx];
 
-      select currStatus {
+      select segment.currentStatus {
         // Quick acquire
         when UNLOCKED {
           backoff = 0;
-          if seg.status.compareExchangeStrong(UNLOCKED, DEQUEUE) {
+          if segment.acquireWithStatus(DEQUEUE) {
             // Steal if empty... because we help if we are not the one set, we only
             // know whether the queue is empty if we were the work stealer.
             if seg.isEmpty {
               var (_idx, hasElem, elem) = stealWork(idx);
-              if _idx == idx && !hasElem then return (false, _defaultOf(eltType));
-              else idx = _idx;
+
+              // If we have lifted an element, we've retrieved an item.
+              if hasElem {
+                return (hasElem, elem);
+              }
+
+              // If the index returned is equivalent to ours, then we were the 'work stealer'
+              // for our queue, and since only we personally know how many elements there are
+              // (as we were in charge of merging all work stolen), we know the queue is empty.
+              // Otherwise, if the index differs then it means we helped assist another
+              // segment in work stealing and we should move to it as if there is any work
+              // available, it would be there.
+              if _idx == idx && !hasElem {
+                return (false, _defaultOf(eltType));
+              } else {
+                idx = _idx;
+              }
+
               continue;
             }
 
-            var retval = seg.take;
-            seg.status.write(UNLOCKED);
-            return retval;
+            // We're lucky; another element has been added to the current segment,
+            // take it and leave like normal...
+            var (hasElem, elem) : (bool, eltType);
+            for elt in segment.takeElements(1) do (hasElem, elem) = (true, elt);
+            segment.releaseStatus();
+            return (hasElem, elem);
           }
-        }
-        // This segment is being stolen from. Switch to that segment...
-        when VICTIM {
-          var currStealer = workStealer.read();
-          if logMPMCQueue then writeln("Victimized segment #", idx, ", moving to work stealing segment #", currStealer);
-          if currStealer != -1 then idx = currStealer;
-          backoff = 0;
-          continue;
         }
         // If someone else is stealing work, we add ourself as a potential helper
         // to help speed this along, and hopefully we get an element for ourself.
@@ -396,7 +382,9 @@ class WorkQueue : Queue {
           var (hasElem, elem) = helpStealWork(startIdx);
 
           // We have our element...
-          if hasElem then return (hasElem, elem);
+          if hasElem {
+            return (hasElem, elem);
+          }
           backoff = 0;
         }
       }
@@ -404,9 +392,10 @@ class WorkQueue : Queue {
       // Backoff to maximum...
       if backoff == 0 then chpl_task_yield();
       else sleep(max(1000, 2 ** backoff), TimeUnits.microseconds);
+      backoff = backoff + 1;
     }
 
-    halt("Somehow exited loop in Phase 3...");
+    halt("Somehow exited without acquiring an item for dequeue...");
   }
 
   /*
