@@ -56,6 +56,13 @@ const FINISHED_WITH_WORK : int = 1;
 
 // The amount of elements per unroll block; defines the tuple size.
 config param ELEMS_PER_BLOCK = 1024;
+// The amount we attempt to steal from each segment of other nodes. Helps to
+// further ensure a proper load balance by not leaving segments empty by stealing
+// on average 1/4 of their work, leaving them with 3/4. As we steal from *all* other
+// segments, it is imperative that this stays low to prevent a ping-pong effect on
+// work propagating from excessive work stealing. We steal at least one element, but
+// no more than ELEMS_PER_BLOCK per segment.
+config param WORK_STEALING_RATIO = 0.25;
 config param logMPMCQueue = false;
 
 class WorkQueueSegmentBlock {
@@ -63,6 +70,21 @@ class WorkQueueSegmentBlock {
   var nElems : int;
   var elems : ELEMS_PER_BLOCK * eltType;
   var next : WorkQueueSegmentBlock(eltType);
+
+  iter drain(n) {
+    while n > 0 {
+      if nElems == 0 {
+        return;
+      }
+
+      var elem = elems[nElems];
+      nElems = headBlock.nElems - 1;
+      nElems.sub(1);
+
+      yield elem;
+      n = n - 1;
+    }
+  }
 }
 
 record WorkQueueSegmentSlot {
@@ -84,7 +106,7 @@ record WorkQueueSegment {
     Fields specific to work stealing for this segment (given 'ws' prefix).
     A helper must first 'register' themselves in our status table, which keeps
     track of which cells are currently taken and which are not. In work stealing,
-    we attempt to steal MAX_ELEMS * here.maxTaskPar elements, but never assign
+    we attempt to steal ELEMS_PER_BLOCK * here.maxTaskPar elements, but never assign
     more than one task to a given node.
   */
 
@@ -431,89 +453,92 @@ class WorkQueue : Queue {
     Work Stealing
   */
 
-  // We have the lock but it is empty, try to set ourself as work stealer...
-  // As our index can change based on whether or not we become the work stealer
-  // or help someone else become the work stealer, we return our acquired index.
+  /*
+    Attempt to steal work as the segment referenced by 'idx'. As we may only have
+    one work stealing segment, we must first contest for that right. If we obtain
+    that right, we become responsible with coordinating and distributing work to other
+    helper tasks, and then merging all of the work together. If another segment has
+    that right, we move to that segment and become one of their helpers.
+  */
   proc stealWork(idx) : (int, bool, eltType) {
-    ref seg = segments[idx];
+    ref segment = segments[idx];
+
+    // We can't steal if we're the only ones, so return as empty
+    if numLocales == 1 {
+        return (idx, false, _defaultOf(eltType));
+    }
 
     if logMPMCQueue then writeln("Attempting to steal work for segment #", idx);
 
-    // If we set ourself as work stealer, we may proceed, otherwise if someone else
-    // is set, we help them out instead...
+    // Attempt to become the sole work stealing segment. If we fail, then we enlist
+    // our aid to the current work stealing segment as a helper.
     while true {
-      if workStealer.compareExchangeStrong(-1, idx) then break;
+      // We are the new work stealing segment...
+      if workStealer.compareExchangeStrong(-1, idx) {
+        break;
+      }
 
-      // Someone else is set...
-      var currStealer = workStealer.read();
-      if currStealer != -1 {
-        seg.status.write(UNLOCKED);
-        var (hasElem, elem) = helpStealWork(currStealer);
-        return (currStealer, hasElem, elem);
+      // Another segment is the work stealing segment; help them out...
+      // If we help steal work, it is possible we also lift an element while helping
+      // Furthermore, we also return the index of the work stealing segment, as it is
+      // likely to have more work.
+      var currentStealer = workStealer.read();
+      if currentStealer != -1 {
+        segment.releaseStatus();
+        var (hasElem, elem) = helpStealWork(currentStealer);
+        return (currentStealer, hasElem, elem);
       }
     }
 
-    // We are the current work stealer, so our responsibility is to initialize
-    // all work statuses and signal that we may begin our work stealing
-    for status in seg.workStealingStatus do status.write(INITIALIZED);
-    seg.workStealingIdx.write(0);
-    seg.status.write(STEALING_LOCAL_WORK);
+    // Initialize each slot for potential helpers. It is imperative that we initialize
+    // the slots *before* resetting the wsSlotsTaken to avoid race conditions, as
+    // helpers only help if they obtain a valid index.
+    for slot in segment.wsSlots {
+      slot.status.write(INITIALIZED);
+    }
+    segment.wsStartOffset = makeRandomStream(int).getNext() % numLocales;
+    segment.wsSlotsTaken.write(0);
+    segment.status.write(STEALING_WORK);
 
-    // Help steal work with everyone else
+    // Help yourself...
     var (hasElem, elem) = helpStealWork(idx);
-    seg.status.write(STEALING_MERGE);
+    // Lets others know that we no longer require help.
+    segment.status.write(STEALING_MERGE);
     if logMPMCQueue then writeln("Merging work stolen on segment #", idx);
 
-    // We are finished, all work stolen (if any) are now available...
-    // As work stealer, our next job is merge it all together...
-    for i in 0..#here.maxTaskPar {
-      // Spin until they are finished... if they finish but have no work, skip them
-      while seg.workStealingStatus[i].read() <= CLAIMED do chpl_task_yield();
-      if i == idx || seg.workStealingStatus[i].read() != FINISHED_WITH_WORK then continue;
+    // At this point, it is possible that other helpers are still working, and so
+    // we wait for them to finish. Merge what has been stolen.
+    for slot in segment.wsSlots {
+      // Wait for the current helper to finish, and when they do skip any without work...
+      while slot.status.read() == INITIALIZED do chpl_task_yield();
+      if slot.status.read() == FINISHED_WITH_NO_WORK then continue;
 
-      // TODO: Find a way copy data from one tuple to another that is faster
-      ref stolenBlock = seg.workStolen[i];
+      ref stolenBlock = slot.block;
       var tailBlock = seg.tailBlock;
-
       var blockElems = stolenBlock.nElems;
-      seg.nElems.add(blockElems : uint);
-      while stolenBlock.nElems > 0 {
-        // If we haven't stolen an element by now, do so
+      segment.nElems.add(blockElems : uint);
+
+      // Drain elements we've stolen and merge it into our segment.
+      for elt in stolenBlock.drain(ELEMS_PER_BLOCK) {
+        // If we have not lifted an element for ourself by now, do so.
         if !hasElem {
-          elem = stolenBlock.elems[stolenBlock.nElems];
+          elem = elt;
           hasElem = true;
-          stolenBlock.nElems = stolenBlock.nElems - 1;
-          seg.nElems.sub(1);
+          segment.nElems.sub(1);
           if logMPMCQueue then writeln("Lifted element ", elem, " from block stolen from segment #", i, " as segment #", idx);
           continue;
         }
 
-        if tailBlock.nElems == ELEMS_PER_BLOCK {
-          tailBlock.next = new WorkQueueSegmentBlock(eltType);
-          seg.tailBlock = tailBlock.next;
-          tailBlock = tailBlock.next;
-        }
-
-        tailBlock.nElems = tailBlock.nElems + 1;
-        tailBlock.elems[tailBlock.nElems] = stolenBlock.elems[stolenBlock.nElems];
-        stolenBlock.nElems = stolenBlock.nElems - 1;
+        segment.addElements(elt);
       }
 
       delete stolenBlock;
     }
 
-    // Check to see if we have actually stolen any work. (I.E: We haven't lifted any)
-    if !hasElem {
-      // Since we can verify that the queue is empty, we need to look elsewhere.
-
-    }
-
-    // No longer work stealer
+    // At this point, we have stolen from all other nodes, and we may relinquish
+    // our role as primary work-stealer.
     workStealer.write(-1);
-    seg.status.write(UNLOCKED);
-
-    // At this point, we have successfully stolen work. Furthermore, we have
-    // stolen at least one element for ourself.
+    segment.releaseStatus();
     return (idx, hasElem, elem);
   }
 
