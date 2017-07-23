@@ -517,26 +517,30 @@ class WorkQueue : Queue {
       while slot.status.read() == INITIALIZED do chpl_task_yield();
       if slot.status.read() == FINISHED_WITH_NO_WORK then continue;
 
-      ref stolenBlock = slot.block;
+      var stolenBlock = slot.block;
       var tailBlock = seg.tailBlock;
       var blockElems = stolenBlock.nElems;
       segment.nElems.add(blockElems : uint);
 
-      // Drain elements we've stolen and merge it into our segment.
-      for elt in stolenBlock.drain(ELEMS_PER_BLOCK) {
-        // If we have not lifted an element for ourself by now, do so.
-        if !hasElem {
-          elem = elt;
-          hasElem = true;
-          segment.nElems.sub(1);
-          if logMPMCQueue then writeln("Lifted element ", elem, " from block stolen from segment #", i, " as segment #", idx);
-          continue;
+      while stolenBlock != nil {
+        // Drain elements we've stolen and merge it into our segment.
+        for elt in stolenBlock.drain(ELEMS_PER_BLOCK) {
+          // If we have not lifted an element for ourself by now, do so.
+          if !hasElem {
+            elem = elt;
+            hasElem = true;
+            segment.nElems.sub(1);
+            if logMPMCQueue then writeln("Lifted element ", elem, " from block stolen from segment #", i, " as segment #", idx);
+            continue;
+          }
+
+          segment.addElements(elt);
         }
 
-        segment.addElements(elt);
+        var tmp = stolenBlock;
+        stolenBlock = stolenBlock.next;
+        delete tmp;
       }
-
-      delete stolenBlock;
     }
 
     // At this point, we have stolen from all other nodes, and we may relinquish
@@ -585,7 +589,10 @@ class WorkQueue : Queue {
       // We know which locale we are going to be working on, but we must setup some
       // temporaries that can make it easier for back-and-forth communication.
       // We create an array of tuples, one for each segment on the other node.
+      // As well, in case a segment is skipped, we initialize the index at '1'
+      // to signify that it is empty.
       var stolenWork : [{0..#Locales[slot.locIdx].maxTaskPar}] (int, ELEMS_PER_BLOCK * eltType);
+      for work in stolenWork do work[1] = 1;
 
       on Locales[slot.locIdx] {
         // We keep track of a simple bitmap to keep track of which segments we have
@@ -673,8 +680,31 @@ class WorkQueue : Queue {
       }
 
       // Link all of the stolen work together (only if they contain any work)
-      
+      for (idx, work) in stolenWork {
+        // Is empty
+        if idx == 1 then continue;
 
+        // Lift an element if not already...
+        if !hasElem {
+          hasElem = true;
+          elem = work[idx - 1];
+          idx = idx - 1;
+
+          // Consumed last element?
+          if idx == 1 then continue;
+        }
+
+        // Create
+        var block = new LocalWorkQueueSegmentBlock(eltType);
+        block.nElems = idx;
+        block.elems = work;
+
+        // Append
+        block.next = slot.block;
+        slot.block = block;
+      }
+
+      if slot.block == nil then slot.status.write(FINISHED_WITH_NO_WORK) else slot.status.write(FINISHED_WITH_WORK);
       if logMPMCQueue then writeln("Finished stealing ", nStolen, " amounts of work for segment #", idx);
     }
 
