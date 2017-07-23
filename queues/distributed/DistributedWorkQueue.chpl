@@ -3,7 +3,6 @@ use Random;
 use Time;
 use BlockDist;
 use BigInteger;
-use LocalAtomicObject;
 
 /*
   A highly parallel segmented queue. Each node gets its own queue, and in each queue
@@ -72,17 +71,17 @@ class WorkQueueSegmentBlock {
   var next : WorkQueueSegmentBlock(eltType);
 
   iter drain(n) {
+    var iterations = n;
     while n > 0 {
       if nElems == 0 {
         return;
       }
 
       var elem = elems[nElems];
-      nElems = headBlock.nElems - 1;
-      nElems.sub(1);
+      nElems = nElems - 1;
 
       yield elem;
-      n = n - 1;
+      iterations = iterations - 1;
     }
   }
 }
@@ -113,7 +112,7 @@ record WorkQueueSegment {
   */
 
   // Number of potential helpers. We don't want more workers than there are nodes.
-  const wsNumSlots = numLocales - 1;
+  var wsNumSlots = numLocales - 1;
 
   // Used to atomically obtain a slot. A task knows they have a slot if it in
   // [0, wsNumSlots). If it is outside of this range, then all slots are filled
@@ -148,25 +147,87 @@ record WorkQueueSegment {
   }
 
   // TODO: Increase efficiency of bulk taking
-  iter proc takeElements(nElems) {
-    while true {
+  proc takeElements(n) {
+    var iterations = n;
+    var arr : [{0..#n : int}] eltType;
+    var arrIdx = 0;
+    while iterations > 0 {
       if isEmpty {
-        return;
+        halt("Attempted to take ", n, " elements when insufficient");
       }
 
-      var elem = headBlock.elems[headBlock.nElems];
+      if headBlock.nElems == 0 {
+        halt("Iterating over ", n, " elements but Head block is 0 but nElems is ", nElems.read());
+      }
+
+      arr[arrIdx] = headBlock.elems[headBlock.nElems];
+      arrIdx = arrIdx + 1;
       headBlock.nElems = headBlock.nElems - 1;
       nElems.sub(1);
 
       // Fix list if we consumed last one...
       if headBlock.nElems == 0 {
-        var block = headBlock;
+        var tmp = headBlock;
         headBlock = headBlock.next;
-        delete block;
+        delete tmp;
+
+        if headBlock == nil then tailBlock = nil;
       }
 
-      yield elem;
+      iterations = iterations - 1;
     }
+
+    return arr;
+  }
+
+  proc takeElement() {
+    if isEmpty {
+      return (false, _defaultOf(eltType));
+    }
+
+    if headBlock.nElems == 0 {
+      halt("Iterating over ", 1, " elements but Head block is 0 but nElems is ", nElems.read());
+    }
+
+    var elem = headBlock.elems[headBlock.nElems];
+    headBlock.nElems = headBlock.nElems - 1;
+    nElems.sub(1);
+
+    // Fix list if we consumed last one...
+    if headBlock.nElems == 0 {
+      var tmp = headBlock;
+      headBlock = headBlock.next;
+      delete tmp;
+
+      if headBlock == nil then tailBlock = nil;
+    }
+
+    return (true, elem);
+  }
+
+  proc addElements(elt : eltType) {
+    var block = tailBlock;
+
+    // Empty?
+    if block == nil then {
+      tailBlock = new WorkQueueSegmentBlock(eltType);
+      headBlock = tailBlock;
+      block = tailBlock;
+    }
+
+    // Full?
+    if block.nElems == ELEMS_PER_BLOCK {
+      block.next = new WorkQueueSegmentBlock(eltType);
+      tailBlock = block.next;
+      block = block.next;
+    }
+
+    block.nElems = block.nElems + 1;
+    block.elems[block.nElems] = elt;
+
+    // We update the count in each iteration to increase the visibility of this
+    // operation (as dequeue operations would skip over us during 2nd pass)
+    nElems.add(1);
   }
 
   // TODO: Increase efficiency of bulk adding
@@ -223,11 +284,11 @@ class WorkQueue : Queue {
 
   const maxIterationsPerPhase = here.maxTaskPar;
 
-  inline nextStartIdxEnq {
+  inline proc nextStartIdxEnq {
     return (startIdxEnq.fetchAdd(1) % here.maxTaskPar : uint) : int;
   }
 
-  inline nextStartIdxDeq {
+  inline proc nextStartIdxDeq {
     return (startIdxDeq.fetchAdd(1) % here.maxTaskPar : uint) : int;
   }
 
@@ -327,8 +388,7 @@ class WorkQueue : Queue {
 
       // Attempt to acquire...
       if !segment.isEmpty && segment.acquireWithStatus(DEQUEUE) {
-        var (hasElem, elem) : (bool, eltType);
-        for elt in segment.takeElements(1) do (hasElem, elem) = (true, elt);
+        var (hasElem, elem) : (bool, eltType) = segment.takeElement();
         segment.releaseStatus();
 
         if hasElem {
@@ -350,14 +410,13 @@ class WorkQueue : Queue {
       or unlocked this time, just that it contains elements; this handles majority
       of cases where we have elements anywhere in any segment.
     */
-    while iterations < maxIterations {
+    while iterations < here.maxTaskPar {
       ref segment = segments[idx];
 
       // Attempt to acquire...
       while !segment.isEmpty {
         if segment.isUnlocked && segment.acquireWithStatus(DEQUEUE) {
-          var (hasElem, elem) : (bool, eltType);
-          for elt in segment.takeElements(1) do (hasElem, elem) = (true, elt);
+          var (hasElem, elem) : (bool, eltType) = segment.takeElement();
           segment.releaseStatus();
 
           if hasElem {
@@ -387,6 +446,7 @@ class WorkQueue : Queue {
       empty or we get an item, so introduce some backoff here.
     */
     var backoff = 0;
+    if logMPMCQueue then writeln(here, ": Task on 3rd pass (worst case)...");
     while true {
       ref segment = segments[idx];
 
@@ -397,7 +457,7 @@ class WorkQueue : Queue {
           if segment.acquireWithStatus(DEQUEUE) {
             // Steal if empty... because we help if we are not the one set, we only
             // know whether the queue is empty if we were the work stealer.
-            if seg.isEmpty {
+            if segment.isEmpty {
               var (_idx, hasElem, elem) = stealWork(idx);
 
               // If we have lifted an element, we've retrieved an item.
@@ -411,7 +471,7 @@ class WorkQueue : Queue {
               // Otherwise, if the index differs then it means we helped assist another
               // segment in work stealing and we should move to it as if there is any work
               // available, it would be there.
-              if _idx == idx && !hasElem {
+              if _idx == idx {
                 return (false, _defaultOf(eltType));
               } else {
                 idx = _idx;
@@ -422,8 +482,7 @@ class WorkQueue : Queue {
 
             // We're lucky; another element has been added to the current segment,
             // take it and leave like normal...
-            var (hasElem, elem) : (bool, eltType);
-            for elt in segment.takeElements(1) do (hasElem, elem) = (true, elt);
+            var (hasElem, elem) : (bool, eltType) = segment.takeElement();
             segment.releaseStatus();
             return (hasElem, elem);
           }
@@ -466,10 +525,11 @@ class WorkQueue : Queue {
 
     // We can't steal if we're the only ones, so return as empty
     if numLocales == 1 {
-        return (idx, false, _defaultOf(eltType));
+      segment.releaseStatus();
+      return (idx, false, _defaultOf(eltType));
     }
 
-    if logMPMCQueue then writeln("Attempting to steal work for segment #", idx);
+    if logMPMCQueue then writeln(here, ": Attempting to steal work for segment #", idx);
 
     // Attempt to become the sole work stealing segment. If we fail, then we enlist
     // our aid to the current work stealing segment as a helper.
@@ -508,7 +568,7 @@ class WorkQueue : Queue {
     var (hasElem, elem) = helpStealWork(idx);
     // Lets others know that we no longer require help.
     segment.status.write(STEALING_MERGE);
-    if logMPMCQueue then writeln("Merging work stolen on segment #", idx);
+    if logMPMCQueue then writeln(here, ": Merging work stolen on segment #", idx);
 
     // At this point, it is possible that other helpers are still working, and so
     // we wait for them to finish. Merge what has been stolen.
@@ -518,7 +578,7 @@ class WorkQueue : Queue {
       if slot.status.read() == FINISHED_WITH_NO_WORK then continue;
 
       var stolenBlock = slot.block;
-      var tailBlock = seg.tailBlock;
+      var tailBlock = segment.tailBlock;
       var blockElems = stolenBlock.nElems;
       segment.nElems.add(blockElems : uint);
 
@@ -530,7 +590,7 @@ class WorkQueue : Queue {
             elem = elt;
             hasElem = true;
             segment.nElems.sub(1);
-            if logMPMCQueue then writeln("Lifted element ", elem, " from block stolen from segment #", i, " as segment #", idx);
+            if logMPMCQueue then writeln(here, ": Lifted element ", elem, " as segment #", idx);
             continue;
           }
 
@@ -572,7 +632,7 @@ class WorkQueue : Queue {
       }
     }
 
-    if logMPMCQueue then writeln("Helping steal work for segment #", idx);
+    if logMPMCQueue then writeln(here, ": Helping steal work for segment #", idx);
     var (hasElem, elem) : (bool, eltType);
 
     // Attempt to help...
@@ -584,7 +644,7 @@ class WorkQueue : Queue {
       }
 
       ref slot = segment.wsSlots[ourIdx];
-      if logMPMCQueue then writeln("Assigned to steal work from segment #", ourIdx, " for segment #", idx);
+      if logMPMCQueue then writeln(here, ": Assigned to steal work from segment #", ourIdx, " for segment #", idx);
 
       // We know which locale we are going to be working on, but we must setup some
       // temporaries that can make it easier for back-and-forth communication.
@@ -639,7 +699,7 @@ class WorkQueue : Queue {
 
           Find any segment not already processed that contains elements...
         */
-        while iterations < maxIterations {
+        while iterations < here.maxTaskPar {
           if segmentBitmap.tstbit(otherSegmentIdx) {
             iterations = iterations + 1;
             otherSegmentIdx = (otherSegmentIdx + 1) % here.maxTaskPar;
@@ -695,7 +755,7 @@ class WorkQueue : Queue {
         }
 
         // Create
-        var block = new LocalWorkQueueSegmentBlock(eltType);
+        var block = new WorkQueueSegmentBlock(eltType);
         block.nElems = idx;
         block.elems = work;
 
@@ -704,8 +764,8 @@ class WorkQueue : Queue {
         slot.block = block;
       }
 
-      if slot.block == nil then slot.status.write(FINISHED_WITH_NO_WORK) else slot.status.write(FINISHED_WITH_WORK);
-      if logMPMCQueue then writeln("Finished stealing ", nStolen, " amounts of work for segment #", idx);
+      if slot.block == nil then slot.status.write(FINISHED_WITH_NO_WORK); else slot.status.write(FINISHED_WITH_WORK);
+      if logMPMCQueue then writeln(here, ": Finished stealing work for segment #", idx);
     }
 
     halt("Exited helpStealWork loop...");
@@ -713,20 +773,27 @@ class WorkQueue : Queue {
 }
 
 class DistributedWorkQueue : Queue {
-  var targetLocales : [] locale = Locales;
-  var perLocaleDomain = domain(1) dmapped Block(boundingBox=targetLocales.domain, targetLocales=targetLocales);
+  var perLocaleDomain = LocaleSpace dmapped Block(boundingBox=LocaleSpace);
   var workQueues : [perLocaleDomain] WorkQueue(eltType);
 
   proc DistributedWorkQueue(type eltType) {
     forall loc in Locales {
       on loc {
-        workQueues[workQueues.domain.subDomain().first] = new WorkQueue(eltType, parentHandle=this);
+        workQueues[workQueues.domain.localSubdomain().first] = new WorkQueue(eltType, parentHandle=this);
       }
     }
   }
 
   inline proc localQueue {
-    return workQueues[workQueues.domain.subDomain().first];
+    return workQueues[workQueues.domain.localSubdomain().first];
+  }
+
+  proc enqueue(elt : eltType) {
+    localQueue.enqueue(elt);
+  }
+
+  proc dequeue() : (bool, eltType) {
+    return localQueue.dequeue();
   }
 }
 
@@ -734,14 +801,16 @@ proc proof_of_correctness() {
   var nElementsForMPMC = 1000000;
   writeln("Starting MPMCQueue Proof of Correctness (Work Depletion) Test ~ nElementsForMPMC: ", nElementsForMPMC);
 
-  var queue = new WorkQueue(int);
+  var queue = new DistributedWorkQueue(int);
   var counter : atomic int;
   var expected = (nElementsForMPMC * (nElementsForMPMC + 1)) / 2;
 
+  writeln("Adding elements concurrently...");
   forall i in 1 .. nElementsForMPMC {
     queue.enqueue(i);
   }
 
+  writeln("Removing elements in a distributed manner...");
   coforall loc in Locales do on loc {
     var localeLocalCounter : atomic int;
     coforall tid in 0 .. #here.maxTaskPar {
@@ -769,6 +838,7 @@ proc proof_of_correctness() {
 }
 
 proc benchmark() {
+  writeln("Starting benchmark...");
   var nJitter = 0;
   var nComputations = 0;
   var nElements = 1000000;
@@ -778,7 +848,7 @@ proc benchmark() {
 
   // Obtain average time for enqueue followed by dequeued...
   for i in 1 .. nTrials {
-    var queue = new WorkQueue(int);
+    var queue = new DistributedWorkQueue(int);
     // We only use one or the other, but we must declare both.
     // TODO: Have both implement some parent 'Queue' class/interface?
     var timer = new Timer();
@@ -833,5 +903,6 @@ proc benchmark() {
 }
 
 proc main() {
+  proof_of_correctness();
   benchmark();
 }
