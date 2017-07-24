@@ -244,7 +244,7 @@ proc main() {
 
   writeln();
   if !testMode then writeln("Threads spawned: ", threads_spawned.read());
-  writeln("Tree size = ", global_count.read(),
+  writeln("Tree size = ", global_elemsProcessed.read(),
             ", depth = ", global_maxDepth.read());
   if !testMode then writeln("Time: t_create= ", t_create.elapsed(),
           " (", global_elemsProcessed.read()/t_create.elapsed(), " nodes/sec)");
