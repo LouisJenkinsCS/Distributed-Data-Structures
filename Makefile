@@ -17,7 +17,7 @@ Benchmark:
 NQueens:
 	chpl ${CHPLFLAGS} queues/Queue.chpl queues/local/SyncList.chpl queues/local/SyncQueue.chpl \
 	queues/local/CCQueue.chpl queues/distributed/DistributedFIFOQueue.chpl \
-	queues/distributed/DistributedQueue.chpl benchmark/NQueens.chpl misc/LocalAtomicObject.chpl \
+	queues/distributed/DistributedWorkQueue.chpl benchmark/NQueens.chpl misc/LocalAtomicObject.chpl \
 	-o $(OUT) --main-module NQueens ${EXTRAFLAGS}
 
 # Proof of Correctness Test for CCQueue...
