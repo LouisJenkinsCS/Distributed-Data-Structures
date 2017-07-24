@@ -26,22 +26,19 @@ to work distribution that ensures fairness in memory, bandwidth, and computation
 
 ![](Results/DequeueFIFO.png)
 
-## MPMC
+## Balanced Queue
 
-A queue which does not provide any FIFO ordering in favor of raw performance. An ideal
-backbone for a work queue, it minimizes any and all communications and employs work stealing
-to ensure work can be done, with best-effort for providing an even distribution of memory and computation.
-
-### Features
-
-#### Bulk Insertion and Removal (WIP)
+A self-balancing queue that makes a best-effort in balancing loads across nodes in
+a cluster through work stealing and other means. An ideal backbone for a work queue.
+Currently the best scaling queue so far, seeing as high as 100M+ Operations/Second
+at 64 nodes.
 
 ### Performance
 
 #### Enqueue
 
-![](Results/EnqueueMPMC.png)
+![](Results/EnqueueBalanced.png)
 
 #### Dequeue
 
-**Work In Progress**
+![](Results/DequeueBalanced.png)

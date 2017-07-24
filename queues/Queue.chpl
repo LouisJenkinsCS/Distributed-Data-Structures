@@ -1,11 +1,8 @@
 class Queue {
   type eltType;
 
-  proc enqueue(elt : eltType) {
-    halt("Enqueue Not Overloaded");
-  }
+  // Adds single element...
+  proc enqueue(elt : eltType) {halt();}
 
-  proc dequeue() : (bool, eltType) {
-    halt ("Dequeue Not Overloaded");
-  }
+  proc dequeue() : (bool, eltType) {halt();}
 }
