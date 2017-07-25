@@ -21,6 +21,29 @@ inline int cas128bit(void *srcvp, void *cmpvp, void *withvp) {
   return result;
 }
 
+inline void write128bit(void *srcvp, void *valvp) {
+  uint128_t *src = srcvp;
+  uint128_t with_val = *(uint128_t *)valvp;
+  uint128_t cmp_val = *src;
+  uint128_t *cmp = &cmp_val;
+  uint128_t *with = &with_val;
+  char successful = 0;
+
+  while (!successful) {
+    __asm__ __volatile__ ("lock; cmpxchg16b (%6);"
+                          "setz %7; "
+                          : "=a" (cmp->lo),
+                          "=d" (cmp->hi)
+                          : "0" (cmp->lo),
+                          "1" (cmp->hi),
+                          "b" (with->lo),
+                          "c" (with->hi),
+                          "r" (src),
+                          "m" (successful)
+                          : "cc", "memory");
+  }
+}
+
 inline void read128bit(void *srcvp, void *dstvp) {
   uint128_t *src = srcvp;
   uint128_t with_val = *src;

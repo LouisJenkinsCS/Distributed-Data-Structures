@@ -9,3 +9,4 @@ typedef struct uint128 uint128_t;
 
 int cas128bit(void *srcvp, void *cmpvp, void *withvp);
 void read128bit(void *srcvp, void *dstvp);
+void write128bit(void *srcvp, void *valvp);
