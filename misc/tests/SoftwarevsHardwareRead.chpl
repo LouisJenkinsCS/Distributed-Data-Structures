@@ -8,7 +8,6 @@ class C {
 }
 
 // Note: Pointer aliasing not allowed!
-extern proc cas128bit(a : c_void_ptr, b : c_void_ptr, c : c_void_ptr) : int;
 extern proc read128bit(a : c_void_ptr, b : c_void_ptr);
 
 extern type wide_ptr_t;
