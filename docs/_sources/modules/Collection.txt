@@ -1,0 +1,52 @@
+.. default-domain:: chpl
+
+.. module:: Collection
+
+Collection
+==========
+**Usage**
+
+.. code-block:: chapel
+
+   use Collection;
+
+**Submodules**
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   Collection/*
+
+.. function:: proc +=(c: Collection(?eltTyp), e: eltType): bool
+
+.. class:: Collection
+
+   
+   A data structure.
+
+
+   .. attribute:: type eltType
+
+   .. method:: proc add(elt: eltType): bool
+
+   .. method:: proc remove(elt: eltType): bool
+
+   .. method:: proc contains(elt: eltType): bool
+
+   .. method:: proc clear()
+
+   .. method:: proc isEmpty: bool
+
+   .. method:: proc size: int
+
+   .. itermethod:: iter these(): eltType
+
+   .. method:: proc canFreeze(): bool
+
+   .. method:: proc freeze(): bool
+
+   .. method:: proc isFrozen(): bool
+
+   .. method:: proc unfreeze(): bool
+

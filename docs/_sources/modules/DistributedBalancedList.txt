@@ -1,0 +1,21 @@
+.. default-domain:: chpl
+
+.. module:: DistributedBalancedList
+
+DistributedBalancedList
+=======================
+**Usage**
+
+.. code-block:: chapel
+
+   use DistributedBalancedList;
+
+.. class:: DistributedBalancedList : UnorderedList
+
+   
+   A work-stealing (hence balanced) distributed list implementation; ideal backbone
+   for a work queue...
+   
+   TODO: Add implementation-specific descriptions here...
+
+

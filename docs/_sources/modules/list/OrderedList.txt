@@ -1,0 +1,28 @@
+.. default-domain:: chpl
+
+.. module:: OrderedList
+
+OrderedList
+===========
+**Usage**
+
+.. code-block:: chapel
+
+   use OrderedList;
+
+.. class:: OrderedList : Collection
+
+   
+   A list that supports some ordering that allows it to be indexed, such as the
+   order in which elements are inserted. Note that this does not mean it is a
+   sorted list.
+
+
+   .. method:: proc get(idx: int): (bool, eltType)
+
+   .. method:: proc indexOf(elt: eltType): int
+
+   .. method:: proc add(idx: int, elt: eltType): bool
+
+   .. method:: proc split(start: int, end: int = -1): List(eltType)
+

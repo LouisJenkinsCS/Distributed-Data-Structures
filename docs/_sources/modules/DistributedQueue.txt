@@ -1,0 +1,20 @@
+.. default-domain:: chpl
+
+.. module:: DistributedQueue
+
+DistributedQueue
+================
+**Usage**
+
+.. code-block:: chapel
+
+   use DistributedQueue;
+
+.. class:: DistributedQueue : Queue
+
+   
+   An unbounded queue that is distributed across nodes.
+   
+   TODO: Add implementation-specific descriptions here...
+
+

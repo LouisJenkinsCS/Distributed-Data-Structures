@@ -1,0 +1,18 @@
+.. default-domain:: chpl
+
+.. module:: DistributedBoundedQueue
+
+DistributedBoundedQueue
+=======================
+**Usage**
+
+.. code-block:: chapel
+
+   use DistributedBoundedQueue;
+
+.. class:: DistributedBoundedQueue : BoundedQueue
+
+   
+   Bounded queue that is distributed across nodes.
+
+

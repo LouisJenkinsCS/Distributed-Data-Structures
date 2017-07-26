@@ -1,0 +1,21 @@
+.. default-domain:: chpl
+
+.. module:: UnorderedList
+
+UnorderedList
+=============
+**Usage**
+
+.. code-block:: chapel
+
+   use UnorderedList;
+
+.. class:: UnorderedList : Collection
+
+   
+   A list that does not allow proper indexing, but does allow removal of arbitary
+   elements therein.
+
+
+   .. method:: proc remove(): (bool, eltType)
+

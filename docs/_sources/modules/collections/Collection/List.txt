@@ -1,0 +1,71 @@
+.. default-domain:: chpl
+
+.. module:: List
+
+List
+====
+**Usage**
+
+.. code-block:: chapel
+
+   use Collection.List;
+
+.. class:: List : Collection
+
+   
+   A data structure without any particular ordering.
+   
+
+
+.. class:: BoundedList : List
+
+   
+   A data structure with a static capacity.
+   
+
+
+   .. method:: proc capacity: int
+
+.. class:: DynamicBoundedList : BoundedList
+
+   
+   A data structure with a dynamic capacity.
+   
+
+
+   .. method:: proc resize(newSize: int): bool
+
+.. class:: IndexableList : Collection
+
+   
+   A list that can be indexed into.
+   
+
+
+   .. method:: proc get(idx: int): (bool, eltType)
+
+      
+      Obtain the element at the requested index.
+      
+
+   .. method:: proc indexOf(elt: eltType): int
+
+      
+      Obtains the index of the requested element, if present in the list.
+      
+
+   .. method:: proc add(idx: int, elt: eltType): bool
+
+      
+      Add an element at a specific index in the list.
+      
+
+   .. method:: proc subList(start: int, end: int = -1): IndexableList(eltType)
+
+      
+      Creates a new list containing the items at the specified indexes. If `end`
+      is less than `start`, then the end indice is set to the end of the list.
+      If the `end` is greater than the size of the list, it will also be set
+      to the end of the list.
+      
+
