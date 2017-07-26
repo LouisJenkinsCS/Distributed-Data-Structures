@@ -24,6 +24,9 @@ use BigInteger;
   possible a rather large amount has been stolen as well, which makes this extremely
   problematic. Requires a better global synchronization scheme, definitely need
   the employment for GlobalAtomicObject.
+
+  TODO: Switch from Tuples to raw C pointers and double the size of each successor
+  segment (potential performance boost, faster compilation time).
 */
 
 /*
@@ -872,7 +875,7 @@ proc benchmark() {
     }
 
     timer.stop();
-    enqueueTrialTime[i] = nElements / timer.elapsed();
+    enqueueTrialTime[i] = (nElements * numLocales) / timer.elapsed();
     writeln(i, "/", nTrials, ": ", (+ reduce enqueueTrialTime) / i);
     timer.clear();
     timer.start();
@@ -895,7 +898,7 @@ proc benchmark() {
     }
 
     timer.stop();
-    dequeueTrialTime[i] = nElements / timer.elapsed();
+    dequeueTrialTime[i] = (nElements * numLocales) / timer.elapsed();
     writeln(i, "/", nTrials, ": ", (+ reduce dequeueTrialTime) / i);
 
     delete queue;

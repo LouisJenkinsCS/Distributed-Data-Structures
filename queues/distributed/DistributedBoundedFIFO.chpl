@@ -1,4 +1,6 @@
 use BlockDist;
+use Time;
+use Random;
 
 /*
   TODO: In QueueFactory, replace with 'proc type Queue.makeBoundedFIFO' etc.
@@ -48,7 +50,7 @@ class DistributedBoundedFIFO {
     }
 
     while true {
-      var head = globalHead.fetchAdd(1) % cap;
+      var head = globalHead.fetchAdd(1) % cap : uint;
       ref slot = eltSlots[head : int];
       var promise = slot.promise.fetchAdd(1);
 
@@ -85,14 +87,14 @@ class DistributedBoundedFIFO {
     while true {
       var sz = queueSize.fetchSub(1);
       if sz <= 0 {
-        return false;
+        return (false, _defaultOf(eltType));
       } else if sz <= cap {
         break;
       }
     }
 
     while true {
-      var tail = globalTail.fetchAdd(1) % cap;
+      var tail = globalTail.fetchAdd(1) % cap : uint;
       ref slot = eltSlots[tail : int];
       var promise = slot.promise.fetchSub(1);
 
@@ -128,20 +130,65 @@ class DistributedBoundedFIFO {
 
 
 proc main() {
-  var queue = new DistributedBoundedFIFO(int, cap=100);
+  var nJitter = 0;
+  var nComputations = 0;
+  var nElements = 1000000;
+  var nTrials = 8;
+  var enqueueTrialTime : [1 .. nTrials] real;
+  var dequeueTrialTime : [1 .. nTrials] real;
 
-  for i in 1 .. 100 {
-    assert(queue.enqueue(i));
-  }
+  // Obtain average time for enqueue followed by dequeued...
+  for i in 1 .. nTrials {
+    var queue = new DistributedBoundedFIFO(int, cap=nElements);
+    // We only use one or the other, but we must declare both.
+    // TODO: Have both implement some parent 'Queue' class/interface?
+    var timer = new Timer();
+    timer.start();
 
-  assert(!queue.enqueue(101));
+    coforall loc in Locales do on loc {
+      var iterations = nElements;
 
-  for i in 1 .. 100 {
-    var retval = queue.dequeue();
-    if !retval[1] || retval[2] != i {
-      halt("i: ", i, "retval: ", retval);
+      coforall tid in 0 .. #here.maxTaskPar {
+        var x : atomic int;
+        var randStr = makeRandomStream(int);
+        for j in 1 .. iterations / here.maxTaskPar {
+          queue.enqueue(j);
+          var nComps = nComputations + (if nJitter then (randStr.getNext() % nJitter) else 0);
+          for i in 1 .. nComps {
+            // Hopefully compiler doesn't throw away?
+            x.write(sin(i) : int);
+          }
+        }
+      }
     }
-  }
 
-  writeln(queue);
+    timer.stop();
+    enqueueTrialTime[i] = (nElements * numLocales) / timer.elapsed();
+    writeln(i, "/", nTrials, ": ", (+ reduce enqueueTrialTime) / i);
+    timer.clear();
+    timer.start();
+
+    coforall loc in Locales do on loc {
+      var iterations = nElements;
+
+      coforall tid in 0 .. #here.maxTaskPar {
+        var x : atomic int;
+        var randStr = makeRandomStream(int);
+        for j in 1 .. iterations / here.maxTaskPar {
+          var retval = queue.dequeue();
+          var nComps = nComputations + (if nJitter then (randStr.getNext() % nJitter) else 0);
+          for i in 1 .. nComps {
+            // Hopefully compiler doesn't throw away?
+            x.write(sin(i) : int);
+          }
+        }
+      }
+    }
+
+    timer.stop();
+    dequeueTrialTime[i] = (nElements * numLocales) / timer.elapsed();
+    writeln(i, "/", nTrials, ": ", (+ reduce dequeueTrialTime) / i);
+
+    delete queue;
+  }
 }
