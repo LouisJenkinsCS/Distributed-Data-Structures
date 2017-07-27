@@ -39,6 +39,11 @@ class DistributedBoundedFIFO {
   }
 
   proc enqueue(elt : eltType) : bool {
+    // Fast path... Check if queue is full...
+    if queueSize.read() >= cap {
+      return false;
+    }
+
     // Try to see if there is room...
     while true {
       var sz = queueSize.fetchAdd(1);
@@ -84,6 +89,11 @@ class DistributedBoundedFIFO {
   }
 
   proc dequeue() : (bool, eltType) {
+    // Fast path... check if queue is empty...
+    if queueSize.read() < 1 {
+      return (false, _defaultOf(eltType));
+    }
+
     while true {
       var sz = queueSize.fetchSub(1);
       if sz <= 0 {
