@@ -22,59 +22,50 @@ class SyncQueue : Queue {
   }
 
   proc enqueue(elt : eltType) {
-    var node = new SyncNode(eltType, elt);
-    tailLock$ = true;
-    tail.next = node;
-    tail = node;
-    tailLock$;
+    on this {
+      var node = new SyncNode(eltType, elt);
+      tailLock$ = true;
+      tail.next = node;
+      tail = node;
+      tailLock$;
+    }
   }
 
   proc dequeue() : (bool, eltType) {
-    var elt : eltType;
-    headLock$ = true;
-    var node = head;
-    var newHead = head.next;
+    var retval : (bool, eltType);
+    on this {
+      var elt : eltType;
+      headLock$ = true;
+      var node = head;
+      var newHead = head.next;
 
-    // Empty
-    if newHead == nil {
-      headLock$;
-      return (false, _defaultOf(eltType));
+      // Empty
+      if newHead == nil {
+        headLock$;
+        retval = (false, _defaultOf(eltType));
+      } else {
+        // Grab and clean up
+        elt = newHead.elt;
+        head = newHead;
+        delete node;
+        headLock$;
+        retval = (true, elt);
+      }
     }
 
-    // Grab and clean up
-    elt = newHead.elt;
-    head = newHead;
-    delete node;
-    headLock$;
-    return (true, elt);
+    return retval;
   }
+
 }
 
 
-config const nElementForSyncQueue = 1000000;
 proc main() {
-  /*writeln("Starting SyncQueue Proof-Of-Correctness Test ~ nElementForSyncQueue=", nElementForSyncQueue);
-  var queue = new SyncQueue(int);
-
-  for i in 1 .. nElementForSyncQueue {
-    queue.enqueue(i);
-  }
-
-  for i in 1 .. nElementForSyncQueue {
-    var retval = queue.dequeue();
-    if retval[2] != i {
-      writeln("BAD RESULT! Expected ", i, ", Received ", retval);
-      return;
-    }
-  }
-
-  writeln("PASSED!");*/
-
   var nJitter = 0;
   var nComputations = 0;
   var nElements = 1000000;
   var nTrials = 8;
   var enqueueTrialTime : [1 .. nTrials] real;
+  var dequeueTrialTime : [1 .. nTrials] real;
 
   // Obtain average time for enqueue followed by dequeued...
   for i in 1 .. nTrials {
@@ -102,9 +93,32 @@ proc main() {
     }
 
     timer.stop();
-    enqueueTrialTime[i] = nElements / timer.elapsed();
+    enqueueTrialTime[i] = (nElements * numLocales) / timer.elapsed();
     writeln(i, "/", nTrials, ": ", (+ reduce enqueueTrialTime) / i);
     timer.clear();
+    timer.start();
+
+    coforall loc in Locales do on loc {
+      var iterations = nElements;
+
+      coforall tid in 0 .. #here.maxTaskPar {
+        var x : atomic int;
+        var randStr = makeRandomStream(int);
+        for j in 1 .. iterations / here.maxTaskPar {
+          var retval = queue.dequeue();
+          var nComps = nComputations + (if nJitter then (randStr.getNext() % nJitter) else 0);
+          for i in 1 .. nComps {
+            // Hopefully compiler doesn't throw away?
+            x.write(sin(i) : int);
+          }
+        }
+      }
+    }
+
+    timer.stop();
+    dequeueTrialTime[i] = (nElements * numLocales) / timer.elapsed();
+    writeln(i, "/", nTrials, ": ", (+ reduce dequeueTrialTime) / i);
+
     delete queue;
   }
 }
