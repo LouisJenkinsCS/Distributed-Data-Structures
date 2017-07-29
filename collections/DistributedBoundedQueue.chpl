@@ -27,6 +27,13 @@ class DistributedBoundedQueue : BoundedQueue {
   var globalTail : atomic uint;
   var queueSize : atomic int;
 
+  // To 'freeze' the queue, we must ensure that current mutating operations finish
+  // first. However, at the same time we want to reduce communication by keeping
+  // a task counter for each node that can be checked at next to no cost.
+  var concurrentTasksDom = LocaleSpace dmapped Block(boundingBox=LocaleSpace);
+  var concurrentTasks : [concurrentTasksDom] atomic uint;
+  var frozenState : [concurrentTasksDom] atomic bool;
+
   // per-locale data
   var eltSlotsSpace = {0..#cap};
   var eltSlotsDomain = eltSlotsSpace dmapped Block(boundingBox=eltSlotsSpace);
@@ -36,9 +43,23 @@ class DistributedBoundedQueue : BoundedQueue {
     if cap == 0 then halt("Cap cannot be 0!");
   }
 
+  inline proc ourConcurrentTasksIndex {
+    return concurrentTasksDom.localSubdomain().first;
+  }
+
   proc add(elts : eltType ... ?nElts) : bool {
+    // Announce that we are currently using the queue...
+    concurrentTasks[ourConcurrentTasksIndex].add(1);
+
+    // Check if the queue is now 'immutable'.
+    if frozenState[ourConcurrentTasksIndex].read() == true {
+      concurrentTasks[ourConcurrentTasksIndex].sub(1);
+      return false;
+    }
+
     // Fast path... Check if queue has space...
     if queueSize.read() + nElts > cap {
+      concurrentTasks[ourConcurrentTasksIndex].sub(1);
       return false;
     }
 
@@ -51,6 +72,7 @@ class DistributedBoundedQueue : BoundedQueue {
       while true {
         var sz = queueSize.fetchAdd(1);
         if sz >= cap {
+          concurrentTasks[ourConcurrentTasksIndex].sub(1);
           return false;
         } else if sz >= 0 {
           break;
@@ -89,6 +111,7 @@ class DistributedBoundedQueue : BoundedQueue {
       }
 
       if !success {
+        concurrentTasks[ourConcurrentTasksIndex].sub(1);
         return false;
       }
     }
@@ -114,18 +137,30 @@ class DistributedBoundedQueue : BoundedQueue {
       idx = idx + 1;
     }
 
-    halt("Broke out of enqueue loop...");
+    concurrentTasks[ourConcurrentTasksIndex].sub(1);
+    return true;
   }
 
   proc remove() : (bool, eltType) {
+    // Announce that we are currently using the queue...
+    concurrentTasks[ourConcurrentTasksIndex].add(1);
+
+    // Check if the queue is now 'immutable'.
+    if frozenState[ourConcurrentTasksIndex].read() == true {
+      concurrentTasks[ourConcurrentTasksIndex].sub(1);
+      return (false, _defaultOf(eltType));
+    }
+
     // Fast path... check if queue is empty...
     if queueSize.read() < 1 {
+      concurrentTasks[ourConcurrentTasksIndex].sub(1);
       return (false, _defaultOf(eltType));
     }
 
     while true {
       var sz = queueSize.fetchSub(1);
       if sz <= 0 {
+        concurrentTasks[ourConcurrentTasksIndex].sub(1);
         return (false, _defaultOf(eltType));
       } else if sz <= cap {
         break;
@@ -143,15 +178,41 @@ class DistributedBoundedQueue : BoundedQueue {
       slot.status.write(SLOT_EMPTY);
 
       slot.isDeq.write(false);
+      concurrentTasks[ourConcurrentTasksIndex].sub(1);
       return (true, elt);
     }
 
     halt("Broke out of dequeue loop...");
   }
+
+  proc freeze() {
+    forall state in frozenState do state.write(true);
+
+    // Wait for all ongoing tasks to finish. Any new tasks will see the new state.
+    forall counter in concurrentTasks do counter.waitFor(0);
+  }
+
+  // TODO: Allow this to be parallel-safe with respect to the freezing operation.
+  // Such as adding a second state after we know all concurrent tasks have exited.
+  inline proc isFrozen {
+    return frozenState[ourConcurrentTasksIndex].read();
+  }
+
+  iter these() : eltType {
+    if !isFrozen {
+      halt("Attempted to iterate while queue is not frozen...");
+    }
+
+    for idx in globalTail.read() .. #globalHead.read() {
+      yield eltSlots[(idx % cap : uint) : int].elt;
+    }
+  }
 }
 
 proc main() {
   var queue = new DistributedBoundedQueue(int, cap=100);
-  queue += (1,2,3,4,5);
-  writeln(queue);
+  queue.add(1,2,3,4,5);
+  queue.freeze();
+  for elt in queue do writeln(elt);
+  forall elt in queue do writeln(elt);
 }
