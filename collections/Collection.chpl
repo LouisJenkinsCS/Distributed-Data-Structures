@@ -69,6 +69,7 @@ class Collection {
   */
   iter these() : eltType {
     compilerError("'iter these() : eltType' is not supported...");
+    yield _defaultOf(eltType);
   }
 }
 

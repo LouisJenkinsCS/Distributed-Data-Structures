@@ -48,18 +48,18 @@ class DistributedBoundedQueue : BoundedQueue {
   }
 
   proc add(elts : eltType ... ?nElts) : bool {
-    // Announce that we are currently using the queue...
+    /*// Announce that we are currently using the queue...
     concurrentTasks[ourConcurrentTasksIndex].add(1);
 
     // Check if the queue is now 'immutable'.
     if frozenState[ourConcurrentTasksIndex].read() == true {
       concurrentTasks[ourConcurrentTasksIndex].sub(1);
       return false;
-    }
+    }*/
 
     // Fast path... Check if queue has space...
     if queueSize.read() + nElts > cap {
-      concurrentTasks[ourConcurrentTasksIndex].sub(1);
+      /*concurrentTasks[ourConcurrentTasksIndex].sub(1);*/
       return false;
     }
 
@@ -72,7 +72,7 @@ class DistributedBoundedQueue : BoundedQueue {
       while true {
         var sz = queueSize.fetchAdd(1);
         if sz >= cap {
-          concurrentTasks[ourConcurrentTasksIndex].sub(1);
+          /*concurrentTasks[ourConcurrentTasksIndex].sub(1);*/
           return false;
         } else if sz >= 0 {
           break;
@@ -111,7 +111,7 @@ class DistributedBoundedQueue : BoundedQueue {
       }
 
       if !success {
-        concurrentTasks[ourConcurrentTasksIndex].sub(1);
+        /*concurrentTasks[ourConcurrentTasksIndex].sub(1);*/
         return false;
       }
     }
@@ -137,7 +137,7 @@ class DistributedBoundedQueue : BoundedQueue {
       idx = idx + 1;
     }
 
-    concurrentTasks[ourConcurrentTasksIndex].sub(1);
+    /*concurrentTasks[ourConcurrentTasksIndex].sub(1);*/
     return true;
   }
 
@@ -190,6 +190,10 @@ class DistributedBoundedQueue : BoundedQueue {
 
     // Wait for all ongoing tasks to finish. Any new tasks will see the new state.
     forall counter in concurrentTasks do counter.waitFor(0);
+  }
+
+  proc unfreeze() {
+    forall state in frozenState do state.write(false);
   }
 
   // TODO: Allow this to be parallel-safe with respect to the freezing operation.
