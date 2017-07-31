@@ -29,7 +29,8 @@ proc doWork(b : B) {
 
 proc main() {
   nLocales = 1;
-  var arr : [{0..0}] (int, int);
+  var arr : [{0..0}] (int, real);
+  arr.clear();
   var lastIter = false;
 
   if numLocales == 1 then lastIter = true;
@@ -38,7 +39,7 @@ proc main() {
     b.benchTime = (0,0,0,30,0,0);
     b.benchFunc = doWork;
     b.run();
-    arr.push_back((nLocales, b.N / ((b.timer.elapsed(TimeUnits.microseconds) * 1000) * 1e-9) : int));
+    arr.push_back((nLocales, b.N / ((b.timer.elapsed(TimeUnits.microseconds) * 1000) * 1e-9)));
 
     if lastIter then break;
     nLocales = min(numLocales, nLocales * 2);

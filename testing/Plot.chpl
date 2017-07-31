@@ -12,7 +12,7 @@ proc main() {
 inline proc stringify(data : [?dataDom] ?tupleType) {
   var str : string;
   for tpl in data {
-    for i in 1..tpl.size {
+    for param i in 1..tpl.size {
       if i != 1 then str = str + ",";
       str = str + tpl[i];
     }
@@ -30,7 +30,7 @@ proc plot(name, data) {
   var cmd : string = "gnuplot -e \"set terminal pngcairo size 1920,1080 enhanced font 'Verdana,10';\n";
   cmd = cmd + "set output 'out.png';\n";
   cmd = cmd + "set datafile separator ',';\n";
-  cmd = cmd + "plot 'gnuplot_data.dat' with lines title '" + name + "'\n";
+  cmd = cmd + "plot 'gnuplot_data.dat' using 1:2:xtic(1) with lines title '" + name + "'\n";
   cmd = cmd + "\"";
 
   writeln("Executing: ", cmd, " with data: ", stringify(data));
