@@ -56,3 +56,4 @@ dkms.conf
 
 # Chapel Specific
 codegen/*
+*.dat

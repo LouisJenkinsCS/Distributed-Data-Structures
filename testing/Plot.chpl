@@ -1,40 +1,62 @@
 use Spawn;
 use Time;
 
-proc main() {
-  var arr : [1..10] (int, int);
-  for i in 1..10 {
-    arr[i] = (i, i**2);
-  }
-  plot("Test", arr);
+record PlotterData {
+  type xAxisType;
+  type yAxisType;
+
+  var data : [{0..-1}] (xAxisType, yAxisType);
 }
 
-inline proc stringify(data : [?dataDom] ?tupleType) {
-  var str : string;
-  for tpl in data {
-    for param i in 1..tpl.size {
-      if i != 1 then str = str + ",";
-      str = str + tpl[i];
+// A plotting device that can be used to add/remove plot data.
+record Plotter {
+  type xAxisType;
+  type yAxisType;
+
+  var plotDataDom : domain(string);
+  var plotData : [plotDataDom] PlotterData(xAxisType, yAxisType);
+
+
+  inline proc stringify(data : [?dataDom] ?tupleType) {
+    var str : string;
+    for tpl in data {
+      for param i in 1..tpl.size {
+        if i != 1 then str = str + ",";
+        str = str + tpl[i];
+      }
+      str = str + "\n";
     }
-    str = str + "\n";
+    return str;
   }
-  return str;
-}
 
-proc plot(name, data) {
-  var tmpFile = open("gnuplot_data.dat", iomode.cw);
-  var writer = tmpFile.writer();
+  proc add(name : string, x : xAxisType, y : yAxisType) {
+    plotDataDom += name;
+    plotData[name].data.push_back((x, y));
+  }
 
-  writer.write(stringify(data));
-  writer.close();
-  var cmd : string = "gnuplot -e \"set terminal pngcairo size 1920,1080 enhanced font 'Verdana,10';\n";
-  cmd = cmd + "set output 'out.png';\n";
-  cmd = cmd + "set datafile separator ',';\n";
-  cmd = cmd + "plot 'gnuplot_data.dat' using 1:2:xtic(1) with lines title '" + name + "'\n";
-  cmd = cmd + "\"";
+  // data : [] PlotData
+  proc plot(outputFile : string) {
+    var plotCmd : string;
 
-  writeln("Executing: ", cmd, " with data: ", stringify(data));
-  var sub = spawnshell([cmd]);
-  sub.communicate();
-  writeln("Done");
+    // Create filename for each unique domain and add elements to be plotted...
+    for name in plotDataDom {
+      var tmpFile = open(name + ".dat", iomode.cw);
+      var writer = tmpFile.writer();
+      writeln(stringify(plotData[name].data));
+      writer.write(stringify(plotData[name].data));
+      writer.close();
+
+      plotCmd = plotCmd + "'" + name + ".dat' using 1:2:xtic(1) with lines title '" + name + "', ";
+    }
+
+    var cmd : string = "gnuplot -e \"set terminal pngcairo size 1920,1080 enhanced font 'Verdana,10';\n";
+    cmd = cmd + "set output '" + outputFile + ".png';\n";
+    cmd = cmd + "set datafile separator ',';\n";
+    cmd = cmd + "plot " + plotCmd;
+    cmd = cmd + "\"";
+
+    var sub = spawnshell([cmd]);
+    sub.communicate();
+    writeln("Done");
+  }
 }
