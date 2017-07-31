@@ -22,6 +22,8 @@ const SLOT_FULL = 1;
 class DistributedBoundedQueue : BoundedQueue {
   var cap : int;
 
+  var targetLocDom : domain(1) = LocaleSpace;
+  var targetLocales: [targetLocDom] locale = Locales;
   // Two monotonically increasing counters used in deciding which locale to choose from
   var globalHead : atomic uint;
   var globalTail : atomic uint;
@@ -30,7 +32,7 @@ class DistributedBoundedQueue : BoundedQueue {
   // To 'freeze' the queue, we must ensure that current mutating operations finish
   // first. However, at the same time we want to reduce communication by keeping
   // a task counter for each node that can be checked at next to no cost.
-  var concurrentTasksDom = LocaleSpace dmapped Block(boundingBox=LocaleSpace);
+  var concurrentTasksDom = targetLocales.domain dmapped Block(boundingBox=targetLocales.domain, targetLocales=targetLocales);
   var concurrentTasks : [concurrentTasksDom] atomic uint;
   var frozenState : [concurrentTasksDom] atomic bool;
 
@@ -211,12 +213,4 @@ class DistributedBoundedQueue : BoundedQueue {
       yield eltSlots[(idx % cap : uint) : int].elt;
     }
   }
-}
-
-proc main() {
-  var queue = new DistributedBoundedQueue(int, cap=100);
-  queue.add(1,2,3,4,5);
-  queue.freeze();
-  for elt in queue do writeln(elt);
-  forall elt in queue do writeln(elt);
 }

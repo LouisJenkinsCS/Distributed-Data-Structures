@@ -1,5 +1,4 @@
 use Time;
-use DistributedBoundedQueue;
 
 class B {
   var N : int;
@@ -47,30 +46,4 @@ class B {
       n = n * 2;
     }
   }
-}
-
-proc doWork(b : B) {
-  var q = new DistributedBoundedQueue(int, cap=b.N);
-  const nPerLoc = b.N / numLocales;
-  const nPerTask = nPerLoc / here.maxTaskPar;
-
-  b.timer.clear();
-  coforall loc in Locales do on loc {
-    coforall tid in 0..#here.maxTaskPar {
-      for i in 1 .. nPerTask {
-        q.add(i);
-      }
-    }
-  }
-
-  b.timer.stop();
-  delete q;
-  b.timer.start();
-}
-
-proc main() {
-  var b = new B();
-  b.benchTime = (0,0,1,0,0,0);
-  b.benchFunc = doWork;
-  b.run();
 }
