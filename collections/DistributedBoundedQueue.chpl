@@ -38,7 +38,7 @@ class DistributedBoundedQueue : BoundedQueue {
 
   // per-locale data
   var eltSlotsSpace = {0..#cap};
-  var eltSlotsDomain = eltSlotsSpace dmapped Block(boundingBox=eltSlotsSpace);
+  var eltSlotsDomain = eltSlotsSpace dmapped Block(boundingBox=eltSlotsSpace, targetLocales=targetLocales);
   var eltSlots : [eltSlotsDomain] DistributedBoundedFIFOSlot(eltType);
 
   proc DistributedBoundedQueue(type eltType) {
@@ -49,19 +49,27 @@ class DistributedBoundedQueue : BoundedQueue {
     return concurrentTasksDom.localSubdomain().first;
   }
 
-  proc add(elts : eltType ... ?nElts) : bool {
-    /*// Announce that we are currently using the queue...
+  inline proc enterFreezeBarrier() {
     concurrentTasks[ourConcurrentTasksIndex].add(1);
+  }
+
+  inline proc exitFreezeBarrier() {
+    concurrentTasks[ourConcurrentTasksIndex].sub(1);
+  }
+
+  proc add(elts : eltType ... ?nElts) : bool {
+    // Announce that we are currently using the queue...
+    enterFreezeBarrier();
 
     // Check if the queue is now 'immutable'.
     if frozenState[ourConcurrentTasksIndex].read() == true {
-      concurrentTasks[ourConcurrentTasksIndex].sub(1);
+      exitFreezeBarrier();
       return false;
-    }*/
+    }
 
     // Fast path... Check if queue has space...
     if queueSize.read() + nElts > cap {
-      /*concurrentTasks[ourConcurrentTasksIndex].sub(1);*/
+      concurrentTasks[ourConcurrentTasksIndex].sub(1);
       return false;
     }
 
@@ -74,7 +82,7 @@ class DistributedBoundedQueue : BoundedQueue {
       while true {
         var sz = queueSize.fetchAdd(1);
         if sz >= cap {
-          /*concurrentTasks[ourConcurrentTasksIndex].sub(1);*/
+          exitFreezeBarrier();
           return false;
         } else if sz >= 0 {
           break;
@@ -113,7 +121,7 @@ class DistributedBoundedQueue : BoundedQueue {
       }
 
       if !success {
-        /*concurrentTasks[ourConcurrentTasksIndex].sub(1);*/
+        exitFreezeBarrier();
         return false;
       }
     }
@@ -127,7 +135,10 @@ class DistributedBoundedQueue : BoundedQueue {
       ref slot = eltSlots[head : int];
 
       // Another enqueuer is waiting on this cell...
-      while slot.isEnq.testAndSet() do chpl_task_yield();
+      while slot.isEnq.testAndSet() {
+        writeln("Waiting on another enqueuer...");
+        chpl_task_yield();
+      }
 
       slot.status.waitFor(SLOT_EMPTY);
       slot.elt = elts[idx];
@@ -139,30 +150,30 @@ class DistributedBoundedQueue : BoundedQueue {
       idx = idx + 1;
     }
 
-    /*concurrentTasks[ourConcurrentTasksIndex].sub(1);*/
+    exitFreezeBarrier();
     return true;
   }
 
   proc remove() : (bool, eltType) {
     // Announce that we are currently using the queue...
-    concurrentTasks[ourConcurrentTasksIndex].add(1);
+    enterFreezeBarrier();
 
     // Check if the queue is now 'immutable'.
     if frozenState[ourConcurrentTasksIndex].read() == true {
-      concurrentTasks[ourConcurrentTasksIndex].sub(1);
+      exitFreezeBarrier();
       return (false, _defaultOf(eltType));
     }
 
     // Fast path... check if queue is empty...
     if queueSize.read() < 1 {
-      concurrentTasks[ourConcurrentTasksIndex].sub(1);
+      exitFreezeBarrier();
       return (false, _defaultOf(eltType));
     }
 
     while true {
       var sz = queueSize.fetchSub(1);
       if sz <= 0 {
-        concurrentTasks[ourConcurrentTasksIndex].sub(1);
+        exitFreezeBarrier();
         return (false, _defaultOf(eltType));
       } else if sz <= cap {
         break;
@@ -180,7 +191,7 @@ class DistributedBoundedQueue : BoundedQueue {
       slot.status.write(SLOT_EMPTY);
 
       slot.isDeq.write(false);
-      concurrentTasks[ourConcurrentTasksIndex].sub(1);
+      exitFreezeBarrier();
       return (true, elt);
     }
 

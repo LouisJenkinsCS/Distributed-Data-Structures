@@ -21,17 +21,22 @@ use Random;
 class LazyListNode {
   type eltType;
   var elt : eltType;
-  var prev : LazyListNode(eltType);
+  var fence : atomic uint;
+  var next : LazyListNode(eltType);
 }
 
 class LazyList : Queue {
+  var head : GlobalAtomicObject(LazyListNode(eltType));
   var tail : GlobalAtomicObject(LazyListNode(eltType));
 
   proc enqueue(elt : eltType) {
     var node = new LazyListNode(eltType, elt);
     var prev = tail.exchange(node);
-    if prev != nil {
-      node.prev = prev;
+    if prev == nil {
+      head.write(node);
+    } else {
+      prev.next = node;
+      prev.fence.fetchAdd(1);
     }
   }
 
@@ -75,7 +80,7 @@ proc main() {
     }
 
     timer.stop();
-    enqueueTrialTime[i] = (nElements * numLocales) / timer.elapsed();
+    enqueueTrialTime[i] = nElements / timer.elapsed();
     writeln(i, "/", nTrials, ": ", (+ reduce enqueueTrialTime) / i);
     timer.clear();
     delete queue;
