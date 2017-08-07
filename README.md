@@ -1,44 +1,48 @@
-# Distributed Queue
+# Distributed Data Structures
 
-This repository features two work-in-progress queues that scale under certain
-workloads, both with varying traits and practical use-cases. One queue provides
-a strict FIFO ordering across clusters (FIFO), and the other has more loose
-guarantees for ordering that employs work stealing (MPMC). Neither queues are
-NUMA-aware.
+This repository hosts the first framework for distributed data structures for the
+Chapel programming language. Here we introduce a 'Collections API', based on Java's
+Collections framework, as well as some data structures, some distributed, others
+local.
 
-## Queue Descriptions
+## Performance Testing
 
-All performance testing is done on Intel Haswell architecture (w/ 24 processors per node).
+All benchmarks performed on a Cray-XC40 cluster.
 
-## FIFO
+## Queues
 
 Provides a strict FIFO ordering without sacrificing too much performance. The FIFO ordering
 is preserved across all nodes in a cluster, and employs a wait-free round-robin approach
-to work distribution that ensures fairness in memory, bandwidth, and computation.
+to load distribution that ensures fairness in memory, bandwidth, and computation.
+
+**Disclaimer:** The queues provided, while scalable, are communication bound and
+as such the performance is bound by network limitations. This is unavoidable.
+
+## MultiSet
+
+With performance that scales both in the number of nodes in a cluster and the
+number of cores per node, we offer a multiset implementation, called a 'Bag',
+which is a medium that allows storing and retrieving data in any arbitrary order.
+This type of data structure is ideal for work queues as it employs it's own load
+balancing, and offers unparalleled performance.
+
+**Disclaimer:** As Chapel does not support privatization of class fields, if the
+user is to use a `DistributedBag`, then they must request a `localBag` to use to
+avoid excess communications from accessing class fields. This is because, there will be a 'GET' operation to the node that allocated the queue, which bounds
+performance to network limitations. To demonstrate this massive difference, we
+show below performance of the `DistributedBag` with and without 'localization',
+or using the `localBag` directly.
 
 ### Performance
 
-#### Enqueue
+We compare our data structures to a naive synchronized list implementation
+as that is all that is available. In all cases, the data structures scale and
+outperform the naive implementation by at least 50x.
 
-![](Results/EnqueueFIFO.png)
+#### Insert
 
-#### Dequeue
+![](Results/Collections_Add.png)
 
-![](Results/DequeueFIFO.png)
+#### Remove
 
-## Balanced Queue
-
-A self-balancing queue that makes a best-effort in balancing loads across nodes in
-a cluster through work stealing and other means. An ideal backbone for a work queue.
-Currently the best scaling queue so far, seeing as high as 100M+ Operations/Second
-at 64 nodes.
-
-### Performance
-
-#### Enqueue
-
-![](Results/EnqueueBalanced.png)
-
-#### Dequeue
-
-![](Results/DequeueBalanced.png)
+TODO
