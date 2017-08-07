@@ -14,6 +14,7 @@ proc main() {
   // Collections share the same API and hence share the same benchFn and deinitFn
   var benchFn = lambda(bd : BenchmarkData) {
     var c = bd.userData : Collection(int);
+    writeln("In BenchFn: ", c.type : string);
     for i in 1 .. bd.iterations {
       c.add(i);
     }
@@ -60,7 +61,7 @@ proc main() {
 
   // Compiler BUG: Generic Lambda issue...
   // DistributedList - Benchmark
-  /*runBenchmarkMultiplePlotted(
+  runBenchmarkMultiplePlotted(
       benchFn = benchFn,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
@@ -69,7 +70,7 @@ proc main() {
       initFn = lambda (bmd : BenchmarkMetaData) : object {
         return new DistributedList(int);
       }
-  );*/
+  );
 
   // DistributedBag - Benchmark
   runBenchmarkMultiplePlotted(

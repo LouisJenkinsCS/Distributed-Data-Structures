@@ -17,7 +17,7 @@ class HSynchLocalNode {
   var requestData : c_void_ptr;
   // request is a function taking both userData and requestData. If the user wishes
   // to return they may do so through the c_void_ptr.
-  var request : func(userDataType, c_void_ptr);
+  var request : func(userDataType, c_void_ptr, void);
   var status : atomic int;
   var next : LocalAtomicObject(HSynchLocalNode(userDataType));
 }
@@ -80,7 +80,7 @@ class HSynch {
     ourNode.next.read().waiting.write(false);
   }
 
-  proc synch(request : func(userDataType, c_void_ptr), requestData : c_void_ptr) {
+  proc synch(request : func(userDataType, c_void_ptr, void), requestData : c_void_ptr) {
     var localThis = getPrivatizedThis;
     var dummyNext = new HSynchLocalNode(userDataType);
     var ourNode = localThis.localWaitList.exchange(dummyNext);
@@ -99,7 +99,7 @@ class HSynch {
 
     if status != HSYNCH_COMPLETE {
       if !localThis.isGlobalLockOwner.read() {
-        acquireGlobalLock();
+        acquireGlobalLock(localThis);
         localThis.isGlobalLockOwner.write(true);
       }
       request(localThis.userData, requestData);
@@ -119,7 +119,7 @@ class HSynch {
       }
 
       if tmpNext == nil {
-        releaseGlobalLock();
+        releaseGlobalLock(localThis);
         localThis.isGlobalLockOwner.write(false);
       }
 
