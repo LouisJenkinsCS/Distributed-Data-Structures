@@ -185,7 +185,7 @@ class DistributedQueue : Queue {
     }
 
     // There is something for us
-    var elt : slot.remove();
+    var elt = slot.remove();
     return (true, elt);
   }
 
