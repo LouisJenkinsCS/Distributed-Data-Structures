@@ -43,6 +43,8 @@ record BenchmarkData {
   var iterations : int;
 }
 
+config param benchmarkLogN = false;
+
 // Runs a benchmark and returns the result for the target number of locales.
 proc runBenchmark(
   benchFn : func(BenchmarkData, void),
@@ -62,8 +64,7 @@ proc runBenchmark(
   var n = 1;
   var timer = new Timer();
   while n < 1e12 {
-    writeln("N=", n);
-
+    if benchmarkLogN then writeln("N=", n);
     var benchData : BenchmarkData;
     var nLocales = targetLocales.size;
     var totalOps = if isWeakScaling then n * nLocales else n;
@@ -134,6 +135,7 @@ proc runBenchmarkMultiplePlotted(
   var results = runBenchmarkMultiple(benchFn, benchTime, unit, initFn, deinitFn, isWeakScaling, targetLocales);
   for result in results {
     if result.operations == 0 || result.time == 0 then continue;
+    writeln("[", benchName, "]: nLocales=", result.nLocales, ", N=", result.operations, ", Op/Sec=", result.opsPerSec);
     plotter.add(benchName, result.nLocales, result.opsPerSec);
   }
 }

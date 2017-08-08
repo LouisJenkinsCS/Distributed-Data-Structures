@@ -14,26 +14,12 @@ proc main() {
   var benchFn = lambda(bd : BenchmarkData) {
     var c = bd.userData : Collection(int);
     for i in 1 .. bd.iterations {
-      c.remove();
+      var _ignored = c.remove();
     }
   };
   var deinitFn = lambda(obj : object) {
     delete obj;
   };
-
-  // DistributedBoundedQueue - Benchmark
-  runBenchmarkMultiplePlotted(
-      benchFn = benchFn,
-      deinitFn = deinitFn,
-      targetLocales=targetLocales,
-      benchName = "DistributedBoundedQueue",
-      plotter = plotter,
-      initFn = lambda (bmd : BenchmarkMetaData) : object {
-        var c = new DistributedBoundedQueue(int, cap=bmd.totalOps, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
-        forall i in 1 .. bmd.totalOps do c.add(i);
-        return c;
-      }
-  );
 
   // DistributedQueue - Benchmark
   runBenchmarkMultiplePlotted(
@@ -44,6 +30,20 @@ proc main() {
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
         var c = new DistributedQueue(int, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
+        forall i in 1 .. bmd.totalOps do c.add(i);
+        return c;
+      }
+  );
+
+  // DistributedBoundedQueue - Benchmark
+  runBenchmarkMultiplePlotted(
+      benchFn = benchFn,
+      deinitFn = deinitFn,
+      targetLocales=targetLocales,
+      benchName = "DistributedBoundedQueue",
+      plotter = plotter,
+      initFn = lambda (bmd : BenchmarkMetaData) : object {
+        var c = new DistributedBoundedQueue(int, cap=bmd.totalOps, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
         forall i in 1 .. bmd.totalOps do c.add(i);
         return c;
       }

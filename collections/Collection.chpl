@@ -24,6 +24,9 @@ class Collection {
   }
   /*
     Removes an arbitrary element from this data structure.
+
+    BUG: Compiler will segfault if the returned value is not captured at callsite.
+    'var capturedRetval = c.remove()'
   */
   inline proc remove() : (bool, eltType) {
     halt("'proc remove() : (bool, eltType)' is not supported...");
