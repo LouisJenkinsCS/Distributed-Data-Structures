@@ -1,9 +1,5 @@
 use Time;
-use CCQueue;
-use SyncQueue;
-use DistributedFIFOQueue;
-use DistributedQueue;
-use SyncList;
+use Collection;
 
 // TODO: Test combined performance (simulate operations per second) and overall time and number of boards
 

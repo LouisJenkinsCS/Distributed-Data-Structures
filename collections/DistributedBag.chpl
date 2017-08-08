@@ -651,9 +651,9 @@ class Bag : Collection {
         // We keep track of a simple bitmap to keep track of which segments we have
         // already processed, since on the first pass we skip over any locked segments.
         var segmentBitmap : bigint;
-        var queue = parentHandle.localQueue;
+        var bag = parentHandle.localBag;
         var iterations = 0;
-        var otherStartIdx = queue.nextStartIdxDeq;
+        var otherStartIdx = bag.nextStartIdxDeq;
         var otherSegmentIdx = otherStartIdx;
 
         /*

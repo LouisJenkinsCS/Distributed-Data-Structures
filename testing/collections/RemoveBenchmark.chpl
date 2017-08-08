@@ -14,7 +14,7 @@ proc main() {
   var benchFn = lambda(bd : BenchmarkData) {
     var c = bd.userData : Collection(int);
     for i in 1 .. bd.iterations {
-      c.add(i);
+      c.remove();
     }
   };
   var deinitFn = lambda(obj : object) {
@@ -29,7 +29,9 @@ proc main() {
       benchName = "DistributedBoundedQueue",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedBoundedQueue(int, cap=bmd.totalOps, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
+        var c = new DistributedBoundedQueue(int, cap=bmd.totalOps, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
+        forall i in 1 .. bmd.totalOps do c.add(i);
+        return c;
       }
   );
 
@@ -41,7 +43,9 @@ proc main() {
       benchName = "DistributedQueue",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedQueue(int, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
+        var c = new DistributedQueue(int, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
+        forall i in 1 .. bmd.totalOps do c.add(i);
+        return c;
       }
   );
 
@@ -53,7 +57,9 @@ proc main() {
       benchName = "SynchronizedList",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new SynchronizedList(int);
+        var c = new SynchronizedList(int);
+        forall i in 1 .. bmd.totalOps do c.add(i);
+        return c;
       }
   );
 
@@ -65,7 +71,9 @@ proc main() {
       benchName = "DistributedBag",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedBag(int);
+        var c = new DistributedBag(int);
+        forall i in 1 .. bmd.totalOps do c.add(i);
+        return c;
       }
   );
 
@@ -74,7 +82,7 @@ proc main() {
       benchFn = lambda(bd : BenchmarkData) {
         var c = (bd.userData : DistributedBag(int)).localBag;
         for i in 1 .. bd.iterations {
-          c.add(i);
+          c.remove();
         }
       },
       deinitFn = deinitFn,
@@ -82,9 +90,11 @@ proc main() {
       benchName = "DistributedBag with Localization",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedBag(int);
+        var c = new DistributedBag(int);
+        forall i in 1 .. bmd.totalOps do c.add(i);
+        return c;
       }
   );
 
-  plotter.plot("Collections_Add_Benchmark");
+  plotter.plot("Collections_Remove_Benchmark");
 }
