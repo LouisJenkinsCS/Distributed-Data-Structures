@@ -22,7 +22,7 @@ proc main() {
   };
 
   // DistributedQueue - Benchmark
-  runBenchmarkMultiplePlotted(
+  /*runBenchmarkMultiplePlotted(
       benchFn = benchFn,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
@@ -61,7 +61,7 @@ proc main() {
         forall i in 1 .. bmd.totalOps do c.add(i);
         return c;
       }
-  );
+  );*/
 
   // DistributedBag - Benchmark
   runBenchmarkMultiplePlotted(
@@ -78,7 +78,7 @@ proc main() {
   );
 
   // DistributedBag (w/ Localization) - Benchmark
-  runBenchmarkMultiplePlotted(
+  /*runBenchmarkMultiplePlotted(
       benchFn = lambda(bd : BenchmarkData) {
         var c = (bd.userData : DistributedBag(int)).localBag;
         for i in 1 .. bd.iterations {
@@ -94,7 +94,7 @@ proc main() {
         forall i in 1 .. bmd.totalOps do c.add(i);
         return c;
       }
-  );
+  );*/
 
   plotter.plot("Collections_Remove_Benchmark");
 }

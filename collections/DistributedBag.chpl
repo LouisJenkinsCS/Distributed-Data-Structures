@@ -56,7 +56,7 @@ const FINISHED_WITH_WORK : int = 1;
 
 
 // The amount of elements per unroll block; defines the tuple size.
-config param ELEMS_PER_BLOCK = 1024;
+config param INITIAL_BLOCK_SIZE = 1024;
 // The amount we attempt to steal from each segment of other nodes. Helps to
 // further ensure a proper load balance by not leaving segments empty by stealing
 // on average 1/4 of their work, leaving them with 3/4. As we steal from *all* other
@@ -64,27 +64,76 @@ config param ELEMS_PER_BLOCK = 1024;
 // work propagating from excessive work stealing. We steal at least one element, but
 // no more than ELEMS_PER_BLOCK per segment.
 config param WORK_STEALING_RATIO = 0.25;
+config param WORK_STEALING_MAX_MEMORY_MB : real = 1;
 config param logMPMCQueue = false;
 
 class BagSegmentBlock {
   type eltType;
-  var nElems : int;
-  var elems : ELEMS_PER_BLOCK * eltType;
+
+  // The capacity of this block.
+  var cap : int;
+  // The number of occupied elements in this block.
+  var size : int;
+
+  // Contiguous memory containing all elements
+  var elems :  c_ptr(eltType);
   var next : BagSegmentBlock(eltType);
 
+  inline proc isEmpty {
+    return size == 0;
+  }
+
+  inline proc isFull {
+    return size == cap;
+  }
+
+  proc push(elt : eltType) {
+    if elems == nil {
+      halt("'elems' is nil");
+    }
+
+    if isFull {
+      halt("SegmentBlock is Full");
+    }
+
+    elems[size] = elt;
+    size = size + 1;
+  }
+
+  proc pop() : eltType {
+    if elems == nil {
+      halt("'elems' is nil");
+    }
+
+    if isEmpty {
+      halt("SegmentBlock is Empty");
+    }
+
+    size = size - 1;
+    var elt = elems[size];
+    return elt;
+  }
+
   iter drain(n) {
-    var iterations = n;
-    while n > 0 {
-      if nElems == 0 {
+    for 1 .. n {
+      if isEmpty {
         return;
       }
 
-      var elem = elems[nElems];
-      nElems = nElems - 1;
-
-      yield elem;
-      iterations = iterations - 1;
+      yield pop();
     }
+  }
+
+  proc BagSegmentBlock(type eltType, cap) {
+    if cap == 0 {
+      halt("Capacity is 0...");
+    }
+
+    var elems = c_malloc(eltType, cap);
+  }
+
+  proc ~BagSegmentBlock() {
+    c_free(elems);
   }
 }
 
@@ -102,27 +151,6 @@ record BagSegment {
   var headBlock : BagSegmentBlock(eltType);
   var tailBlock : BagSegmentBlock(eltType);
 
-  /*
-    Fields specific to work stealing for this segment (given 'ws' prefix).
-    A helper must first 'register' themselves in our status table, which keeps
-    track of which cells are currently taken and which are not. In work stealing,
-    we attempt to steal ELEMS_PER_BLOCK * here.maxTaskPar elements, but never assign
-    more than one task to a given node.
-  */
-
-  // Number of potential helpers. We don't want more workers than there are nodes.
-  var wsNumSlots = here.maxTaskPar;
-
-  // Used to atomically obtain a slot. A task knows they have a slot if it in
-  // [0, wsNumSlots). If it is outside of this range, then all slots are filled
-  // or this work stealing session is over before the next is initialized.
-  var wsSlotsTaken : atomic int;
-
-  // Slots which keep track of data stolen as well as the current status of the helper task.
-  var wsSlots : [{0..#wsNumSlots}] BagSegmentSlot(eltType);
-
-  // Number of elements currently in the list to allow faster determinism of whether
-  // or not an operation should attempt this bucket.
   var nElems : atomic uint;
 
   inline proc isEmpty {
@@ -150,31 +178,28 @@ record BagSegment {
     var iterations = n : int;
     var arr : [{0..#n : int}] eltType;
     var arrIdx = 0;
-    while iterations > 0 {
+
+    for 1 .. n {
       if isEmpty {
         halt("Attempted to take ", n, " elements when insufficient");
       }
 
-      if headBlock.nElems == 0 {
-        halt("Iterating over ", n, " elements but Head block is 0 but nElems is ", nElems.read());
+      if headBlock.isEmpty {
+        halt("Iterating over ", n, " elements with headBlock empty but nElems is ", nElems.read());
       }
 
-      if arrIdx >= arr.size then halt(arrIdx, " > ", arr.size, "; iterations: ", iterations, ", n: ", n);
-      arr[arrIdx] = headBlock.elems[headBlock.nElems];
+      arr[arrIdx] = headBlock.pop();
       arrIdx = arrIdx + 1;
-      headBlock.nElems = headBlock.nElems - 1;
       nElems.sub(1);
 
       // Fix list if we consumed last one...
-      if headBlock.nElems == 0 {
+      if headBlock.isEmpty {
         var tmp = headBlock;
         headBlock = headBlock.next;
         delete tmp;
 
         if headBlock == nil then tailBlock = nil;
       }
-
-      iterations = iterations - 1;
     }
 
     return arr;
@@ -185,16 +210,15 @@ record BagSegment {
       return (false, _defaultOf(eltType));
     }
 
-    if headBlock.nElems == 0 {
-      halt("Iterating over ", 1, " elements but Head block is 0 but nElems is ", nElems.read());
+    if headBlock.isEmpty {
+      halt("Iterating over 1 element with headBlock empty but nElems is ", nElems.read());
     }
 
-    var elem = headBlock.elems[headBlock.nElems];
-    headBlock.nElems = headBlock.nElems - 1;
+    var elem = headBlock.pop();
     nElems.sub(1);
 
     // Fix list if we consumed last one...
-    if headBlock.nElems == 0 {
+    if headBlock.isEmpty {
       var tmp = headBlock;
       headBlock = headBlock.next;
       delete tmp;
@@ -208,54 +232,27 @@ record BagSegment {
   proc addElements(elt : eltType) {
     var block = tailBlock;
 
-    // Empty?
+    // Empty? Create a new one of initial size
     if block == nil then {
-      tailBlock = new BagSegmentBlock(eltType);
+      tailBlock = new BagSegmentBlock(eltType, INITIAL_BLOCK_SIZE);
       headBlock = tailBlock;
       block = tailBlock;
     }
 
-    // Full?
-    if block.nElems == ELEMS_PER_BLOCK {
-      block.next = new BagSegmentBlock(eltType);
+    // Full? Create a new one double the previous size
+    if block.isFull {
+      block.next = new BagSegmentBlock(eltType, block.cap * 2);
       tailBlock = block.next;
       block = block.next;
     }
 
-    block.nElems = block.nElems + 1;
-    block.elems[block.nElems] = elt;
-
-    // We update the count in each iteration to increase the visibility of this
-    // operation (as dequeue operations would skip over us during 2nd pass)
+    block.push(elt);
     nElems.add(1);
   }
 
-  // TODO: Increase efficiency of bulk adding
+  // TODO: Improve efficiency of bulk adding...
   proc addElements(elts) {
-    var block = tailBlock;
-
-    // Empty?
-    if block == nil then {
-      tailBlock = new BagSegmentBlock(eltType);
-      headBlock = tailBlock;
-      block = tailBlock;
-    }
-
-    for elt in elts {
-      // Full?
-      if block.nElems == ELEMS_PER_BLOCK {
-        block.next = new BagSegmentBlock(eltType);
-        tailBlock = block.next;
-        block = block.next;
-      }
-
-      block.nElems = block.nElems + 1;
-      block.elems[block.nElems] = elt;
-
-      // We update the count in each iteration to increase the visibility of this
-      // operation (as dequeue operations would skip over us during 2nd pass)
-      nElems.add(1);
-    }
+    for elt in elts do addElements(elt);
   }
 }
 
@@ -277,6 +274,13 @@ class Bag : Collection {
     found enough items, then it may attempt to balance the load distribution.
   */
   var loadBalanceInProgress : atomic bool;
+  var isBagEmpty : bool;
+
+  // To 'freeze' the bag, we must ensure that current mutating operations finish
+  // first. However, at the same time we want to reduce communication by keeping
+  // a task counter for each node that can be checked at next to no cost.
+  var concurrentTasks : atomic uint;
+  var frozenState : atomic bool;
 
   var maxParallelSegmentSpace = {0 .. #here.maxTaskPar};
   var segments : [maxParallelSegmentSpace] BagSegment(eltType);
@@ -287,6 +291,25 @@ class Bag : Collection {
 
   inline proc nextStartIdxDeq {
     return (startIdxDeq.fetchAdd(1) % here.maxTaskPar : uint) : int;
+  }
+
+  proc freeze() {
+    coforall loc in Locales do on loc {
+      var localBag = parentHandle.getPrivatizedThis.bag;
+      localBag.frozenState.write(true);
+      localBag.concurrentTasks.waitFor(0);
+    }
+  }
+
+  proc unfreeze() {
+    coforall loc in Locales do on loc {
+      var localBag = parentHandle.getPrivatizedThis.bag;
+      localBag.frozenState.write(false);
+    }
+  }
+
+  inline proc isFrozen {
+    return frozenState.read();
   }
 
   proc Bag(type eltType, parentHandle) {
@@ -463,6 +486,7 @@ class Bag : Collection {
                     segment.releaseStatus();
                     if logMPMCQueue then writeln(here, ": loadBalance is in progres... spinning...");
                     while loadBalanceInProgress.read() do chpl_task_yield();
+                    if isBagEmpty then return (false, _defaultOf(eltType));
                     if logMPMCQueue then writeln(here, ": loadBalance is finished, continuing...");
 
                     // Reset our phase and scan for more elements...
@@ -498,6 +522,7 @@ class Bag : Collection {
                           // As we only care that the segment contains data,
                           // we test-and-test-and-set until we gain ownership.
                           while !targetSegment.isEmpty {
+                            var backoff = 0;
                             if targetSegment.currentStatus == UNLOCKED && targetSegment.acquireWithStatus(DEQUEUE) {
                               // Sanity check: ensure segment wasn't emptied since last check
                               if targetSegment.isEmpty {
@@ -526,7 +551,9 @@ class Bag : Collection {
                             }
 
                             // Backoff...
-                            chpl_task_yield();
+                            if backoff == 0 then chpl_task_yield();
+                            else sleep(max(1000, 2 ** backoff), TimeUnits.microseconds);
+                            backoff = backoff + 1;
                           }
                         }
                       }
@@ -550,6 +577,7 @@ class Bag : Collection {
                     recvSegment.releaseStatus();
                   }
 
+                  isBagEmpty = isEmpty.read();
                   loadBalanceInProgress.write(false);
 
                   // At this point, if no work has been found, we will return empty...

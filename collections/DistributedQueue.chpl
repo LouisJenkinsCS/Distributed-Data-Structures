@@ -151,6 +151,16 @@ class DistributedQueue : Queue {
     var localThis = getPrivatizedThis;
     ref _globalTail = globalTail;
 
+    local {
+      localThis.concurrentTasks.add(1);
+
+      // Check if the queue is now 'immutable'.
+      if localThis.frozenState.read() == true {
+        localThis.concurrentTasks.sub(1);
+        return false;
+      }
+    }
+
     var _nSlots : int;
     local { _nSlots = localThis.nSlots; }
 
@@ -163,6 +173,7 @@ class DistributedQueue : Queue {
 
       if sz >= 0 {
         slot.add(elt);
+        local { localThis.concurrentTasks.sub(1); }
         return true;
       }
     }
@@ -173,6 +184,16 @@ class DistributedQueue : Queue {
   proc remove() : (bool, eltType) {
     var localThis = getPrivatizedThis;
 
+    local {
+      localThis.concurrentTasks.add(1);
+
+      // Check if the queue is now 'immutable'.
+      if localThis.frozenState.read() == true {
+        localThis.concurrentTasks.sub(1);
+        return (false, _defaultOf(eltType));
+      }
+    }
+
     // Find a slot we can take from; if the slot is empty, we bail as it is empty.
     var head = (globalHead.fetchAdd(1) % localThis.nSlots : uint) : int;
     var slot : DistributedQueueSlot(eltType);
@@ -181,12 +202,18 @@ class DistributedQueue : Queue {
 
     // Nothing for us...
     if sz < 1 {
+      local { localThis.concurrentTasks.sub(1); }
       return (false, _defaultOf(eltType));
     }
 
     // There is something for us
     var elt = slot.remove();
+    local { localThis.concurrentTasks.sub(1); }
     return (true, elt);
+  }
+
+  inline proc isFrozen {
+    return getPrivatizedThis.frozenState.read();
   }
 
   proc freeze() {
