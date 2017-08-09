@@ -91,10 +91,7 @@ class BagSegmentBlock {
 record BagSegmentSlot {
   type eltType;
 
-  // The locale we are assigned to steal from...
-  var locIdx : int;
   var status : atomic int;
-  var block : BagSegmentBlock(eltType);
 }
 
 record BagSegment {
@@ -276,11 +273,10 @@ class Bag : Collection {
   var startIdxDeq : atomic uint;
 
   /*
-    We only allow one segment to be nominated as the 'work stealer' for our queue.
-    This reduces the complexity of having to manage multiple work stealing segments
-    while also providing more concurrency through work stealing.
+    If a task makes 2 complete passes (1 best-case, 1 average-case) and has not
+    found enough items, then it may attempt to balance the load distribution.
   */
-  var workStealer : atomic int;
+  var loadBalanceInProgress : atomic bool;
 
   var maxParallelSegmentSpace = {0 .. #here.maxTaskPar};
   var segments : [maxParallelSegmentSpace] BagSegment(eltType);
@@ -294,7 +290,6 @@ class Bag : Collection {
   }
 
   proc Bag(type eltType, parentHandle) {
-    workStealer.write(-1);
     parentHandle.bag = this;
   }
 
@@ -453,52 +448,119 @@ class Bag : Collection {
               // Quick acquire
               when UNLOCKED {
                 if segment.acquireWithStatus(DEQUEUE) {
-                  // Steal if empty... because we help if we are not the one set, we only
-                  // know whether the queue is empty if we were the work stealer.
-                  if segment.isEmpty {
-                    var (_idx, foundWork, hasElem, elem) = stealWork(idx);
-
-                    // If we have lifted an element, we've retrieved an item.
-                    if hasElem {
-                      return (hasElem, elem);
-                    }
-
-                    // If the index returned is equivalent to ours, then we were the 'work stealer'
-                    // for our queue, and since only we personally know how many elements there are
-                    // (as we were in charge of merging all work stolen), we know the queue is empty.
-                    // Otherwise, if the index differs then it means we helped assist another
-                    // segment in work stealing and we should move to it as if there is any work
-                    // available, it would be there.
-                    if _idx == idx && !foundWork {
-                      return (false, _defaultOf(eltType));
-                    } else {
-                      phase = 1;
-                      break;
-                    }
-                  }
-
                   // We're lucky; another element has been added to the current segment,
                   // take it and leave like normal...
-                  var (hasElem, elem) : (bool, eltType) = segment.takeElement();
+                  if !segment.isEmpty {
+                    var (hasElem, elem) : (bool, eltType) = segment.takeElement();
+                    segment.releaseStatus();
+                    return (hasElem, elem);
+                  }
+
+                  // Attempt to become the sole work stealer for this node. If we
+                  // do not, we spin until they finish. We need to release the lock
+                  // on our segment so our segment may be load balanced as well.
+                  if loadBalanceInProgress.testAndSet() {
+                    segment.releaseStatus();
+                    if logMPMCQueue then writeln(here, ": loadBalance is in progres... spinning...");
+                    while loadBalanceInProgress.read() do chpl_task_yield();
+                    if logMPMCQueue then writeln(here, ": loadBalance is finished, continuing...");
+
+                    // Reset our phase and scan for more elements...
+                    phase = 1;
+                    break;
+                  }
+
+                  if logMPMCQueue then writeln(here, ": work stealing...");
+
+                  // We are the sole work stealer, and so it is our responsibility
+                  // to balance the load for our node. We fork-join new worker
+                  // tasks that will check horizontally across each node (as in
+                  // across each segment with the same index), and vertically across
+                  // each segment (each segment in a node). Horizontally, we steal
+                  // at most a % of work from other nodes to give to ourselves.
+                  // As load balancer, we also are the only one who knows whether
+                  // or not all bags are empty.
+                  var isEmpty : atomic bool;
+                  isEmpty.write(true);
                   segment.releaseStatus();
-                  return (hasElem, elem);
+                  coforall segmentIdx in 0..#here.maxTaskPar {
+                    var stolenWork : [{0..#numLocales}] (int, ELEMS_PER_BLOCK * eltType);
+                    coforall loc in parentHandle.targetLocales {
+                      if loc != here then on loc {
+                        // As we jumped to the target node, 'localBag' returns
+                        // the target's bag that we are attempting to steal from.
+                        var targetBag = parentHandle.localBag;
+
+                        // Only proceed if the target is not load balancing themselves...
+                        if !targetBag.loadBalanceInProgress.read() {
+                          ref targetSegment = targetBag.segments[segmentIdx];
+
+                          // As we only care that the segment contains data,
+                          // we test-and-test-and-set until we gain ownership.
+                          while !targetSegment.isEmpty {
+                            if targetSegment.currentStatus == UNLOCKED && targetSegment.acquireWithStatus(DEQUEUE) {
+                              // Sanity check: ensure segment wasn't emptied since last check
+                              if targetSegment.isEmpty {
+                                targetSegment.releaseStatus();
+                                break;
+                              }
+
+                              // We steal at least 1 element, even if its the only element. We steal at most
+                              // ELEMS_PER_BLOCK because thats the max we can hold in our tuple. We steal a %
+                              // if they have (1, ELEMS_PER_BLOCK) so a sizeable amount is stolen, while leaving them
+                              // with enough to get by.
+                              var toSteal = max(1, min(ELEMS_PER_BLOCK, targetSegment.nElems.read() * WORK_STEALING_RATIO));
+                              var stolen : ELEMS_PER_BLOCK * eltType;
+                              var stolenIdx : int;
+                              for elt in targetSegment.takeElements(toSteal) {
+                                stolenIdx = stolenIdx + 1;
+                                stolen[stolenIdx] = elt;
+                              }
+                              targetSegment.releaseStatus();
+
+                              // Mark as processed and move stolen work...
+                              stolenWork[here.id] = (stolenIdx, stolen);
+
+                              // We are done...
+                              break;
+                            }
+
+                            // Backoff...
+                            chpl_task_yield();
+                          }
+                        }
+                      }
+                    }
+
+                    // It is our job now to distribute all stolen data to the same
+                    // horizontal segment on our node. Acquire lock...
+                    ref recvSegment = segments[segmentIdx];
+                    while true {
+                      if recvSegment.currentStatus == UNLOCKED && recvSegment.acquireWithStatus(ENQUEUE) then break;
+                      chpl_task_yield();
+                    }
+
+                    // Add stolen elements to segment...
+                    for (nStolen, stolen) in stolenWork {
+                      for i in 1 .. nStolen do recvSegment.addElements(stolen[i]);
+
+                      // Let parent know that the bag is not empty.
+                      isEmpty.write(false);
+                    }
+                    recvSegment.releaseStatus();
+                  }
+
+                  loadBalanceInProgress.write(false);
+
+                  // At this point, if no work has been found, we will return empty...
+                  if isEmpty.read() {
+                    return (false, _defaultOf(eltType));
+                  } else {
+                    // Otherwise, we try to get data like everyone else.
+                    phase = 1;
+                    break;
+                  }
                 }
-              }
-              // If someone else is stealing work, we add ourself as a potential helper
-              // to help speed this along, and hopefully we get an element for ourself.
-              when STEALING_WORK {
-                var (hasElem, elem) = helpStealWork(startIdx);
-
-                // We have our element...
-                if hasElem {
-                  return (hasElem, elem);
-                }
-
-                // If we did not lift an element, its possible that there are more
-                // elements elsewhere in the map, iterate through again...
-
-                phase = 1;
-                break;
               }
             }
 
@@ -508,6 +570,7 @@ class Bag : Collection {
             backoff = backoff + 1;
           }
         }
+
         otherwise do halt("Invalid phase #", phase);
       }
 
@@ -519,203 +582,8 @@ class Bag : Collection {
 
     halt("DistributedBag.remove() DEADCODE...");
   }
-
-  /*
-    Work Stealing
-  */
-
-  /*
-    Attempt to steal work as the segment referenced by 'idx'. As we may only have
-    one work stealing segment, we must first contest for that right. If we obtain
-    that right, we become responsible with coordinating and distributing work to other
-    helper tasks, and then merging all of the work together. If another segment has
-    that right, we move to that segment and become one of their helpers.
-  */
-  proc stealWork(idx) : (int, bool, bool, eltType) {
-    ref segment = segments[idx];
-
-    // We can't steal if we're the only ones, so return as empty
-    if parentHandle.targetLocales.size == 1 {
-      segment.releaseStatus();
-      return (idx, false, false, _defaultOf(eltType));
-    }
-
-    if logMPMCQueue then writeln(here, ": Attempting to steal work... WorkStealer: ", workStealer.read());
-
-    // Attempt to become the sole work stealing segment. If we fail, then we enlist
-    // our aid to the current work stealing segment as a helper.
-    while true {
-      // We are the new work stealing segment...
-      if workStealer.compareExchangeStrong(-1, idx) {
-        break;
-      }
-
-      // Another segment is the work stealing segment; help them out...
-      // If we help steal work, it is possible we also lift an element while helping
-      // Furthermore, we also return the index of the work stealing segment, as it is
-      // likely to have more work.
-      var currentStealer = workStealer.read();
-      if currentStealer != -1 {
-        segment.releaseStatus();
-        var (hasElem, elem) = helpStealWork(currentStealer);
-        return (currentStealer, false, hasElem, elem);
-      }
-    }
-
-    // Initialize each slot for potential helpers. It is imperative that we initialize
-    // the slots *before* resetting the wsSlotsTaken to avoid race conditions, as
-    // helpers only help if they obtain a valid index.
-    for slot in segment.wsSlots do slot.status.write(INITIALIZED);
-    segment.wsSlotsTaken.write(0);
-    segment.status.write(STEALING_WORK);
-
-    // Help yourself...
-    var (hasElem, elem) = helpStealWork(idx);
-    // Lets others know that we no longer require help.
-    segment.status.write(STEALING_INIT);
-
-    // At this point, it is possible that other helpers are still working, and so
-    // we wait for them to finish. Take account for what has been stolen.
-    var foundWork = false;
-    for slot in segment.wsSlots {
-      // Wait for the current helper to finish, keep track of whether or not the bag is empty.
-      while slot.status.read() == INITIALIZED do chpl_task_yield();
-      if slot.status.read() == FINISHED_WITH_WORK then foundWork = true;
-    }
-
-    // At this point, we have stolen from all other nodes, and we may relinquish
-    // our role as primary work-stealer.
-    workStealer.write(-1);
-    segment.releaseStatus();
-    if logMPMCQueue then writeln(here, ": Finished Stealing Work... Lifted an Element: ", hasElem, ", Empty: ", !foundWork);
-    return (idx, foundWork, hasElem, elem);
-  }
-
-  /*
-    Enlist our aid as a helper thread for the current work stealer. To do so, we
-    must claim a slot (atomically),
-  */
-  proc helpStealWork(idx) : (bool, eltType) {
-    ref segment = segments[idx];
-
-    while true {
-      select segment.currentStatus {
-        // They are still initializing...
-        when STEALING_INIT {
-          // Tight spin, we'll be able to help soon...
-        }
-        // They are initialized, we can now attempt to help...
-        when STEALING_WORK {
-          break;
-        }
-        // We're not stealing work...
-        otherwise do return (false, _defaultOf(eltType));
-      }
-    }
-
-    if logMPMCQueue then writeln(here, ": Helper assisting to steal work...");
-    var (hasElem, elem) : (bool, eltType);
-
-    // Attempt to help...
-    while true {
-      var ourIdx = segment.wsSlotsTaken.fetchAdd(1);
-      // If the index we get is not in a valid range, we're done helping.
-      if ourIdx >= segment.wsNumSlots {
-        return (hasElem, elem);
-      }
-
-      ref slot = segment.wsSlots[ourIdx];
-      if logMPMCQueue then writeln(here, ": Helper assigned to steal work from segment #", ourIdx);
-
-      // We know which locale we are going to be working on, but we must setup some
-      // temporaries that can make it easier for back-and-forth communication.
-      // We create an array of tuples, one for each segment on the other node.
-      // As well, in case a segment is skipped, we initialize the index at '1'
-      // to signify that it is empty.
-      var stolenWork : [{0..#numLocales}] (int, ELEMS_PER_BLOCK * eltType);
-      for work in stolenWork do work[1] = 1;
-
-      // We perform a 'fork-join' and steal work from other nodes at the same index.
-      // This way, we can keep an even work distribution even after stealing work.
-      coforall loc in parentHandle.targetLocales do if loc != here then on loc {
-        var bag = parentHandle.localBag;
-        ref otherSegment = bag.segments[ourIdx];
-
-        // The segment is not empty, meaning there is work here for us, contest for it...
-        while !otherSegment.isEmpty {
-          var status = otherSegment.currentStatus;
-          // If they are stealing work as well, we back out.
-          if status == STEALING_WORK || status == STEALING_INIT then break;
-
-          // We have acquired access to the segment.
-          if status == UNLOCKED && otherSegment.acquireWithStatus(DEQUEUE) {
-            // Someone stole the last element in between this and the last check...
-            if otherSegment.isEmpty {
-              otherSegment.releaseStatus();
-              break;
-            }
-
-            var toSteal = max(1, min(ELEMS_PER_BLOCK, otherSegment.nElems.read() * WORK_STEALING_RATIO));
-            var stolen : ELEMS_PER_BLOCK * eltType;
-            var stolenIdx = 1;
-            for elt in otherSegment.takeElements(toSteal) {
-                stolen[stolenIdx] = elt;
-                stolenIdx = stolenIdx + 1;
-            }
-            otherSegment.releaseStatus();
-
-            // Mark as processed and move stolen work...
-            stolenWork[here.id] = (stolenIdx, stolen);
-            if logMPMCQueue then writeln(stolenWork.locale, " stole ", stolenIdx - 1, " work from ", here);
-            break;
-          }
-          if logMPMCQueue then writeln(here, ": Helper finished stealing work for segment #", ourIdx);
-
-          chpl_task_yield();
-        }
-      }
-
-      // Add elements to our segment index... if the index of the segments we stole
-      // from are equivalent to the work stealing segment index, then we do not need
-      // to acquire the lock and we assume mutual exclusion.
-      ref ourSegment = segments[ourIdx];
-      if ourIdx != idx then while !ourSegment.acquireWithStatus(ENQUEUE) do chpl_task_yield();
-
-      // Add all of our stolen work...
-      var foundWork = false;
-      for (idx, work) in stolenWork {
-        // Is empty
-        if idx == 1 then continue;
-
-        // Lift an element if not already...
-        if !hasElem {
-          hasElem = true;
-          elem = work[idx - 1];
-          idx = idx - 1;
-
-          // Consumed last element?
-          if idx == 1 then continue;
-        }
-
-        while idx > 1 {
-          var e = work[idx];
-          ourSegment.addElements(e);
-          idx = idx - 1;
-        }
-
-        foundWork = true;
-      }
-
-      if ourIdx != idx then ourSegment.releaseStatus();
-
-      // Let work stealer know whether or not we found work.
-      if foundWork then slot.status.write(FINISHED_WITH_WORK); else slot.status.write(FINISHED_WITH_NO_WORK);
-      if logMPMCQueue then writeln(here, ": Helper finished stealing work...");
-    }
-
-    halt("DistributedBag.helpStealWork()... DEADCODE");
-  }
 }
+
 
 class DistributedBag : Collection {
   var targetLocDom : domain(1) = LocaleSpace;

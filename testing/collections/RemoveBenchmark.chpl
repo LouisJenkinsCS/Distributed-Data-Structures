@@ -1,8 +1,8 @@
+use Collection;
 use DistributedBoundedQueue;
 use DistributedQueue;
 use DistributedBag;
 use SynchronizedList;
-use Collection;
 use Benchmark;
 use Plot;
 
@@ -22,7 +22,7 @@ proc main() {
   };
 
   // DistributedQueue - Benchmark
-  /*runBenchmarkMultiplePlotted(
+  runBenchmarkMultiplePlotted(
       benchFn = benchFn,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
@@ -61,7 +61,7 @@ proc main() {
         forall i in 1 .. bmd.totalOps do c.add(i);
         return c;
       }
-  );*/
+  );
 
   // DistributedBag - Benchmark
   runBenchmarkMultiplePlotted(
