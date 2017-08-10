@@ -137,6 +137,7 @@ class BagSegmentBlock {
   proc BagSegmentBlock(type eltType, ptr, capacity) {
     cap = capacity;
     elems = ptr;
+    size = cap;
   }
 
   proc ~BagSegmentBlock() {
@@ -185,7 +186,7 @@ record BagSegment {
     var srcOffset = 0;
     while destOffset < n {
       if headBlock == nil || isEmpty {
-        halt(here, ": Attempted transfer ", n, " elements to ", locId, " but failed...");
+        halt(here, ": Attempted transfer ", n, " elements to ", locId, " but failed... destOffset=", destOffset);
       }
 
       var len = headBlock.size;
@@ -213,6 +214,8 @@ record BagSegment {
         if headBlock == nil then tailBlock = nil;
       }
     }
+
+    nElems.sub(n : uint);
   }
 
   inline proc takeElements(n) {
@@ -613,9 +616,17 @@ class Bag : Collection {
                     // Add stolen elements to segment...
                     for (nStolen, stolenPtr) in stolenWork {
                       for i in 0 .. #nStolen do writeln(stolenPtr[i]);
-                      recvSegment.tailBlock.next = new BagSegmentBlock(eltType, stolenPtr, nStolen);
-                      recvSegment.tailBlock = recvSegment.tailBlock.next;
+                      var block = new BagSegmentBlock(eltType, stolenPtr, nStolen);
 
+                      if recvSegment.tailBlock == nil {
+                        recvSegment.tailBlock = block;
+                        recvSegment.headBlock = block;
+                      } else {
+                        recvSegment.tailBlock.next = block;
+                        recvSegment.tailBlock = recvSegment.tailBlock.next;
+                      }
+
+                      recvSegment.nElems.add(nStolen : uint);
                       // Let parent know that the bag is not empty.
                       isEmpty.write(false);
                     }
