@@ -8,7 +8,7 @@ use Plot;
 
 proc main() {
   var plotter : Plotter(int, real);
-  var targetLocales = (1,2,4,8,16,32,64);
+  var targetLocales = (2,4,8,16,32,64);
 
   // Collections share the same API and hence share the same benchFn and deinitFn
   var benchFn = lambda(bd : BenchmarkData) {

@@ -64,20 +64,20 @@ config param INITIAL_BLOCK_SIZE = 1024;
 // work propagating from excessive work stealing. We steal at least one element, but
 // no more than ELEMS_PER_BLOCK per segment.
 config param WORK_STEALING_RATIO = 0.25;
-config param WORK_STEALING_MAX_MEMORY_MB : real = 1;
+config param WORK_STEALING_MAX_MEMORY_MB : real = 1.0;
 config param logMPMCQueue = false;
 
 class BagSegmentBlock {
   type eltType;
 
+  // Contiguous memory containing all elements
+  var elems :  c_ptr(eltType);
+  var next : BagSegmentBlock(eltType);
+
   // The capacity of this block.
   var cap : int;
   // The number of occupied elements in this block.
   var size : int;
-
-  // Contiguous memory containing all elements
-  var elems :  c_ptr(eltType);
-  var next : BagSegmentBlock(eltType);
 
   inline proc isEmpty {
     return size == 0;
@@ -87,8 +87,9 @@ class BagSegmentBlock {
     return size == cap;
   }
 
-  proc push(elt : eltType) {
+  inline proc push(elt : eltType) {
     if elems == nil {
+      writeln("Cap: ", cap, "; elems: ", elems : string);
       halt("'elems' is nil");
     }
 
@@ -100,7 +101,7 @@ class BagSegmentBlock {
     size = size + 1;
   }
 
-  proc pop() : eltType {
+  inline proc pop() : eltType {
     if elems == nil {
       halt("'elems' is nil");
     }
@@ -124,12 +125,18 @@ class BagSegmentBlock {
     }
   }
 
-  proc BagSegmentBlock(type eltType, cap) {
-    if cap == 0 {
+  proc BagSegmentBlock(type eltType, capacity) {
+    if capacity == 0 {
       halt("Capacity is 0...");
     }
 
-    var elems = c_malloc(eltType, cap);
+    cap = capacity;
+    elems = c_malloc(eltType, capacity);
+  }
+
+  proc BagSegmentBlock(type eltType, ptr, capacity) {
+    cap = capacity;
+    elems = ptr;
   }
 
   proc ~BagSegmentBlock() {
@@ -173,13 +180,47 @@ record BagSegment {
     status.write(UNLOCKED);
   }
 
-  // TODO: Increase efficiency of bulk taking
-  proc takeElements(n) {
+  inline proc transferElements(destPtr, n, locId = here.id) {
+    var destOffset = 0;
+    var srcOffset = 0;
+    while destOffset < n {
+      if headBlock == nil || isEmpty {
+        halt(here, ": Attempted transfer ", n, " elements to ", locId, " but failed...");
+      }
+
+      var len = headBlock.size;
+      var need = n - destOffset;
+      // If the amount in this block is greater than what is left to transfer, we
+      // cannot begin transferring at the beginning, so we set our offset from the end.
+      if len > need {
+        srcOffset = len - need;
+        headBlock.size = srcOffset;
+        __primitive("chpl_comm_array_put", headBlock.elems[srcOffset], locId, destPtr[destOffset], need);
+        destOffset = destOffset + need;
+      } else {
+        srcOffset = 0;
+        headBlock.size = 0;
+        __primitive("chpl_comm_array_put", headBlock.elems[srcOffset], locId, destPtr[destOffset], len);
+        destOffset = destOffset + len;
+      }
+
+      // Fix list if we consumed last one...
+      if headBlock.isEmpty {
+        var tmp = headBlock;
+        headBlock = headBlock.next;
+        delete tmp;
+
+        if headBlock == nil then tailBlock = nil;
+      }
+    }
+  }
+
+  inline proc takeElements(n) {
     var iterations = n : int;
     var arr : [{0..#n : int}] eltType;
     var arrIdx = 0;
 
-    for 1 .. n {
+    for 1 .. n : int{
       if isEmpty {
         halt("Attempted to take ", n, " elements when insufficient");
       }
@@ -205,7 +246,7 @@ record BagSegment {
     return arr;
   }
 
-  proc takeElement() {
+  inline proc takeElement() {
     if isEmpty {
       return (false, _defaultOf(eltType));
     }
@@ -229,7 +270,7 @@ record BagSegment {
     return (true, elem);
   }
 
-  proc addElements(elt : eltType) {
+  inline proc addElements(elt : eltType) {
     var block = tailBlock;
 
     // Empty? Create a new one of initial size
@@ -251,7 +292,7 @@ record BagSegment {
   }
 
   // TODO: Improve efficiency of bulk adding...
-  proc addElements(elts) {
+  inline proc addElements(elts) {
     for elt in elts do addElements(elt);
   }
 }
@@ -382,6 +423,12 @@ class Bag : Collection {
     halt("Almost exited enqueueAcquire before getting a segment...");
   }
 
+  record StolenWork {
+    type eltType;
+    var dom : domain(1);
+    var arr : [dom] eltType;
+  }
+
   proc remove() : (bool, eltType) {
     var startIdx = nextStartIdxDeq;
     var idx = startIdx;
@@ -484,10 +531,10 @@ class Bag : Collection {
                   // on our segment so our segment may be load balanced as well.
                   if loadBalanceInProgress.testAndSet() {
                     segment.releaseStatus();
-                    if logMPMCQueue then writeln(here, ": loadBalance is in progres... spinning...");
-                    while loadBalanceInProgress.read() do chpl_task_yield();
+                    if logMPMCQueue then writeln(here, ": loadBalance is in progres... Looking for work...");
+                    /*while loadBalanceInProgress.read() do chpl_task_yield();
                     if isBagEmpty then return (false, _defaultOf(eltType));
-                    if logMPMCQueue then writeln(here, ": loadBalance is finished, continuing...");
+                    if logMPMCQueue then writeln(here, ": loadBalance is finished, continuing...");*/
 
                     // Reset our phase and scan for more elements...
                     phase = 1;
@@ -508,7 +555,7 @@ class Bag : Collection {
                   isEmpty.write(true);
                   segment.releaseStatus();
                   coforall segmentIdx in 0..#here.maxTaskPar {
-                    var stolenWork : [{0..#numLocales}] (int, ELEMS_PER_BLOCK * eltType);
+                    var stolenWork : [{0..#numLocales}] (int, c_ptr(eltType));
                     coforall loc in parentHandle.targetLocales {
                       if loc != here then on loc {
                         // As we jumped to the target node, 'localBag' returns
@@ -530,21 +577,17 @@ class Bag : Collection {
                                 break;
                               }
 
-                              // We steal at least 1 element, even if its the only element. We steal at most
-                              // ELEMS_PER_BLOCK because thats the max we can hold in our tuple. We steal a %
-                              // if they have (1, ELEMS_PER_BLOCK) so a sizeable amount is stolen, while leaving them
-                              // with enough to get by.
-                              var toSteal = max(1, min(ELEMS_PER_BLOCK, targetSegment.nElems.read() * WORK_STEALING_RATIO));
-                              var stolen : ELEMS_PER_BLOCK * eltType;
-                              var stolenIdx : int;
-                              for elt in targetSegment.takeElements(toSteal) {
-                                stolenIdx = stolenIdx + 1;
-                                stolen[stolenIdx] = elt;
-                              }
-                              targetSegment.releaseStatus();
+                              extern proc sizeof(type x): size_t;
+                              // We steal at most 1MB worth of data. If the user has less than that, we steal a %, at least 1.
+                              const mb = WORK_STEALING_MAX_MEMORY_MB * 1024 * 1024;
+                              var toSteal = max(1, min(mb / sizeof(eltType), targetSegment.nElems.read() * WORK_STEALING_RATIO)) : int;
+                              if logMPMCQueue then writeln(stolenWork.locale, ": Stealing ", toSteal, " elements from ", here);
 
-                              // Mark as processed and move stolen work...
-                              stolenWork[here.id] = (stolenIdx, stolen);
+                              // Allocate storage...
+                              on stolenWork do stolenWork[loc.id] = (toSteal, c_malloc(eltType, toSteal));
+                              var destPtr = stolenWork[here.id][2];
+                              targetSegment.transferElements(destPtr, toSteal, stolenWork.locale.id);
+                              targetSegment.releaseStatus();
 
                               // We are done...
                               break;
@@ -568,8 +611,10 @@ class Bag : Collection {
                     }
 
                     // Add stolen elements to segment...
-                    for (nStolen, stolen) in stolenWork {
-                      for i in 1 .. nStolen do recvSegment.addElements(stolen[i]);
+                    for (nStolen, stolenPtr) in stolenWork {
+                      for i in 0 .. #nStolen do writeln(stolenPtr[i]);
+                      recvSegment.tailBlock.next = new BagSegmentBlock(eltType, stolenPtr, nStolen);
+                      recvSegment.tailBlock = recvSegment.tailBlock.next;
 
                       // Let parent know that the bag is not empty.
                       isEmpty.write(false);
