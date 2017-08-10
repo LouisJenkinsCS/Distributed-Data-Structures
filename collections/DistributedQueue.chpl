@@ -13,8 +13,8 @@ class DistributedQueueSlot {
   type eltType;
 
   // Locks are atomic to allow us to remotely contest for the lock.
-  var headLock : atomic bool;
-  var tailLock : atomic bool;
+  var headLock$ : sync bool;
+  var tailLock$ : sync bool;
 
   // Number of elements in this slot. If the count is negative, that means a 'dequeue'
   // has skipped over this, and as 'enqueue' we should as well to catch up.
@@ -29,47 +29,60 @@ class DistributedQueueSlot {
   }
 
   proc add(elt : eltType) {
-    // Create note ahead of time to reduce overhead...
-    var node = new DistributedQueueSlotNode(eltType, elt=elt);
-
-    ref _tailLock = tailLock;
-    // Contest for lock...
-    while !_tailLock.testAndSet() do chpl_task_yield();
-
-    // Append to tail...
-    ref _tail = tail;
-    _tail.next = node;
-    _tail = node;
-
-    // Release lock. This counts as a full memory barrier so the above will be
-    // made visible to other nodes.
-    _tailLock.write(false);
+    on this {
+      var node = new DistributedQueueSlotNode(eltType, elt=elt);
+      local {
+        tailLock$ = true;
+        tail.next = node;
+        tail = node;
+        tailLock$;
+      }
+    }
   }
 
   // Note, this should be *only* called after we know for a fact that there is an element
   // waiting for us...
   // TODO: Check performance using an 'on' statement...
   proc remove() : eltType {
-    ref _headLock = headLock;
-    // Contest for lock...
-    while !_headLock.testAndSet() do chpl_task_yield();
+    var elt : eltType;
+    on this {
+      var _elt : eltType;
+      local {
+        headLock$ = true;
+        var node = head;
+        var newHead = head.next;
 
-    ref _head = head;
-    var node = _head;
-    var newHead = _head.next;
+        if newHead == nil {
+          var barrier : atomic uint;
+          while newHead == nil {
+            chpl_task_yield();
+            barrier.fetchAdd(1);
+            newHead = head.next;
+          }
+        }
 
-    // Another node hasn't finished it's write yet...
-    while newHead == nil {
-      newHead = _head.next;
+        head = newHead;
+        _elt = newHead.elt;
+        headLock$;
+        delete node;
+      }
+      elt = _elt;
     }
-    _head = newHead;
-    var elt = newHead.elt;
-
-    // Release the lock and free resources...
-    _headLock.write(false);
-
-    delete node;
     return elt;
+  }
+
+  proc ~DistributedQueueSlot() {
+    on this {
+      local {
+        var curr = head;
+
+        while curr != nil {
+          var tmp = curr.next;
+          delete curr;
+          curr = tmp;
+        }
+      }
+    }
   }
 }
 
@@ -138,6 +151,16 @@ class DistributedQueue : Queue {
     var localThis = getPrivatizedThis;
     ref _globalTail = globalTail;
 
+    local {
+      localThis.concurrentTasks.add(1);
+
+      // Check if the queue is now 'immutable'.
+      if localThis.frozenState.read() == true {
+        localThis.concurrentTasks.sub(1);
+        return false;
+      }
+    }
+
     var _nSlots : int;
     local { _nSlots = localThis.nSlots; }
 
@@ -150,6 +173,7 @@ class DistributedQueue : Queue {
 
       if sz >= 0 {
         slot.add(elt);
+        local { localThis.concurrentTasks.sub(1); }
         return true;
       }
     }
@@ -160,17 +184,55 @@ class DistributedQueue : Queue {
   proc remove() : (bool, eltType) {
     var localThis = getPrivatizedThis;
 
+    local {
+      localThis.concurrentTasks.add(1);
+
+      // Check if the queue is now 'immutable'.
+      if localThis.frozenState.read() == true {
+        localThis.concurrentTasks.sub(1);
+        return (false, _defaultOf(eltType));
+      }
+    }
+
     // Find a slot we can take from; if the slot is empty, we bail as it is empty.
     var head = (globalHead.fetchAdd(1) % localThis.nSlots : uint) : int;
-    ref slot = localThis.slots[head];
+    var slot : DistributedQueueSlot(eltType);
+    local { slot = localThis.slots[head]; }
     var sz = slot.size.fetchSub(1);
 
     // Nothing for us...
     if sz < 1 {
+      local { localThis.concurrentTasks.sub(1); }
       return (false, _defaultOf(eltType));
     }
 
     // There is something for us
-    return (true, slot.remove());
+    var elt = slot.remove();
+    local { localThis.concurrentTasks.sub(1); }
+    return (true, elt);
+  }
+
+  inline proc isFrozen {
+    return getPrivatizedThis.frozenState.read();
+  }
+
+  proc freeze() {
+    coforall loc in Locales do on loc {
+      var localThis = getPrivatizedThis;
+      localThis.frozenState.write(true);
+      localThis.concurrentTasks.waitFor(0);
+    }
+  }
+
+  proc unfreeze() {
+    coforall loc in Locales do on loc {
+      var localThis = getPrivatizedThis;
+      localThis.frozenState.write(false);
+    }
+  }
+
+  proc ~DistributedQueue() {
+    var localThis = getPrivatizedThis;
+    for slot in localThis.slots do delete slot;
   }
 }

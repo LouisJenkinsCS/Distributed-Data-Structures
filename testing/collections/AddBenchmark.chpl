@@ -1,6 +1,5 @@
 use DistributedBoundedQueue;
 use DistributedQueue;
-use DistributedList;
 use DistributedBag;
 use SynchronizedList;
 use Collection;
@@ -25,6 +24,7 @@ proc main() {
   // DistributedBoundedQueue - Benchmark
   runBenchmarkMultiplePlotted(
       benchFn = benchFn,
+      benchTime = 10,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
       benchName = "DistributedBoundedQueue",
@@ -37,6 +37,7 @@ proc main() {
   // DistributedQueue - Benchmark
   runBenchmarkMultiplePlotted(
       benchFn = benchFn,
+      benchTime = 10,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
       benchName = "DistributedQueue",
@@ -49,6 +50,7 @@ proc main() {
   // SynchronizedList - Benchmark
   runBenchmarkMultiplePlotted(
       benchFn = benchFn,
+      benchTime = 10,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
       benchName = "SynchronizedList",
@@ -58,32 +60,7 @@ proc main() {
       }
   );
 
-  // Compiler BUG: Generic Lambda issue...
-  // DistributedList - Benchmark
-  /*runBenchmarkMultiplePlotted(
-      benchFn = benchFn,
-      deinitFn = deinitFn,
-      targetLocales=targetLocales,
-      benchName = "DistributedList",
-      plotter = plotter,
-      initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedList(int);
-      }
-  );*/
-
   // DistributedBag - Benchmark
-  runBenchmarkMultiplePlotted(
-      benchFn = benchFn,
-      deinitFn = deinitFn,
-      targetLocales=targetLocales,
-      benchName = "DistributedBag",
-      plotter = plotter,
-      initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedBag(int);
-      }
-  );
-
-  // DistributedBag (w/ Localization) - Benchmark
   runBenchmarkMultiplePlotted(
       benchFn = lambda(bd : BenchmarkData) {
         var c = (bd.userData : DistributedBag(int)).localBag;
@@ -91,9 +68,10 @@ proc main() {
           c.add(i);
         }
       },
+      benchTime = 10,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
-      benchName = "DistributedBag with Localization",
+      benchName = "DistributedBag",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
         return new DistributedBag(int);

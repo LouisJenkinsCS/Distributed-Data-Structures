@@ -190,8 +190,6 @@ class DistributedBoundedQueue : BoundedQueue {
     }
   }
 
-  // TODO: Allow this to be parallel-safe with respect to the freezing operation.
-  // Such as adding a second state after we know all concurrent tasks have exited.
   inline proc isFrozen {
     return getPrivatizedThis.frozenState.read();
   }

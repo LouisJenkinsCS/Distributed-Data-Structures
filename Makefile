@@ -11,5 +11,12 @@ CollectionAdd-Benchmark:
 	misc/LocalAtomicObject.chpl misc/GlobalAtomicObject.chpl \
 	$(CHPLFLAGS) $(EXTRAFLAGS) --main-module AddBenchmark -o $(OUT)
 
+CollectionRemove-Benchmark:
+	chpl testing/Benchmark.chpl collections/DistributedBoundedQueue.chpl collections/DistributedQueue.chpl \
+	collections/DistributedBag.chpl \
+	collections/Collection.chpl testing/collections/RemoveBenchmark.chpl testing/Plot.chpl collections/SynchronizedList.chpl \
+	misc/LocalAtomicObject.chpl misc/GlobalAtomicObject.chpl \
+	$(CHPLFLAGS) $(EXTRAFLAGS) --main-module RemoveBenchmark -o $(OUT)
+
 clean:
 	rm $(OUT) $(OUT)_real
