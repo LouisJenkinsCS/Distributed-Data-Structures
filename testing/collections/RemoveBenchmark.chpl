@@ -8,7 +8,7 @@ use Plot;
 
 proc main() {
   var plotter : Plotter(int, real);
-  var targetLocales = (2,4,8,16,32,64);
+  var targetLocales = (1,2,4,8,16,32,64);
 
   // Collections share the same API and hence share the same benchFn and deinitFn
   var benchFn = lambda(bd : BenchmarkData) {
@@ -22,7 +22,7 @@ proc main() {
   };
 
   // DistributedQueue - Benchmark
-  /*runBenchmarkMultiplePlotted(
+  runBenchmarkMultiplePlotted(
       benchFn = benchFn,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
@@ -61,11 +61,16 @@ proc main() {
         forall i in 1 .. bmd.totalOps do c.add(i);
         return c;
       }
-  );*/
+  );
 
-  // DistributedBag - Benchmark
+  // DistributedBag (Imbalanced) - Benchmark
   runBenchmarkMultiplePlotted(
-      benchFn = benchFn,
+      benchFn = lambda(bd : BenchmarkData) {
+        var c = (bd.userData : DistributedBag(int)).localBag;
+        for i in 1 .. bd.iterations {
+          c.remove();
+        }
+      },
       deinitFn = deinitFn,
       targetLocales=targetLocales,
       benchName = "DistributedBag",
@@ -77,8 +82,8 @@ proc main() {
       }
   );
 
-  // DistributedBag (w/ Localization) - Benchmark
-  /*runBenchmarkMultiplePlotted(
+  // DistributedBag (Balanced) - Benchmark
+  runBenchmarkMultiplePlotted(
       benchFn = lambda(bd : BenchmarkData) {
         var c = (bd.userData : DistributedBag(int)).localBag;
         for i in 1 .. bd.iterations {
@@ -91,10 +96,12 @@ proc main() {
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
         var c = new DistributedBag(int, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
-        forall i in 1 .. bmd.totalOps do c.add(i);
+        coforall loc in bmd.targetLocales do on loc {
+          forall i in 1 .. bmd.totalOps / bmd.targetLocales.size do c.add(i);
+        }
         return c;
       }
-  );*/
+  );
 
   plotter.plot("Collections_Remove_Benchmark");
 }

@@ -218,6 +218,35 @@ record BagSegment {
     nElems.sub(n : uint);
   }
 
+  inline proc addElementsPtr(ptr, n) {
+    var offset = 0;
+    while offset < n {
+      var block = tailBlock;
+      // Empty? Create a new one of initial size
+      if block == nil then {
+        tailBlock = new BagSegmentBlock(eltType, INITIAL_BLOCK_SIZE);
+        headBlock = tailBlock;
+        block = tailBlock;
+      }
+
+      // Full? Create a new one double the previous size
+      if block.isFull {
+        block.next = new BagSegmentBlock(eltType, block.cap * 2);
+        tailBlock = block.next;
+        block = block.next;
+      }
+
+      var nLeft = n - offset;
+      var nSpace = block.cap - block.size;
+      var nFill = min(nLeft, nSpace);
+      __primitive("chpl_comm_array_put", ptr[offset], here.id, block.elems[block.size], nFill);
+      block.size = block.size + nFill;
+      offset = offset + nFill;
+    }
+
+    nElems.add(n : uint);
+  }
+
   inline proc takeElements(n) {
     var iterations = n : int;
     var arr : [{0..#n : int}] eltType;
@@ -615,18 +644,10 @@ class Bag : Collection {
 
                     // Add stolen elements to segment...
                     for (nStolen, stolenPtr) in stolenWork {
-                      for i in 0 .. #nStolen do writeln(stolenPtr[i]);
-                      var block = new BagSegmentBlock(eltType, stolenPtr, nStolen);
+                      if nStolen == 0 then continue;
+                      recvSegment.addElementsPtr(stolenPtr, nStolen);
+                      c_free(stolenPtr);
 
-                      if recvSegment.tailBlock == nil {
-                        recvSegment.tailBlock = block;
-                        recvSegment.headBlock = block;
-                      } else {
-                        recvSegment.tailBlock.next = block;
-                        recvSegment.tailBlock = recvSegment.tailBlock.next;
-                      }
-
-                      recvSegment.nElems.add(nStolen : uint);
                       // Let parent know that the bag is not empty.
                       isEmpty.write(false);
                     }
