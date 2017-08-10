@@ -73,7 +73,7 @@ proc main() {
       },
       deinitFn = deinitFn,
       targetLocales=targetLocales,
-      benchName = "DistributedBag",
+      benchName = "DistributedBag - Imbalanced",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
         var c = new DistributedBag(int, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
@@ -92,7 +92,7 @@ proc main() {
       },
       deinitFn = deinitFn,
       targetLocales=targetLocales,
-      benchName = "DistributedBag with Localization",
+      benchName = "DistributedBag - Balanced",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
         var c = new DistributedBag(int, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);

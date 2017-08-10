@@ -28,21 +28,42 @@ balancing, and offers unparalleled performance.
 
 **Disclaimer:** As Chapel does not support privatization of class fields, if the
 user is to use a `DistributedBag`, then they must request a `localBag` to use to
-avoid excess communications from accessing class fields. This is because, there will be a 'GET' operation to the node that allocated the queue, which bounds
-performance to network limitations. To demonstrate this massive difference, we
-show below performance of the `DistributedBag` with and without 'localization',
-or using the `localBag` directly.
+avoid excess communications from accessing class fields. This is because,
+there will be a 'GET' operation to the node that allocated the queue, which bounds
+performance to network limitations. The benchmark results below show performance
+using `localBag` directly.
 
 ### Performance
 
 We compare our data structures to a naive synchronized list implementation
 as that is all that is available. In all cases, the data structures scale and
-outperform the naive implementation by at least 50x.
+outperform the naive implementation by far.
 
 #### Insert
+
+Implementation | Performance over Naive
+-------------- | :-----------:
+SynchronizedList | 100%
+DistributedBoundedQueue | 6233.1%
+DistributedQueue | 3638%
+DistributedBag | 40323%
 
 ![](Results/Collections_Add.png)
 
 #### Remove
 
-TODO
+In this benchmark, we test raw removal time. In the case of DistributedBag, we have
+two variants; one which tests remove when it is already load balanced (as in we
+fill the bag ahead of time in a fairly distributed manner), given a `(Balanced)` suffix,
+and one which is not all too uncommon, where we add all elements to a single node
+causing an artificial imbalance, which tests how the bag performs in the worst case.
+
+Implementation | Performance over Naive
+-------------- | :-----------:
+SynchronizedList | 100%
+DistributedBoundedQueue | 9345.4%
+DistributedQueue | 6225.1%
+DistributedBag (Imbalanced) | 18853%
+DistributedBag (Balanced) | 50330%
+
+![](Results/Collections_Remove.png)
