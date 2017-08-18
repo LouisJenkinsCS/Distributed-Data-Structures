@@ -3,7 +3,7 @@ use Random;
 use BlockDist;
 use LayoutCSR;
 use Time;
-use SyncList;
+use SynchronizedList;
 use Barrier;
 
 var r = new RandomStream(int, seed = 13);
@@ -22,12 +22,12 @@ proc g500_generate_quartile(){
   if rand_num < B_NUM then return 1;
   rand_num -= B_NUM;
   if rand_num < C_NUM then return 2;
-  return 3; 
+  return 3;
 }
 
-iter g500_vpair_generator(verticeIDs: [] int, numVertices: int, 
+iter g500_vpair_generator(verticeIDs: [] int, numVertices: int,
     edgefactor = 16, prng_seed=13){
-  var r = new RandomStream(int, seed=prng_seed); 
+  var r = new RandomStream(int, seed=prng_seed);
   var u,v,q: int;
   var quartile_size = numVertices/2;
 
@@ -36,7 +36,7 @@ iter g500_vpair_generator(verticeIDs: [] int, numVertices: int,
     (u,v) = (0,0);
     var nv_temp = numVertices;
     while nv_temp > 1 {
-      q = g500_generate_quartile();            
+      q = g500_generate_quartile();
       nv_temp /= 2;
       u += nv_temp * (q/2);
       v += nv_temp * (q%2);
@@ -114,8 +114,16 @@ proc getBFSParentArray(g, key: int, ref parents: [] int){
 
   // you can assume queues to be a "work queue":
   // distributed/unbounded/concurrent-safe enqueue-dequeue
-  var l0 = new SyncList(int);
-  var l1 = new SyncList(int);
+  var l0 : Collection(int);
+  var l1 : Collection(int);
+
+  if isBag {
+    l0 = new DistributedBag(int);
+    l1 = new DistributedBag(int);
+  } else if isDeque {
+    l0 = new DistributedDeque(int);
+    l1 = new DistributedDeque(int);
+  }
 
   inline proc produceQueue {
     if step%2 == 0 then return l0;
@@ -127,54 +135,31 @@ proc getBFSParentArray(g, key: int, ref parents: [] int){
     else return l1;
   }
 
-  inline proc uglyClearWorkAround() {
-    while true {
-      var (x,exists) = consumeQueue.dequeue();
-      if !exists then break;
-    }
-  }
-
   //parent[i] = j means j is an immediate parent of i in breadth first
   //iteration that starts from the root.
 
-  consumeQueue.enqueue(key);
-
+  consumeQueue.add(key);
+  produceQueue.freeze();
   var b = new Barrier(numLocales*here.maxTaskPar);
   //as long as there vertices to be visited
-  while consumeQueue.data.size != 0 {  
-    coforall l in Locales with (ref step) do on l {
-      coforall t in 0..#here.maxTaskPar with (ref step) {
-        while true {
-          var (exists, v) = consumeQueue.dequeue();
-          if exists {
-            for n in g.dimIter(2,v) { // assume a serial `neighbors` iterator
-              /*writeln("\t", v, ",", n);*/
+  while !consumeQueue.isEmpty() {
+    forall v in consumeQueue {
+      for n in g.dimIter(2,v) { // assume a serial `neighbors` iterator
+        /*writeln("\t", v, ",", n);*/
 
-              // note that this benign race condition is allowed. but you can
-              // assume otherwise, if that makes things easier
+        // note that this benign race condition is allowed. but you can
+        // assume otherwise, if that makes things easier
 
-              // than the enqueue should be enclosed in a CAS conditional on
-              // parent[n]
-              if parents[n] == -1 { // doesn't have a parent yet (unvisited)
-                parents[n] = v; // "visit"
-                produceQueue.enqueue(n); // add to the "to-be-visited" queue
-              }
-            }
-          }
-          else {
-            break;
-          }
-        }
-        //proceed to the next level
-        b.barrier();
-        if l.id==0 && t==0 {
-          uglyClearWorkAround();
-          /*writeln("Stepping ", consumeQueue.data.size, " ",*/
-                               /*produceQueue.data.size);*/
-          step += 1;
+        // than the enqueue should be enclosed in a CAS conditional on
+        // parent[n]
+        if parents[n] == -1 { // doesn't have a parent yet (unvisited)
+          parents[n] = v; // "visit"
+          produceQueue.add(n); // add to the "to-be-visited" queue
         }
       }
     }
+    consumeQueue.clear();
+    step += 1;
   }
 }
 
@@ -182,7 +167,7 @@ proc getBFSStats(parents: [] int, g) {
   var traversedEdges = 0, traversedNodes = 0;
 
   for i in 0..#(1<<scale) {
-    if parents[i] != -1 { 
+    if parents[i] != -1 {
       traversedNodes += 1;
       traversedEdges += numActualNeighbors(g, i);
     }
@@ -232,7 +217,7 @@ proc validate(g, key: int, parents: [] int){
 
   if !passed$.readFF() then return false;
 
-  //every edge in the input list has vertices with levels 
+  //every edge in the input list has vertices with levels
   //that differ by at most one or that both are not in the BFS tree,
   for e in g {
     //neither in BFS tree
@@ -240,7 +225,7 @@ proc validate(g, key: int, parents: [] int){
       continue;
 
     if abs(getLevel(e[1]) - getLevel(e[2])) > 1 {
-      writeln("Condition 3 fails " + e[1] + " " + e[2] + " " + 
+      writeln("Condition 3 fails " + e[1] + " " + e[2] + " " +
           getLevel(e[1]) + " " + getLevel(e[2]));
       /*writeln("Parents");*/
       /*[i in parents.domain] writeln(i, " ", parents[i]);*/
@@ -348,7 +333,7 @@ proc main(){
 
   if debugKey != -1 {
     writeln("Starting");
-    t.start();        
+    t.start();
     getBFSParentArray(g, debugKey, parents);
     t.stop();
 
@@ -371,7 +356,7 @@ proc main(){
 
       writef("%3i %10i ", i, sampleKeys[i]);
 
-      t.start();        
+      t.start();
       getBFSParentArray(g, sampleKeys[i], parents);
       t.stop();
 
@@ -382,9 +367,9 @@ proc main(){
       writef("%10.06r %15.6er", t.elapsed(), te/t.elapsed());
 
       /*writeln("Parents: \n", parents);*/
-      if validation then writef("%10s", 
-          if validate(g, sampleKeys[i], parents) 
-          then "Success" 
+      if validation then writef("%10s",
+          if validate(g, sampleKeys[i], parents)
+          then "Success"
           else "FAIL");
       else
         writef("%10s", "N/A");

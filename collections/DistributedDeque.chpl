@@ -9,7 +9,12 @@ use Collection;
   of checking whether you may proceed with an operation, that is wait-free under
   most cases, lock-free in the worst case, which guarantees scalability. In the
   barrier, we perform freeze checks (if DEQUE_NO_FREEZE is not enabled), and bounds
-  checking (if a capacity is given). 
+  checking (if a capacity is given). Deque operations are separated into two
+  levels: global and local. At a global level, we use simple fetchAdd and fetchSub
+  counters to denote which local deque we apply our operation to, and at a local level
+  we use an unrolled linked list which further has its own (non-atomic) counter.
+  By maintaining an
+
 */
 
 /*
@@ -791,7 +796,11 @@ class DistributedDeque : Collection {
     }
   }
 
-  iter FIFO() {
+  /*
+    Iterates over the deque in First-In-First-Out order, from front to back. The
+    deque must be frozen or it will result in a halt. This operation is sequential.
+  */
+  iter FIFO() : eltType {
     if !isFrozen() {
       halt("Ordered iteration requires the queue to be frozen.");
     }
@@ -850,7 +859,11 @@ class DistributedDeque : Collection {
     }
   }
 
-  iter LIFO() {
+  /*
+    Iterates over the deque in Last-In-First-Out order, from back to front. The
+    deque must be frozen or it will result in a halt. This operation is sequential.
+  */
+  iter LIFO() : eltType {
     if !isFrozen() {
       halt("Ordered iteration requires the queue to be frozen.");
     }

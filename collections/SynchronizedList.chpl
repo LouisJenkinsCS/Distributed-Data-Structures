@@ -10,6 +10,7 @@ class SynchronizedList : Collection {
   var head : SynchronizedListNode(eltType);
   var tail : SynchronizedListNode(eltType);
   var lock$ : sync bool;
+  var _size : int;
 
   proc add(elt : eltType) : bool {
     on this {
@@ -22,8 +23,11 @@ class SynchronizedList : Collection {
         tail.next = node;
         tail = node;
       }
+      this._size += 1;
       lock$;
     }
+
+
     return true;
   }
 
@@ -44,9 +48,17 @@ class SynchronizedList : Collection {
           head = head.next;
           delete tmp;
         }
+
+        this._size -= 1;
       }
+
       lock$;
     }
+
     return (hasElem, elem);
+  }
+
+  proc size() : int {
+    return _size;
   }
 }
