@@ -3,7 +3,8 @@ use Random;
 use BlockDist;
 use LayoutCSR;
 use Time;
-use SynchronizedList;
+use DistributedBag;
+use DistributedDeque;
 use Barrier;
 
 var r = new RandomStream(int, seed = 13);
@@ -106,24 +107,17 @@ proc numActualNeighbors(g, v) {
   return count;
 }
 
+config param isBag = false;
+
 proc getBFSParentArray(g, key: int, ref parents: [] int){
 
   var step = 0;
 
   parents[key] = key;
 
-  // you can assume queues to be a "work queue":
-  // distributed/unbounded/concurrent-safe enqueue-dequeue
-  var l0 : Collection(int);
-  var l1 : Collection(int);
-
-  if isBag {
-    l0 = new DistributedBag(int);
-    l1 = new DistributedBag(int);
-  } else if isDeque {
-    l0 = new DistributedDeque(int);
-    l1 = new DistributedDeque(int);
-  }
+  // Our data structures...
+  var l0 = (if isBag then new DistributedBag(int) else new DistributedDeque(int));
+  var l1 = (if isBag then new DistributedBag(int) else new DistributedDeque(int));
 
   inline proc produceQueue {
     if step%2 == 0 then return l0;
@@ -139,10 +133,10 @@ proc getBFSParentArray(g, key: int, ref parents: [] int){
   //iteration that starts from the root.
 
   consumeQueue.add(key);
-  produceQueue.freeze();
   var b = new Barrier(numLocales*here.maxTaskPar);
   //as long as there vertices to be visited
   while !consumeQueue.isEmpty() {
+    consumeQueue.freeze();
     forall v in consumeQueue {
       for n in g.dimIter(2,v) { // assume a serial `neighbors` iterator
         /*writeln("\t", v, ",", n);*/
@@ -158,6 +152,7 @@ proc getBFSParentArray(g, key: int, ref parents: [] int){
         }
       }
     }
+    consumeQueue.unfreeze();
     consumeQueue.clear();
     step += 1;
   }
