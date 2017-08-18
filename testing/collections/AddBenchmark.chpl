@@ -1,9 +1,6 @@
-use DistributedBoundedQueue;
-use DistributedQueue;
-use DistributedList;
+use DistributedDeque;
 use DistributedBag;
 use SynchronizedList;
-use Collection;
 use Benchmark;
 use Plot;
 
@@ -25,30 +22,33 @@ proc main() {
   // DistributedBoundedQueue - Benchmark
   runBenchmarkMultiplePlotted(
       benchFn = benchFn,
+      benchTime = 1,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
-      benchName = "DistributedBoundedQueue",
+      benchName = "DistributedDeque - Bounded",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedBoundedQueue(int, cap=bmd.totalOps, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
+        return new DistributedDeque(int, cap=bmd.totalOps, targetLocales=bmd.targetLocales);
       }
   );
 
   // DistributedQueue - Benchmark
   runBenchmarkMultiplePlotted(
       benchFn = benchFn,
+      benchTime = 1,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
-      benchName = "DistributedQueue",
+      benchName = "DistributedDeque",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedQueue(int, targetLocDom=bmd.targetLocDom, targetLocales=bmd.targetLocales);
+        return new DistributedDeque(int, targetLocales=bmd.targetLocales);
       }
   );
 
   // SynchronizedList - Benchmark
   runBenchmarkMultiplePlotted(
       benchFn = benchFn,
+      benchTime = 1,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
       benchName = "SynchronizedList",
@@ -58,42 +58,18 @@ proc main() {
       }
   );
 
-  // Compiler BUG: Generic Lambda issue...
-  // DistributedList - Benchmark
-  /*runBenchmarkMultiplePlotted(
-      benchFn = benchFn,
-      deinitFn = deinitFn,
-      targetLocales=targetLocales,
-      benchName = "DistributedList",
-      plotter = plotter,
-      initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedList(int);
-      }
-  );*/
-
   // DistributedBag - Benchmark
   runBenchmarkMultiplePlotted(
-      benchFn = benchFn,
-      deinitFn = deinitFn,
-      targetLocales=targetLocales,
-      benchName = "DistributedBag",
-      plotter = plotter,
-      initFn = lambda (bmd : BenchmarkMetaData) : object {
-        return new DistributedBag(int);
-      }
-  );
-
-  // DistributedBag (w/ Localization) - Benchmark
-  runBenchmarkMultiplePlotted(
       benchFn = lambda(bd : BenchmarkData) {
-        var c = (bd.userData : DistributedBag(int)).localBag;
+        var c = (bd.userData : DistributedBag(int)).getPrivatizedInstance();
         for i in 1 .. bd.iterations {
           c.add(i);
         }
       },
+      benchTime = 1,
       deinitFn = deinitFn,
       targetLocales=targetLocales,
-      benchName = "DistributedBag with Localization",
+      benchName = "DistributedBag",
       plotter = plotter,
       initFn = lambda (bmd : BenchmarkMetaData) : object {
         return new DistributedBag(int);

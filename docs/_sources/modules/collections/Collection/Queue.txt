@@ -1,0 +1,39 @@
+.. default-domain:: chpl
+
+.. module:: Queue
+
+Queue
+=====
+**Usage**
+
+.. code-block:: chapel
+
+   use Collection.Queue;
+
+.. class:: Queue : Collection
+
+   
+   A First-In-First-Out data structure. Classes inheriting from this class must
+   override the `add` to enqueue elements in First-In-First-Out order, and `remove`
+   to dequeue elements in First-In-First-Out order.
+   
+
+
+.. class:: BoundedQueue : Queue
+
+   
+   A queue with a static capacity.
+   
+
+
+   .. method:: proc capacity: int
+
+.. class:: DynamicBoundedQueue : BoundedQueue
+
+   
+   A queue with a dynamic capacity.
+   
+
+
+   .. method:: proc resize(newSize: int): bool
+

@@ -1,0 +1,22 @@
+.. default-domain:: chpl
+
+.. module:: Queue
+
+Queue
+=====
+**Usage**
+
+.. code-block:: chapel
+
+   use Queue;
+
+.. class:: Queue : Collection
+
+   
+   A First-In-First-Out data structure.
+
+
+   .. method:: proc enqueue(elt: eltType): bool
+
+   .. method:: proc dequeue(elt: eltType): (bool, eltType)
+

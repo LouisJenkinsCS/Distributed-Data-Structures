@@ -1,0 +1,39 @@
+.. default-domain:: chpl
+
+.. module:: Stack
+
+Stack
+=====
+**Usage**
+
+.. code-block:: chapel
+
+   use Collection.Stack;
+
+.. class:: Stack : Collection
+
+   
+   A Last-In-First-Out data structure. Classes inheriting from this class must
+   override the `add` to push elements in Last-In-First-Out order, and `remove`
+   to pop elements in Last-In-First-Out order.
+   
+
+
+.. class:: BoundedStack : Stack
+
+   
+   A stack with a static capacity.
+   
+
+
+   .. method:: proc capacity: int
+
+.. class:: DynamicBoundedStack : BoundedStack
+
+   
+   A stack with a dynamic capacity.
+   
+
+
+   .. method:: proc resize(newSize: int): bool
+

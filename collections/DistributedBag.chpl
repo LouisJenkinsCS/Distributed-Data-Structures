@@ -1,131 +1,181 @@
 use Collection;
-use BigInteger;
-use Time;
 use BlockDist;
 
 /*
-  A highly parallel segmented multiset. Each node gets its own queue, and in each queue
-  its segmented into 'here.maxTaskPar' segments. Segments allow for actual parallelism
-  while operating on the queue in that it enables us to manage 'best-case', 'average-case',
-  and 'worst-case' scenarios by making multiple passes over each segment. Examples
-  of 'best-case' scenarios would be when a segment is unlocked. 'average-case' would be
-  when any unlocked/locked segment, and so on.
+  A highly parallel segmented multiset. Each node gets its own bag, and in each bag
+  it is segmented into 'here.maxTaskPar' segments. Segments allow for actual parallelism
+  while operating in that it enables us to manage 'best-case', 'average-case',
+  and 'worst-case' scenarios by making multiple passes over each segment. In the
+  case where there is no oversubscription, the best-case will always be achieved
+  (considering any other conditions are also met), while in the case of oversubscription
+  or, for example a near empty bag, we fall into the 'average-case', etc. Examples
+  of 'best-case' scenarios for a removal would be when a segment is unlocked
+  and contains some elements we can drain, and the 'average-case' would be to find
+  any segment, unlocked or not, that contains elements we can drain, and so on.
 
-  This queue employs work stealing, where after multiple failed passes over the
-  segments in the queue we attempt to steal work from other queues. Work stealing
-  employs a nice helper algorithm where any task performing dequeue operations,
-  after also making multiple failed consecutive passes over the queue,
-  will enlist their help in terms of finding elements from other nodes.
+  This data structure also employs its own load balancing algorithm, beginning
+  with a best-effort round-robin algorithm such that each task begins searching
+  at another segment (with the added benefit of reducing overall contention), in
+  particular is useful for locally distributing insertion operations. Next it also
+  employs a work-stealing algorithm that horizontally steals a ratio of elements
+  across segments. A segment is considered 'horizontal' if it shares the same
+  segment index within [0, here.maxTaskPar); those other segments likely are also
+  benefitted from local distribution from the round-robin algorithm discussed above.
+  We also steal a ratio of elements, say 25%, because it leaves all other segments
+  with 75% of their work; the more elements they have, the more we take, but the
+  less they have, the less we steal; this also has the added benefit of reducing
+  unnecessary work stealing between segments when the bag is nearly emptied. Furthermore,
+  stealing horizontally ensures that all segments remain filled and that we still
+  achieve parallelism across segments for removal operations. Lastly, we attempt
+  to steal a maximum of `N / sizeof(eltType)`, where N is some size in megabytes
+  (representing how much data can be sent in one network request), which keeps
+  down excessive communication.
 
-  TODO/BUG: Global work stealing is non-deterministic in terms of whether or not
-  the queue is empty. If we process a node and they steal from another node ahead
-  of us, then we skip over it as if the queue is empty when it really isn't. Its
-  possible a rather large amount has been stolen as well, which makes this extremely
-  problematic. Requires a better global synchronization scheme, definitely need
-  the employment for GlobalAtomicObject.
-
-  TODO: Switch from Tuples to raw C pointers and double the size of each successor
-  segment (potential performance boost, faster compilation time).
+  This data structure does not come without flaws; as work stealing is dynamic
+  and trigered on demand, work stealing can still be performed in excess, which
+  dramatically causes a performance drop; this data structure scales in terms of
+  both processors per node, and in terms of raw nodes themselves. As well, due
+  to how work stealing is, we perform the best when we have large amounts of data
+  to work on, but do not do well with smaller amounts due to excessive work stealing.
+  As well, to achieve true parallelism, one must use a privatized instance, specific
+  to their node to avoid communication overhead of accessing class fields.
 */
 
 /*
   Below are segment statuses, which is a way to make visible to outsiders the
   current ongoing operation.
 */
-// Free to contest
-const UNLOCKED : uint = 0;
-// These are normal operations which are for more-verbose debugging purposes.
-const ENQUEUE : uint = 1;
-const DEQUEUE : uint = 2;
-// The work stealer is initializing fields for work stealing, and will be ready soon.
-const STEALING_INIT : uint = 3;
-// The work stealer is currently stealing work, and may require assistance.
-const STEALING_WORK : uint = 4;
-// The work stealer is currently merging work that is stolen, and no longer requires assistance.
-const STEALING_MERGE : uint = 5;
+private const STATUS_UNLOCKED : uint = 0;
+private const STATUS_ADD : uint = 1;
+private const STATUS_REMOVE : uint = 2;
+private const STATUS_LOOKUP : uint = 3;
 
 /*
-  Below are statuses specific work queue segment slots.
+  Below are statuses specific to the work stealing algorithm.
 */
-// The work stealer has reinitialized the slot for use.
-const INITIALIZED : int = -1;
-// A helper task has finished but has not found any work...
-const FINISHED_WITH_NO_WORK : int = 0;
-// A helper task has finished with work.
-const FINISHED_WITH_WORK : int = 1;
+private const WS_INITIALIZED : int = -1;
+private const WS_FINISHED_WITH_NO_WORK : int = 0;
+private const WS_FINISHED_WITH_WORK : int = 1;
 
+/*
+  Frozen states... If we are FREEZE_UNFROZEN, we are mutable. If we are FREEZE_FROZEN,
+  we are immutable. If we are FREEZE_MARKED, we are in the middle of a state change.
+*/
+private const FREEZE_UNFROZEN = 0;
+private const FREEZE_MARKED = 1;
+private const FREEZE_FROZEN = 2;
 
-// The amount of elements per unroll block; defines the tuple size.
-config param ELEMS_PER_BLOCK = 1024;
+/*
+  The phases for operations.
+*/
+private const ADD_BEST_CASE = 0;
+private const ADD_AVERAGE_CASE = 1;
+private const REMOVE_BEST_CASE = 2;
+private const REMOVE_AVERAGE_CASE = 3;
+private const REMOVE_WORST_CASE = 4;
+
+// The initial amount of elements in an unroll block.
+config param INITIAL_BLOCK_SIZE = 1024;
 // The amount we attempt to steal from each segment of other nodes. Helps to
 // further ensure a proper load balance by not leaving segments empty by stealing
 // on average 1/4 of their work, leaving them with 3/4. As we steal from *all* other
 // segments, it is imperative that this stays low to prevent a ping-pong effect on
-// work propagating from excessive work stealing. We steal at least one element, but
-// no more than ELEMS_PER_BLOCK per segment.
+// work propagating from excessive work stealing. We steal at least one element,
+// but no more than the amount of data that can be transferred within a single
+// bulk transfer, measured in megabytes.
 config param WORK_STEALING_RATIO = 0.25;
-config param logMPMCQueue = false;
+config param WORK_STEALING_MAX_MEMORY_MB : real = 1.0;
+config param BAG_NO_FREEZE = false;
+// The amount of elements a segment must have to be stolen from.
+config param WORK_STEALING_MINIMUM = 1;
 
+/*
+  A segment block is an unrolled linked list node that holds a contiguous buffer
+  of memory. Each segment block *should* be a power of two, as we increase the
+  size of each subsequent unroll block by twice the size. This is so that stealing
+  work is faster in that majority of elements are confined to one area.
+*/
 class BagSegmentBlock {
   type eltType;
-  var nElems : int;
-  var elems : ELEMS_PER_BLOCK * eltType;
+
+  // Contiguous memory containing all elements
+  var elems :  c_ptr(eltType);
   var next : BagSegmentBlock(eltType);
 
-  iter drain(n) {
-    var iterations = n;
-    while n > 0 {
-      if nElems == 0 {
-        return;
-      }
+  // The capacity of this block.
+  var cap : int;
+  // The number of occupied elements in this block.
+  var size : int;
 
-      var elem = elems[nElems];
-      nElems = nElems - 1;
+  inline proc isEmpty {
+    return size == 0;
+  }
 
-      yield elem;
-      iterations = iterations - 1;
+  inline proc isFull {
+    return size == cap;
+  }
+
+  inline proc push(elt : eltType) {
+    if elems == nil {
+      writeln("Cap: ", cap, "; elems: ", elems : string);
+      halt("'elems' is nil");
     }
+
+    if isFull {
+      halt("SegmentBlock is Full");
+    }
+
+    elems[size] = elt;
+    size = size + 1;
+  }
+
+  inline proc pop() : eltType {
+    if elems == nil {
+      halt("'elems' is nil");
+    }
+
+    if isEmpty {
+      halt("SegmentBlock is Empty");
+    }
+
+    size = size - 1;
+    var elt = elems[size];
+    return elt;
+  }
+
+  proc BagSegmentBlock(type eltType, capacity) {
+    if capacity == 0 {
+      halt("Capacity is 0...");
+    }
+
+    cap = capacity;
+    elems = c_malloc(eltType, capacity);
+  }
+
+  proc BagSegmentBlock(type eltType, ptr, capacity) {
+    cap = capacity;
+    elems = ptr;
+    size = cap;
+  }
+
+  proc ~BagSegmentBlock() {
+    c_free(elems);
   }
 }
 
-record BagSegmentSlot {
-  type eltType;
-
-  // The locale we are assigned to steal from...
-  var locIdx : int;
-  var status : atomic int;
-  var block : BagSegmentBlock(eltType);
-}
-
+/*
+  A segment is, in and of itself an unrolled linked list. We maintain one per core
+  to ensure maximum parallelism.
+*/
 record BagSegment {
   type eltType;
 
+  // Used as a test-and-test-and-set spinlock.
   var status : atomic uint;
 
   var headBlock : BagSegmentBlock(eltType);
   var tailBlock : BagSegmentBlock(eltType);
 
-  /*
-    Fields specific to work stealing for this segment (given 'ws' prefix).
-    A helper must first 'register' themselves in our status table, which keeps
-    track of which cells are currently taken and which are not. In work stealing,
-    we attempt to steal ELEMS_PER_BLOCK * here.maxTaskPar elements, but never assign
-    more than one task to a given node.
-  */
-
-  // Number of potential helpers. We don't want more workers than there are nodes.
-  var wsNumSlots = numLocales - 1;
-
-  // Used to atomically obtain a slot. A task knows they have a slot if it in
-  // [0, wsNumSlots). If it is outside of this range, then all slots are filled
-  // or this work stealing session is over before the next is initialized.
-  var wsSlotsTaken : atomic int;
-
-  // Slots which keep track of data stolen as well as the current status of the helper task.
-  var wsSlots : [{0..#wsNumSlots}] BagSegmentSlot(eltType);
-
-  // Number of elements currently in the list to allow faster determinism of whether
-  // or not an operation should attempt this bucket.
   var nElems : atomic uint;
 
   inline proc isEmpty {
@@ -133,11 +183,40 @@ record BagSegment {
   }
 
   inline proc acquireWithStatus(newStatus) {
-    return status.compareExchangeStrong(UNLOCKED, newStatus);
+    return status.compareExchangeStrong(STATUS_UNLOCKED, newStatus);
+  }
+
+  // Set status with a test-and-test-and-set loop...
+  inline proc acquire(newStatus) {
+    while true {
+      if currentStatus == STATUS_UNLOCKED && acquireWithStatus(newStatus) {
+        break;
+      }
+
+      chpl_task_yield();
+    }
+  }
+
+  // Set status with a test-and-test-and-set loop, but only while it is not empty...
+  inline proc acquireIfNonEmpty(newStatus) {
+    while !isEmpty {
+      if currentStatus == STATUS_UNLOCKED && acquireWithStatus(newStatus) {
+        if isEmpty {
+          releaseStatus();
+          return false;
+        } else {
+          return true;
+        }
+      }
+
+      chpl_task_yield();
+    }
+
+    return false;
   }
 
   inline proc isUnlocked {
-    return status.read() == UNLOCKED;
+    return status.read() == STATUS_UNLOCKED;
   }
 
   inline proc currentStatus {
@@ -145,58 +224,120 @@ record BagSegment {
   }
 
   inline proc releaseStatus() {
-    status.write(UNLOCKED);
+    status.write(STATUS_UNLOCKED);
   }
 
-  // TODO: Increase efficiency of bulk taking
-  proc takeElements(n) {
-    var iterations = n;
-    var arr : [{0..#n : int}] eltType;
-    var arrIdx = 0;
-    while iterations > 0 {
-      if isEmpty {
-        halt("Attempted to take ", n, " elements when insufficient");
+  inline proc transferElements(destPtr, n, locId = here.id) {
+    var destOffset = 0;
+    var srcOffset = 0;
+    while destOffset < n {
+      if headBlock == nil || isEmpty {
+        halt(here, ": Attempted transfer ", n, " elements to ", locId, " but failed... destOffset=", destOffset);
       }
 
-      if headBlock.nElems == 0 {
-        halt("Iterating over ", n, " elements but Head block is 0 but nElems is ", nElems.read());
+      var len = headBlock.size;
+      var need = n - destOffset;
+      // If the amount in this block is greater than what is left to transfer, we
+      // cannot begin transferring at the beginning, so we set our offset from the end.
+      if len > need {
+        srcOffset = len - need;
+        headBlock.size = srcOffset;
+        __primitive("chpl_comm_array_put", headBlock.elems[srcOffset], locId, destPtr[destOffset], need);
+        destOffset = destOffset + need;
+      } else {
+        srcOffset = 0;
+        headBlock.size = 0;
+        __primitive("chpl_comm_array_put", headBlock.elems[srcOffset], locId, destPtr[destOffset], len);
+        destOffset = destOffset + len;
       }
-
-      arr[arrIdx] = headBlock.elems[headBlock.nElems];
-      arrIdx = arrIdx + 1;
-      headBlock.nElems = headBlock.nElems - 1;
-      nElems.sub(1);
 
       // Fix list if we consumed last one...
-      if headBlock.nElems == 0 {
+      if headBlock.isEmpty {
         var tmp = headBlock;
         headBlock = headBlock.next;
         delete tmp;
 
         if headBlock == nil then tailBlock = nil;
       }
+    }
 
-      iterations = iterations - 1;
+    nElems.sub(n : uint);
+  }
+
+  inline proc addElementsPtr(ptr, n) {
+    var offset = 0;
+    while offset < n {
+      var block = tailBlock;
+      // Empty? Create a new one of initial size
+      if block == nil then {
+        tailBlock = new BagSegmentBlock(eltType, INITIAL_BLOCK_SIZE);
+        headBlock = tailBlock;
+        block = tailBlock;
+      }
+
+      // Full? Create a new one double the previous size
+      if block.isFull {
+        block.next = new BagSegmentBlock(eltType, block.cap * 2);
+        tailBlock = block.next;
+        block = block.next;
+      }
+
+      var nLeft = n - offset;
+      var nSpace = block.cap - block.size;
+      var nFill = min(nLeft, nSpace);
+      __primitive("chpl_comm_array_put", ptr[offset], here.id, block.elems[block.size], nFill);
+      block.size = block.size + nFill;
+      offset = offset + nFill;
+    }
+
+    nElems.add(n : uint);
+  }
+
+  inline proc takeElements(n) {
+    var iterations = n : int;
+    var arr : [{0..#n : int}] eltType;
+    var arrIdx = 0;
+
+    for 1 .. n : int{
+      if isEmpty {
+        halt("Attempted to take ", n, " elements when insufficient");
+      }
+
+      if headBlock.isEmpty {
+        halt("Iterating over ", n, " elements with headBlock empty but nElems is ", nElems.read());
+      }
+
+      arr[arrIdx] = headBlock.pop();
+      arrIdx = arrIdx + 1;
+      nElems.sub(1);
+
+      // Fix list if we consumed last one...
+      if headBlock.isEmpty {
+        var tmp = headBlock;
+        headBlock = headBlock.next;
+        delete tmp;
+
+        if headBlock == nil then tailBlock = nil;
+      }
     }
 
     return arr;
   }
 
-  proc takeElement() {
+  inline proc takeElement() {
     if isEmpty {
       return (false, _defaultOf(eltType));
     }
 
-    if headBlock.nElems == 0 {
-      halt("Iterating over ", 1, " elements but Head block is 0 but nElems is ", nElems.read());
+    if headBlock.isEmpty {
+      halt("Iterating over 1 element with headBlock empty but nElems is ", nElems.read());
     }
 
-    var elem = headBlock.elems[headBlock.nElems];
-    headBlock.nElems = headBlock.nElems - 1;
+    var elem = headBlock.pop();
     nElems.sub(1);
 
     // Fix list if we consumed last one...
-    if headBlock.nElems == 0 {
+    if headBlock.isEmpty {
       var tmp = headBlock;
       headBlock = headBlock.next;
       delete tmp;
@@ -207,62 +348,40 @@ record BagSegment {
     return (true, elem);
   }
 
-  proc addElements(elt : eltType) {
+  inline proc addElements(elt : eltType) {
     var block = tailBlock;
 
-    // Empty?
+    // Empty? Create a new one of initial size
     if block == nil then {
-      tailBlock = new BagSegmentBlock(eltType);
+      tailBlock = new BagSegmentBlock(eltType, INITIAL_BLOCK_SIZE);
       headBlock = tailBlock;
       block = tailBlock;
     }
 
-    // Full?
-    if block.nElems == ELEMS_PER_BLOCK {
-      block.next = new BagSegmentBlock(eltType);
+    // Full? Create a new one double the previous size
+    if block.isFull {
+      block.next = new BagSegmentBlock(eltType, block.cap * 2);
       tailBlock = block.next;
       block = block.next;
     }
 
-    block.nElems = block.nElems + 1;
-    block.elems[block.nElems] = elt;
-
-    // We update the count in each iteration to increase the visibility of this
-    // operation (as dequeue operations would skip over us during 2nd pass)
+    block.push(elt);
     nElems.add(1);
   }
 
-  // TODO: Increase efficiency of bulk adding
-  proc addElements(elts) {
-    var block = tailBlock;
-
-    // Empty?
-    if block == nil then {
-      tailBlock = new BagSegmentBlock(eltType);
-      headBlock = tailBlock;
-      block = tailBlock;
-    }
-
-    for elt in elts {
-      // Full?
-      if block.nElems == ELEMS_PER_BLOCK {
-        block.next = new BagSegmentBlock(eltType);
-        tailBlock = block.next;
-        block = block.next;
-      }
-
-      block.nElems = block.nElems + 1;
-      block.elems[block.nElems] = elt;
-
-      // We update the count in each iteration to increase the visibility of this
-      // operation (as dequeue operations would skip over us during 2nd pass)
-      nElems.add(1);
-    }
+  inline proc addElements(elts) {
+    for elt in elts do addElements(elt);
   }
 }
 
-class Bag : Collection {
-  // A handle to our parent 'distributed' work queue, which is needed for work stealing.
+/*
+  We maintain a multiset 'bag' per node. Each bag keeps a handle to it's parent,
+  which is required for work stealing.
+*/
+class Bag {
+  type eltType;
+
+  // A handle to our parent 'distributed' bag, which is needed for work stealing.
   var parentHandle : DistributedBag(eltType);
 
   /*
@@ -275,16 +394,15 @@ class Bag : Collection {
   var startIdxDeq : atomic uint;
 
   /*
-    We only allow one segment to be nominated as the 'work stealer' for our queue.
-    This reduces the complexity of having to manage multiple work stealing segments
-    while also providing more concurrency through work stealing.
+    If a task makes 2 complete passes (1 best-case, 1 average-case) and has not
+    found enough items, then it may attempt to balance the load distribution.
   */
-  var workStealer : atomic int;
+  var loadBalanceInProgress : atomic bool;
+
+
 
   var maxParallelSegmentSpace = {0 .. #here.maxTaskPar};
   var segments : [maxParallelSegmentSpace] BagSegment(eltType);
-
-  const maxIterationsPerPhase = here.maxTaskPar;
 
   inline proc nextStartIdxEnq {
     return (startIdxEnq.fetchAdd(1) % here.maxTaskPar : uint) : int;
@@ -294,499 +412,622 @@ class Bag : Collection {
     return (startIdxDeq.fetchAdd(1) % here.maxTaskPar : uint) : int;
   }
 
-  proc WorkQueue(type eltType) {
-    workStealer.write(-1);
+  proc Bag(type eltType, parentHandle) {
+    this.parentHandle = parentHandle;
   }
 
   proc add(elt : eltType) : bool {
-    var startIdx = nextStartIdxEnq;
-    var idx = startIdx : int;
-    var iterations = 0;
+    var startIdx = nextStartIdxEnq : int;
+    var phase = ADD_BEST_CASE;
 
-    /*
-      Pass 1: Best Case
-
-      Find a segment that is unlocked and attempt to acquire it. As we are adding
-      elements, we don't care how many elements there are, just that we find
-      some place to add ours.
-    */
-    while iterations < maxIterationsPerPhase {
-      ref segment = segments[idx];
-
-      // Attempt to acquire...
-      if segment.acquireWithStatus(ENQUEUE) {
-        segment.addElements(elt);
-        segment.releaseStatus();
-        return true;
-      }
-
-      iterations = iterations + 1;
-      idx = (idx + 1) % here.maxTaskPar;
-    }
-
-    iterations = 0;
-    idx = startIdx : int;
-
-    /*
-      Pass 2: Average Case
-
-      Find any segment (locked or unlocked) and make an attempt to acquire it.
-      If the segment is actively 'work stealing' then we skip over it to minimize
-      the excessive wait-time; given that there can be only *one* work-stealer
-      for a node, we know we'll find a better one nearby.
-    */
     while true {
-      ref segment = segments[idx];
+      select phase {
+        /*
+          Pass 1: Best Case
 
-      while true {
-        select segment.currentStatus {
-          // Quick acquire...
-          when UNLOCKED do {
-            if segment.acquireWithStatus(ENQUEUE) {
+          Find a segment that is unlocked and attempt to acquire it. As we are adding
+          elements, we don't care how many elements there are, just that we find
+          some place to add ours.
+        */
+        when ADD_BEST_CASE {
+          for offset in 0 .. #here.maxTaskPar {
+            ref segment = segments[(startIdx + offset) % here.maxTaskPar];
+
+            // Attempt to acquire...
+            if segment.acquireWithStatus(STATUS_ADD) {
               segment.addElements(elt);
               segment.releaseStatus();
               return true;
             }
           }
-          // If someone is stealing, then that means that we'd be waiting for a while
-          // anyway, so we may as well attempt to find a node with a shorter wait time.
-          when STEALING_INIT do break;
-          when STEALING_WORK do break;
-          when STEALING_MERGE do break;
+
+          phase = ADD_AVERAGE_CASE;
         }
+        /*
+          Pass 2: Average Case
 
-        chpl_task_yield();
+          Find any segment (locked or unlocked) and make an attempt to acquire it.
+        */
+        when ADD_AVERAGE_CASE {
+          ref segment = segments[startIdx];
+
+          while true {
+            select segment.currentStatus {
+              // Quick acquire...
+              when STATUS_UNLOCKED do {
+                if segment.acquireWithStatus(STATUS_ADD) {
+                  segment.addElements(elt);
+                  segment.releaseStatus();
+                  return true;
+                }
+              }
+            }
+            chpl_task_yield();
+          }
+        }
       }
-
-      idx = (idx + 1) % here.maxTaskPar;
     }
 
-    halt("Almost exited enqueueAcquire before getting a segment...");
+    halt("DEADCODE");
   }
 
   proc remove() : (bool, eltType) {
     var startIdx = nextStartIdxDeq;
     var idx = startIdx;
     var iterations = 0;
-
-    /*
-      Pass 1: Best Case
-
-      Find the first bucket that is both unlocked and contains elements. This is
-      extremely helpful in the case where we have a good distribution of elements
-      in each segment.
-    */
-    while iterations < maxIterationsPerPhase {
-      ref segment = segments[idx];
-
-      // Attempt to acquire...
-      if !segment.isEmpty && segment.acquireWithStatus(DEQUEUE) {
-        var (hasElem, elem) : (bool, eltType) = segment.takeElement();
-        segment.releaseStatus();
-
-        if hasElem {
-          return (hasElem, elem);
-        }
-      }
-
-      iterations = iterations + 1;
-      idx = (idx + 1) % here.maxTaskPar;
-    }
-
-    idx = startIdx;
-    iterations = 0;
-
-    /*
-      Pass 2: Average Case
-
-      Find the first bucket containing elements. We don't care if it is locked
-      or unlocked this time, just that it contains elements; this handles majority
-      of cases where we have elements anywhere in any segment.
-    */
-    while iterations < here.maxTaskPar {
-      ref segment = segments[idx];
-
-      // Attempt to acquire...
-      while !segment.isEmpty {
-        if segment.isUnlocked && segment.acquireWithStatus(DEQUEUE) {
-          var (hasElem, elem) : (bool, eltType) = segment.takeElement();
-          segment.releaseStatus();
-
-          if hasElem {
-            return (hasElem, elem);
-          }
-        }
-
-        // Backoff
-        chpl_task_yield();
-      }
-
-      iterations = iterations + 1;
-      idx = (idx + 1) % here.maxTaskPar;
-    }
-
-    idx = startIdx;
-
-    /*
-      Pass 3: Worst Case
-
-      After two full iterations, we're sure the queue is full at this point, so we
-      can attempt to steal work from other nodes. In this pass, we find *any* segment
-      and if it is empty, we attempt to become the work-stealer; if someone else is the
-      current work stealer we assist them instead and lift an element for ourselves.
-
-      Furthermore, in this phase we loop indefinitely until we are 100% certain it is
-      empty or we get an item, so introduce some backoff here.
-    */
+    var phase = REMOVE_BEST_CASE;
     var backoff = 0;
-    if logMPMCQueue then writeln(here, ": Task on 3rd pass (worst case)...");
-    while true {
-      ref segment = segments[idx];
-
-      select segment.currentStatus {
-        // Quick acquire
-        when UNLOCKED {
-          backoff = 0;
-          if segment.acquireWithStatus(DEQUEUE) {
-            // Steal if empty... because we help if we are not the one set, we only
-            // know whether the queue is empty if we were the work stealer.
-            if segment.isEmpty {
-              var (_idx, hasElem, elem) = stealWork(idx);
-
-              // If we have lifted an element, we've retrieved an item.
-              if hasElem {
-                return (hasElem, elem);
-              }
-
-              // If the index returned is equivalent to ours, then we were the 'work stealer'
-              // for our queue, and since only we personally know how many elements there are
-              // (as we were in charge of merging all work stolen), we know the queue is empty.
-              // Otherwise, if the index differs then it means we helped assist another
-              // segment in work stealing and we should move to it as if there is any work
-              // available, it would be there.
-              if _idx == idx {
-                return (false, _defaultOf(eltType));
-              } else {
-                idx = _idx;
-              }
-
-              continue;
-            }
-
-            // We're lucky; another element has been added to the current segment,
-            // take it and leave like normal...
-            var (hasElem, elem) : (bool, eltType) = segment.takeElement();
-            segment.releaseStatus();
-            return (hasElem, elem);
-          }
-        }
-        // If someone else is stealing work, we add ourself as a potential helper
-        // to help speed this along, and hopefully we get an element for ourself.
-        when STEALING_WORK {
-          var (hasElem, elem) = helpStealWork(startIdx);
-
-          // We have our element...
-          if hasElem {
-            return (hasElem, elem);
-          }
-          backoff = 0;
-        }
-      }
-
-      // Backoff to maximum...
-      if backoff == 0 then chpl_task_yield();
-      else sleep(max(1000, 2 ** backoff), TimeUnits.microseconds);
-      backoff = backoff + 1;
-    }
-
-    halt("Somehow exited without acquiring an item for dequeue...");
-  }
-
-  /*
-    Work Stealing
-  */
-
-  /*
-    Attempt to steal work as the segment referenced by 'idx'. As we may only have
-    one work stealing segment, we must first contest for that right. If we obtain
-    that right, we become responsible with coordinating and distributing work to other
-    helper tasks, and then merging all of the work together. If another segment has
-    that right, we move to that segment and become one of their helpers.
-  */
-  proc stealWork(idx) : (int, bool, eltType) {
-    ref segment = segments[idx];
-
-    // We can't steal if we're the only ones, so return as empty
-    if numLocales == 1 {
-      segment.releaseStatus();
-      return (idx, false, _defaultOf(eltType));
-    }
-
-    if logMPMCQueue then writeln(here, ": Attempting to steal work for segment #", idx);
-
-    // Attempt to become the sole work stealing segment. If we fail, then we enlist
-    // our aid to the current work stealing segment as a helper.
-    while true {
-      // We are the new work stealing segment...
-      if workStealer.compareExchangeStrong(-1, idx) {
-        break;
-      }
-
-      // Another segment is the work stealing segment; help them out...
-      // If we help steal work, it is possible we also lift an element while helping
-      // Furthermore, we also return the index of the work stealing segment, as it is
-      // likely to have more work.
-      var currentStealer = workStealer.read();
-      if currentStealer != -1 {
-        segment.releaseStatus();
-        var (hasElem, elem) = helpStealWork(currentStealer);
-        return (currentStealer, hasElem, elem);
-      }
-    }
-
-    // Initialize each slot for potential helpers. It is imperative that we initialize
-    // the slots *before* resetting the wsSlotsTaken to avoid race conditions, as
-    // helpers only help if they obtain a valid index.
-    var locIdx = 0;
-    for slot in segment.wsSlots {
-      if locIdx == here.id then locIdx = locIdx + 1;
-      slot.locIdx = locIdx;
-      slot.status.write(INITIALIZED);
-      locIdx = locIdx + 1;
-    }
-    segment.wsSlotsTaken.write(0);
-    segment.status.write(STEALING_WORK);
-
-    // Help yourself...
-    var (hasElem, elem) = helpStealWork(idx);
-    // Lets others know that we no longer require help.
-    segment.status.write(STEALING_MERGE);
-    if logMPMCQueue then writeln(here, ": Merging work stolen on segment #", idx);
-
-    // At this point, it is possible that other helpers are still working, and so
-    // we wait for them to finish. Merge what has been stolen.
-    for slot in segment.wsSlots {
-      // Wait for the current helper to finish, and when they do skip any without work...
-      while slot.status.read() == INITIALIZED do chpl_task_yield();
-      if slot.status.read() == FINISHED_WITH_NO_WORK then continue;
-
-      var stolenBlock = slot.block;
-      var tailBlock = segment.tailBlock;
-      var blockElems = stolenBlock.nElems;
-      segment.nElems.add(blockElems : uint);
-
-      while stolenBlock != nil {
-        // Drain elements we've stolen and merge it into our segment.
-        for elt in stolenBlock.drain(ELEMS_PER_BLOCK) {
-          // If we have not lifted an element for ourself by now, do so.
-          if !hasElem {
-            elem = elt;
-            hasElem = true;
-            segment.nElems.sub(1);
-            if logMPMCQueue then writeln(here, ": Lifted element ", elem, " as segment #", idx);
-            continue;
-          }
-
-          segment.addElements(elt);
-        }
-
-        var tmp = stolenBlock;
-        stolenBlock = stolenBlock.next;
-        delete tmp;
-      }
-    }
-
-    // At this point, we have stolen from all other nodes, and we may relinquish
-    // our role as primary work-stealer.
-    workStealer.write(-1);
-    segment.releaseStatus();
-    return (idx, hasElem, elem);
-  }
-
-  /*
-    Enlist our aid as a helper thread for the current work stealer. To do so, we
-    must claim a slot (atomically),
-  */
-  proc helpStealWork(idx) : (bool, eltType) {
-    ref segment = segments[idx];
 
     while true {
-      select segment.currentStatus {
-        // They are still initializing...
-        when STEALING_INIT {
-          // Tight spin, we'll be able to help soon...
-        }
-        // They are initialized, we can now attempt to help...
-        when STEALING_WORK {
-          break;
-        }
-        // We're not stealing work...
-        otherwise do return (false, _defaultOf(eltType));
-      }
-    }
-
-    if logMPMCQueue then writeln(here, ": Helping steal work for segment #", idx);
-    var (hasElem, elem) : (bool, eltType);
-
-    // Attempt to help...
-    while true {
-      var ourIdx = segment.wsSlotsTaken.fetchAdd(1);
-      // If the index we get is not in a valid range, we're done helping.
-      if ourIdx >= segment.wsNumSlots {
-        return (hasElem, elem);
-      }
-
-      ref slot = segment.wsSlots[ourIdx];
-      if logMPMCQueue then writeln(here, ": Assigned to steal work from segment #", ourIdx, " for segment #", idx);
-
-      // We know which locale we are going to be working on, but we must setup some
-      // temporaries that can make it easier for back-and-forth communication.
-      // We create an array of tuples, one for each segment on the other node.
-      // As well, in case a segment is skipped, we initialize the index at '1'
-      // to signify that it is empty.
-      var stolenWork : [{0..#Locales[slot.locIdx].maxTaskPar}] (int, ELEMS_PER_BLOCK * eltType);
-      for work in stolenWork do work[1] = 1;
-
-      on Locales[slot.locIdx] {
-        // We keep track of a simple bitmap to keep track of which segments we have
-        // already processed, since on the first pass we skip over any locked segments.
-        var segmentBitmap : bigint;
-        var queue = parentHandle.localQueue;
-        var iterations = 0;
-        var otherStartIdx = queue.nextStartIdxDeq;
-        var otherSegmentIdx = otherStartIdx;
-
+      select phase {
         /*
           Pass 1: Best Case
 
-          Find any unlocked segment that contains elements...
+          Find the first bucket that is both unlocked and contains elements. This is
+          extremely helpful in the case where we have a good distribution of elements
+          in each segment.
         */
-        while iterations < here.maxTaskPar {
-          ref otherSegment = segments[otherSegmentIdx];
+        when REMOVE_BEST_CASE {
+          while iterations < here.maxTaskPar {
+            ref segment = segments[idx];
 
-          // Attempt to acquire...
-          if !otherSegment.isEmpty && otherSegment.acquireWithStatus(DEQUEUE) {
-            var toSteal = max(1, min(ELEMS_PER_BLOCK, otherSegment.nElems.read() * WORK_STEALING_RATIO));
-            var stolen : ELEMS_PER_BLOCK * eltType;
-            var stolenIdx = 1;
-            for elt in otherSegment.takeElements(toSteal) {
-                stolen[stolenIdx] = elt;
-                stolenIdx = stolenIdx + 1;
+            // Attempt to acquire...
+            if !segment.isEmpty && segment.acquireWithStatus(STATUS_REMOVE) {
+              var (hasElem, elem) : (bool, eltType) = segment.takeElement();
+              segment.releaseStatus();
+
+              if hasElem {
+                return (hasElem, elem);
+              }
             }
-            otherSegment.releaseStatus();
 
-            // Mark as processed and move stolen work...
-            segmentBitmap.setbit(otherSegmentIdx);
-            stolenWork[otherSegmentIdx] = (stolenIdx, stolen);
+            iterations = iterations + 1;
+            idx = (idx + 1) % here.maxTaskPar;
           }
 
-          iterations = iterations + 1;
-          otherSegmentIdx = (otherSegmentIdx + 1) % here.maxTaskPar;
+          phase = REMOVE_AVERAGE_CASE;
         }
-
-        otherSegmentIdx = otherStartIdx;
-        iterations = 0;
 
         /*
           Pass 2: Average Case
 
-          Find any segment not already processed that contains elements...
+          Find the first bucket containing elements. We don't care if it is locked
+          or unlocked this time, just that it contains elements; this handles majority
+          of cases where we have elements anywhere in any segment.
         */
-        while iterations < here.maxTaskPar {
-          if segmentBitmap.tstbit(otherSegmentIdx) {
-            iterations = iterations + 1;
-            otherSegmentIdx = (otherSegmentIdx + 1) % here.maxTaskPar;
-            continue;
-          }
-          ref otherSegment = segments[otherSegmentIdx];
+        when REMOVE_AVERAGE_CASE {
+          while iterations < here.maxTaskPar {
+            ref segment = segments[idx];
 
-          // Attempt to acquire...
-          while !otherSegment.isEmpty {
-            // If they are stealing work as well, we back out.
-            if otherSegment.status.read() == STEALING_WORK then break;
+            // Attempt to acquire...
+            while !segment.isEmpty {
+              if segment.isUnlocked && segment.acquireWithStatus(STATUS_REMOVE) {
+                var (hasElem, elem) : (bool, eltType) = segment.takeElement();
+                segment.releaseStatus();
 
-            if otherSegment.isUnlocked && otherSegment.acquireWithStatus(DEQUEUE) {
-              var toSteal = max(1, min(ELEMS_PER_BLOCK, otherSegment.nElems.read() * WORK_STEALING_RATIO));
-              var stolen : ELEMS_PER_BLOCK * eltType;
-              var stolenIdx = 1;
-              for elt in otherSegment.takeElements(toSteal) {
-                  stolen[stolenIdx] = elt;
-                  stolenIdx = stolenIdx + 1;
+                if hasElem {
+                  return (hasElem, elem);
+                }
               }
-              otherSegment.releaseStatus();
 
-              // Mark as processed and move stolen work...
-              segmentBitmap.setbit(otherSegmentIdx);
-              stolenWork[otherSegmentIdx] = (stolenIdx, stolen);
+              // Backoff
+              chpl_task_yield();
             }
 
-            // Backoff
-            chpl_task_yield();
+            iterations = iterations + 1;
+            idx = (idx + 1) % here.maxTaskPar;
           }
 
-          iterations = iterations + 1;
-          otherSegmentIdx = (otherSegmentIdx + 1) % here.maxTaskPar;
+          phase = REMOVE_WORST_CASE;
         }
 
-        // At this point we are done, we've stolen from all segments that aren't
-        // currently stealing work...
-      }
+        /*
+          Pass 3: Worst Case
 
-      // Link all of the stolen work together (only if they contain any work)
-      for (idx, work) in stolenWork {
-        // Is empty
-        if idx == 1 then continue;
+          After two full iterations, we're sure the queue is full at this point, so we
+          can attempt to steal work from other nodes. In this pass, we find *any* segment
+          and if it is empty, we attempt to become the work-stealer; if someone else is the
+          current work stealer we assist them instead and lift an element for ourselves.
 
-        // Lift an element if not already...
-        if !hasElem {
-          hasElem = true;
-          elem = work[idx - 1];
-          idx = idx - 1;
+          Furthermore, in this phase we loop indefinitely until we are 100% certain it is
+          empty or we get an item, so introduce some backoff here.
+        */
+        when REMOVE_WORST_CASE {
+          while true {
+            ref segment = segments[idx];
 
-          // Consumed last element?
-          if idx == 1 then continue;
+            select segment.currentStatus {
+              // Quick acquire
+              when STATUS_UNLOCKED {
+                if segment.acquireWithStatus(STATUS_REMOVE) {
+                  // We're lucky; another element has been added to the current segment,
+                  // take it and leave like normal...
+                  if !segment.isEmpty {
+                    var (hasElem, elem) : (bool, eltType) = segment.takeElement();
+                    segment.releaseStatus();
+                    return (hasElem, elem);
+                  }
+
+                  if parentHandle.targetLocales.size == 1 {
+                    segment.releaseStatus();
+                    return (false, _defaultOf(eltType));
+                  }
+
+                  // Attempt to become the sole work stealer for this node. If we
+                  // do not, we spin until they finish. We need to release the lock
+                  // on our segment so our segment may be load balanced as well.
+                  if loadBalanceInProgress.testAndSet() {
+                    segment.releaseStatus();
+
+                    loadBalanceInProgress.waitFor(false);
+                    // Reset our phase and scan for more elements...
+                    phase = REMOVE_BEST_CASE;
+                    break;
+                  }
+
+                  // We are the sole work stealer, and so it is our responsibility
+                  // to balance the load for our node. We fork-join new worker
+                  // tasks that will check horizontally across each node (as in
+                  // across each segment with the same index), and vertically across
+                  // each segment (each segment in a node). Horizontally, we steal
+                  // at most a % of work from other nodes to give to ourselves.
+                  // As load balancer, we also are the only one who knows whether
+                  // or not all bags are empty.
+                  var isEmpty : atomic bool;
+                  isEmpty.write(true);
+                  segment.releaseStatus();
+                  coforall segmentIdx in 0..#here.maxTaskPar {
+                    var stolenWork : [{0..#numLocales}] (int, c_ptr(eltType));
+                    coforall loc in parentHandle.targetLocales {
+                      if loc != here then on loc {
+                        // As we jumped to the target node, 'localBag' returns
+                        // the target's bag that we are attempting to steal from.
+                        var targetBag = parentHandle.bag;
+
+                        // Only proceed if the target is not load balancing themselves...
+                        if !targetBag.loadBalanceInProgress.read() {
+                          ref targetSegment = targetBag.segments[segmentIdx];
+
+                          // As we only care that the segment contains data,
+                          // we test-and-test-and-set until we gain ownership.
+                          while targetSegment.nElems.read() >= WORK_STEALING_MINIMUM {
+                            var backoff = 0;
+                            if targetSegment.currentStatus == STATUS_UNLOCKED && targetSegment.acquireWithStatus(STATUS_REMOVE) {
+                              // Sanity check: ensure segment did not fall under minimum since last check
+                              if  targetSegment.nElems.read() < WORK_STEALING_MINIMUM {
+                                targetSegment.releaseStatus();
+                                break;
+                              }
+
+                              extern proc sizeof(type x): size_t;
+                              // We steal at most 1MB worth of data. If the user has less than that, we steal a %, at least 1.
+                              const mb = WORK_STEALING_MAX_MEMORY_MB * 1024 * 1024;
+                              var toSteal = max(WORK_STEALING_MINIMUM, min(mb / sizeof(eltType), targetSegment.nElems.read() * WORK_STEALING_RATIO)) : int;
+
+                              // Allocate storage...
+                              on stolenWork do stolenWork[loc.id] = (toSteal, c_malloc(eltType, toSteal));
+                              var destPtr = stolenWork[here.id][2];
+                              targetSegment.transferElements(destPtr, toSteal, stolenWork.locale.id);
+                              targetSegment.releaseStatus();
+
+                              // We are done...
+                              break;
+                            }
+
+                            // Backoff...
+                            chpl_task_yield();
+                          }
+                        }
+                      }
+                    }
+
+                    // It is our job now to distribute all stolen data to the same
+                    // horizontal segment on our node. Acquire lock...
+                    ref recvSegment = segments[segmentIdx];
+                    while true {
+                      if recvSegment.currentStatus == STATUS_UNLOCKED && recvSegment.acquireWithStatus(STATUS_ADD) then break;
+                      chpl_task_yield();
+                    }
+
+                    // Add stolen elements to segment...
+                    for (nStolen, stolenPtr) in stolenWork {
+                      if nStolen == 0 then continue;
+                      recvSegment.addElementsPtr(stolenPtr, nStolen);
+                      c_free(stolenPtr);
+
+                      // Let parent know that the bag is not empty.
+                      isEmpty.write(false);
+                    }
+                    recvSegment.releaseStatus();
+                  }
+
+                  loadBalanceInProgress.write(false);
+
+                  // At this point, if no work has been found, we will return empty...
+                  if isEmpty.read() {
+                    return (false, _defaultOf(eltType));
+                  } else {
+                    // Otherwise, we try to get data like everyone else.
+                    phase = REMOVE_BEST_CASE;
+                    break;
+                  }
+                }
+              }
+            }
+
+            // Backoff to maximum...
+            chpl_task_yield();
+          }
         }
 
-        // Create
-        var block = new BagSegmentBlock(eltType);
-        block.nElems = idx;
-        block.elems = work;
-
-        // Append
-        block.next = slot.block;
-        slot.block = block;
+        otherwise do halt("Invalid phase #", phase);
       }
 
-      if slot.block == nil then slot.status.write(FINISHED_WITH_NO_WORK); else slot.status.write(FINISHED_WITH_WORK);
-      if logMPMCQueue then writeln(here, ": Finished stealing work for segment #", idx);
+      // Reset variables...
+      idx = startIdx;
+      iterations = 0;
+      backoff = 0;
     }
 
-    halt("Exited helpStealWork loop...");
+    halt("DEADCODE");
   }
 }
 
-class DistributedBag : Collection {
-  var perLocaleDomain = LocaleSpace dmapped Block(boundingBox=LocaleSpace);
-  var bags : [perLocaleDomain] Bag(eltType);
 
-  proc DistributedBag(type eltType) {
-    forall loc in Locales {
-      on loc {
-        bags[here.id] = new Bag(eltType, parentHandle=this);
+class DistributedBag : Collection {
+  var targetLocDom : domain(1);
+  var targetLocales : [targetLocDom] locale;
+  var pid : int = -1;
+
+  // Node-local fields
+  var bag : Bag(eltType);
+  var concurrentTasks : atomic int;
+  var frozenState : atomic int;
+
+  proc DistributedBag(type eltType, targetLocales : [?targetLocDom] locale = Locales) {
+    bag = new Bag(eltType, this);
+    this.targetLocDom = targetLocDom;
+    this.targetLocales = targetLocales;
+    pid = _newPrivatizedClass(this);
+  }
+
+  proc DistributedBag(other, pid, type eltType = other.eltType) {
+    bag = new Bag(eltType, this);
+    this.targetLocDom = other.targetLocDom;
+    this.targetLocales = other.targetLocales;
+    this.pid = pid;
+  }
+
+  proc dsiPrivatize(pid) {
+    return new DistributedBag(this, pid);
+  }
+
+  proc dsiGetPrivatizeData() {
+    return pid;
+  }
+
+  inline proc getPrivatizedThis {
+    if this.locale == here {
+      return this;
+    }
+
+    return chpl_getPrivatizedCopy(this.type, pid);
+  }
+
+  /*
+    Obtains a privatized version of this instance. The privatized version is a
+    cloned instance that is allocated on this node, which is useful for eliding
+    communications generated from accessing instance fields. Using another node's
+    instance will significantly penalize performance by bounding overall throughput
+    on the communication between the two nodes.
+  */
+  proc getPrivatizedInstance() {
+    return getPrivatizedThis;
+  }
+
+  /*
+    Insert an element to this node's bag. The ordering is not guaranteed to be
+    preserved. If this instance is privatized, it is an entirely local operation.
+  */
+  proc add(elt : eltType) : bool {
+    var localThis = getPrivatizedThis;
+    if BAG_NO_FREEZE then return localThis.bag.add(elt);
+
+    local {
+      localThis.concurrentTasks.add(1);
+
+      // Check if the queue is now 'immutable'.
+      if localThis.frozenState.read() > FREEZE_UNFROZEN {
+        localThis.concurrentTasks.sub(1);
+        return false;
+      }
+    }
+
+    var result = localThis.bag.add(elt);
+    local { localThis.concurrentTasks.sub(1); }
+    return result;
+  }
+
+  /*
+    Remove an element from this node's bag. The order in which elements are removed
+    are not guaranteed to be the same order it has been inserted. If this node's
+    bag is empty, it will attempt to steal elements from bags of other nodes.
+  */
+  proc remove() : (bool, eltType) {
+    var localThis = getPrivatizedThis;
+    if BAG_NO_FREEZE then return localThis.bag.remove();
+
+    local {
+      localThis.concurrentTasks.add(1);
+
+      // Check if the queue is now 'immutable'.
+      if localThis.frozenState.read() > FREEZE_UNFROZEN {
+        localThis.concurrentTasks.sub(1);
+        return (false, _defaultOf(eltType));
+      }
+    }
+
+    var (elem, hasElem) = localThis.bag.remove();
+    local { localThis.concurrentTasks.sub(1); }
+    return (elem, hasElem);
+  }
+
+  /*
+    Obtain the number of elements held in all bags across all nodes. This method
+    is best-effort if the bags are unfrozen, and can be non-deterministic for
+    concurrent updates across nodes, and may miss elements or even count
+    duplicates resulting from any concurrent insertion or removal operations.
+  */
+  proc size() : int {
+    var sz : atomic int;
+    forall loc in targetLocales do on loc {
+      var instance = getPrivatizedThis;
+      forall segmentIdx in 0..#here.maxTaskPar {
+        sz.add(instance.bag.segments[segmentIdx].nElems.read() : int);
+      }
+    }
+
+    return sz.read();
+  }
+
+  /*
+    Performs a lookup to determine if the requested element exists in this bag.
+    This method is best-effort if the bags are unfrozen, and can be
+    non-deterministic for concurrent updates across nodes, and may miss elements
+    resulting from any concurrent insertion or removal operations.
+  */
+  proc contains(elt : eltType) : bool {
+    var foundElt : atomic bool;
+    forall elem in getPrivatizedThis {
+      if elem == elt {
+        foundElt.write(true);
+      }
+    }
+    return foundElt.read();
+  }
+
+  /*
+    Clears all elements from all bags across nodes. It is equivalent to a sequence
+    of `remove` operations.
+  */
+  proc clear() {
+    while remove()[1] do ;
+  }
+
+  /*
+    If all bags are currently empty. See `size` for notes on non-deterministic
+    behavior.
+  */
+  proc isEmpty() : bool {
+    return size() == 0;
+  }
+
+  /*
+    Freeze our state, becoming immutable; we wait for any ongoing concurrent
+    operations to allow them to finish.
+  */
+  proc freeze() {
+    if BAG_NO_FREEZE then return false;
+
+    // Check if already frozen
+    if frozenState.read() == FREEZE_FROZEN {
+      return true;
+    }
+
+    // Mark as transient state...
+    coforall loc in targetLocales do on loc {
+      var localThis = getPrivatizedThis;
+      localThis.frozenState.write(FREEZE_MARKED);
+      localThis.concurrentTasks.waitFor(0);
+    }
+
+    // Mark as frozen...
+    coforall loc in targetLocales do on loc {
+      var localThis = getPrivatizedThis;
+      localThis.frozenState.write(FREEZE_FROZEN);
+    }
+
+    return true;
+  }
+
+  /*
+    Unfreezes our state, allowing mutating operations; we wait on any ongoing
+    concurrent operations to allow them to finish.
+  */
+  proc unfreeze() : bool {
+    if BAG_NO_FREEZE then return false;
+    // Check if already unfrozen
+    if frozenState.read() == FREEZE_UNFROZEN {
+      return true;
+    }
+
+    // Mark as transient state...
+    coforall loc in targetLocales do on loc {
+      var localThis = getPrivatizedThis;
+      localThis.frozenState.write(FREEZE_MARKED);
+      localThis.concurrentTasks.waitFor(0);
+    }
+
+    // Mark as unfrozen...
+    coforall loc in targetLocales do on loc {
+      var localThis = getPrivatizedThis;
+      localThis.frozenState.write(FREEZE_UNFROZEN);
+    }
+
+    return true;
+  }
+
+  proc canFreeze() : bool {
+    return !BAG_NO_FREEZE;
+  }
+
+  /*
+    If we are currently frozen. If we are in the middle of a state transition, we
+    wait until it has completed.
+  */
+  proc isFrozen() : bool {
+    if BAG_NO_FREEZE then return false;
+
+    var state = frozenState.read();
+
+    // Current transitioning state, wait it out...
+    while state == FREEZE_MARKED {
+      chpl_task_yield();
+      state = frozenState.read();
+    }
+
+    return state == FREEZE_FROZEN;
+  }
+
+  /*
+    Iterate over each bag in each node. If the bag is frozen, we elide the need
+    to acquire any locks and iterate directly over the bag. If the bag is not
+    frozen, we must acquire not only the needed locks, but also take a snapshot
+    approach, increasing memory consumption.
+  */
+  iter these() : eltType {
+    // Only allowed while frozen due to issue where breaking from a serial iterator
+    // does not cleanup resources, leaving the bag in an undefined state.
+    var frozen = isFrozen();
+
+    for loc in targetLocales {
+      for segmentIdx in 0..#here.maxTaskPar {
+
+        // If the data structure is frozen, we may elide the need to acquire any locks,
+        // and we can iterate directly over the data.
+        if frozen {
+          var instance : DistributedBag(int);
+          on loc do instance = getPrivatizedThis;
+          ref segment = instance.bag.segments[segmentIdx];
+          var block = segment.headBlock;
+
+          while block != nil {
+            for i in 0 .. #block.size {
+              var elt : eltType;
+              on loc do elt = block.elems[i];
+              yield elt;
+            }
+            block = block.next;
+          }
+        }
+        // If the data structure is not frozen, then we must acquire the lock and
+        // produce a snapshot (to reduce the time we hold the lock)
+        else {
+          // The size of the snapshot is only known once we have the lock.
+          // TODO/BUG: c_ptr does not seem to work here and causes a segmentation fault at runtime.
+          var dom : domain(1) = {0..-1};
+          var buffer : [dom] eltType;
+
+          on loc {
+            ref segment = getPrivatizedThis.bag.segments[segmentIdx];
+
+            if segment.acquireIfNonEmpty(STATUS_LOOKUP) {
+              var block = segment.headBlock;
+              while block != nil {
+                for i in 0 .. #block.size {
+                    buffer.push_back(block.elems[i]);
+                }
+                block = block.next;
+              }
+              segment.releaseStatus();
+
+            }
+          }
+
+          // Process this chunk if we have one...
+          for elem in buffer {
+            yield elem;
+          }
+        }
       }
     }
   }
 
-  inline proc localBag {
-    return bags[here.id];
+  iter these(param tag : iterKind) where tag == iterKind.leader {
+    var frozen = isFrozen();
+    coforall loc in targetLocales do on loc {
+      var instance = getPrivatizedThis;
+      coforall segmentIdx in 0 .. #here.maxTaskPar {
+        ref segment = instance.bag.segments[segmentIdx];
+
+        // If the data structure is frozen, we elide the need to acquire any locks,
+        // and we may iterate directly over the data as well.
+        if frozen {
+          var block = segment.headBlock;
+
+          while block != nil {
+            yield (block.size, block.elems);
+            block = block.next;
+          }
+        } else if segment.acquireIfNonEmpty(STATUS_LOOKUP) {
+          // Create a snapshot...
+          var block = segment.headBlock;
+          var bufferSz = segment.nElems.read() : int;
+          var buffer = c_malloc(eltType, bufferSz);
+          var bufferOffset = 0;
+
+          while block != nil {
+            if bufferOffset + block.size > bufferSz {
+              halt("Snapshot attempt with bufferSz(", bufferSz, ") with offset bufferOffset(", bufferOffset + block.size, ")");
+            }
+            __primitive("chpl_comm_array_put", block.elems[0], here.id, buffer[bufferOffset], block.size);
+            bufferOffset += block.size;
+            block = block.next;
+          }
+
+          // Yield this chunk to be process...
+          segment.releaseStatus();
+          yield (bufferSz, buffer);
+          c_free(buffer);
+        }
+      }
+    }
   }
 
-  proc add(elt : eltType) : bool {
-    localBag.add(elt);
-    return true;
-  }
-
-  proc remove() : (bool, eltType) {
-    return localBag.remove();
+  iter these(param tag : iterKind, followThis) where tag == iterKind.follower {
+    var (bufferSz, buffer) = followThis;
+    for i in 0 .. #bufferSz {
+      yield buffer[i];
+    }
   }
 }

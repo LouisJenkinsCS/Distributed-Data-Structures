@@ -1,0 +1,99 @@
+.. default-domain:: chpl
+
+.. module:: Collection
+
+Collection
+==========
+**Usage**
+
+.. code-block:: chapel
+
+   use Collection;
+
+**Submodules**
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   Collection/*
+
+.. function:: proc +=(c: Collection(?eltTyp), other): bool
+
+   
+   Syntactic sugar for 'add'.
+
+.. class:: Collection
+
+   
+   Base class for data structures.
+
+
+   .. attribute:: type eltType
+
+   .. method:: proc add(elt: eltType ...?nElts): bool
+
+      
+      Adds an element to this data structure.
+      
+
+   .. method:: proc add(otherCollection: Collection(eltType)): bool
+
+      
+      Add all elements from another collection to this.
+      
+
+   .. method:: proc add(elts: [?nElts] eltType): bool
+
+      
+      Add all elements in the array.
+      
+
+   .. method:: proc remove(): (bool, eltType)
+
+      
+      Removes an arbitrary element from this data structure.
+      
+
+   .. method:: proc remove(nElems: int): Collection(eltType)
+
+      
+      Removes up to `nElems` elements into a separate collection.
+      
+
+   .. method:: proc removeItem(elt: eltType): bool
+
+      
+      Removes an item from the data structure (if it exists).
+      
+
+   .. method:: proc contains(elt: eltType): bool
+
+      
+      Check if the element exists in this data structure.
+      
+
+   .. method:: proc clear()
+
+      
+      Clears all elements from this data structure.
+      
+
+   .. method:: proc isEmpty: bool
+
+      
+      Check if this data structure is empty.
+      
+
+   .. method:: proc size: int
+
+      
+      Obtain the number of elements contained in this data structure.
+      
+
+   .. itermethod:: iter these(): eltType
+
+      
+      Iterate over all elements in the data structure.
+      
+

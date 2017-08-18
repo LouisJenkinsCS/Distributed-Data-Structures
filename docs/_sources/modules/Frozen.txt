@@ -1,0 +1,24 @@
+.. default-domain:: chpl
+
+.. module:: Frozen
+
+Frozen
+======
+**Usage**
+
+.. code-block:: chapel
+
+   use Frozen;
+
+.. class:: Frozen
+
+   
+   An object that allows 'freezing' semantics, rendering it immutable.
+
+
+   .. method:: proc freeze(): bool
+
+   .. method:: proc isFrozen(): bool
+
+   .. method:: proc unfreeze(): bool
+

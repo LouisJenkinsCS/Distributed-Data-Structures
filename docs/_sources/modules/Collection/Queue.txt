@@ -1,0 +1,34 @@
+.. default-domain:: chpl
+
+.. module:: Queue
+
+Queue
+=====
+**Usage**
+
+.. code-block:: chapel
+
+   use Collection.Queue;
+
+.. class:: Queue : Collection
+
+   
+   A First-In-First-Out data structure.
+   
+
+
+   .. method:: proc enqueue(elt: eltType): bool
+
+   .. method:: proc dequeue(elt: eltType): (bool, eltType)
+
+.. class:: BoundedQueue : Queue
+
+   
+   A queue that is bounded; may or may not support resizing.
+   
+
+
+   .. method:: proc cap: int
+
+   .. method:: proc resize(newSize: int): bool
+

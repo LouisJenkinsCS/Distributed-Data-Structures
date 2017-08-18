@@ -275,6 +275,24 @@ yielded. See the first <a class="reference internal" href="#Queue.Queue.enqueue"
 </dd></dl>
 
 <dl class="method">
+<dt id="Queue.Queue.clear">
+<em class="property">proc </em><code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span>: bool<a class="headerlink" href="#Queue.Queue.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the queue of all elements in a best-effort approach. Elements added
+concurrently, or elements moved around via means of work stealing may be
+missed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If the queue is unfrozen.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">bool</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="Queue.Queue.unfreeze">
 <em class="property">proc </em><code class="descname">unfreeze</code><span class="sig-paren">(</span><span class="sig-paren">)</span>: bool<a class="headerlink" href="#Queue.Queue.unfreeze" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unfreezes the queue, making it mutable, if supported.</p>
@@ -319,6 +337,74 @@ all elements in the list equivalent to a highly optimized sequence of dequeues.<
 <tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body">Elements in the queue.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Yield type:</th><td class="field-body"><a class="reference internal" href="#Queue.Queue.eltType" title="Queue.Queue.eltType"><code class="xref chpl chpl-type docutils literal"><span class="pre">eltType</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Queue.Queue.length">
+<em class="property">proc </em><code class="descname">length</code>: uint<a class="headerlink" href="#Queue.Queue.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the queue is frozen, then it returns a deterministic # of items in the queue.
+If the queue is unfrozen, then it makes an implementation-dependent best-effort.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of elements in the queue.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">uint</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Queue.Queue.isEmpty">
+<em class="property">proc </em><code class="descname">isEmpty</code><span class="sig-paren">(</span><span class="sig-paren">)</span>: bool<a class="headerlink" href="#Queue.Queue.isEmpty" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the queue is frozen, then it returns a deterministic yes/no if the queue is empty.
+If the queue is unfrozen, then it makes an implementation-dependent best-effort.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If the queue is empty.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">bool</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Queue.Queue.isFull">
+<em class="property">proc </em><code class="descname">isFull</code><span class="sig-paren">(</span><span class="sig-paren">)</span>: bool<a class="headerlink" href="#Queue.Queue.isFull" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the queue is frozen, then it returns a deterministic yes/no if the queue is full.
+If the queue is unfrozen, then it makes an implementation-dependent best-effort.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If the queue is full.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">bool</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Queue.Queue.capacity">
+<em class="property">proc </em><code class="descname">capacity</code>: uint<a class="headerlink" href="#Queue.Queue.capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the queue is unbounded, then this will return 0. If the queue is bounded,
+then it will return the upper bounds of number of elements it may hold.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Capacity of the queue; if the queue is unbounded, always 0.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref chpl chpl-type docutils literal"><span class="pre">uint</span></code></td>
 </tr>
 </tbody>
 </table>
