@@ -377,7 +377,12 @@ class DistributedDeque : Collection {
   }
 
   pragma "no doc"
-  proc DistributedDeque(other, privData, type eltType = other.eltType, cap=other.cap, targetLocales=other.targetLocales) {
+  proc DistributedDeque(other, privData, type eltType = other.eltType) {
+    this.cap = other.cap;
+    this.targetLocDom = other.targetLocDom;
+    this.targetLocales = other.targetLocales;
+    this.nSlots = other.nSlots;
+    this.slotSpace = {0..#this.nSlots};
     slots = other.slots;
   }
 
