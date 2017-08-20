@@ -3,7 +3,7 @@
 This repository hosts the first framework for distributed data structures for the
 Chapel programming language. Here we introduce a 'Collections API', based on Java's
 Collections framework, as well as some data structures, some distributed, others
-local.
+local. Documentation can be seen [here](https://louisjenkinscs.github.io/Distributed-Data-Structures/).
 
 ## Performance Testing
 
