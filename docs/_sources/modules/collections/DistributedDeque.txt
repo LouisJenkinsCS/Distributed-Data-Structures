@@ -150,7 +150,7 @@ _______
 
    .. method:: proc DistDeque(type eltType, cap = -1, targetLocales = Locales)
 
-   .. method:: proc forwarding_expr2__value()
+   .. method:: proc forwarding_expr1__value()
 
 .. class:: DistributedDequeImpl : CollectionImpl
 

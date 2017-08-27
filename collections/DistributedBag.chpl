@@ -1,4 +1,23 @@
 /*
+ * Copyright 2004-2017 Cray Inc.
+ * Other additional copyright holders may be indicated within.
+ *
+ * The entirety of this work is licensed under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
   A highly parallel segmented multiset. Each node gets its own bag, and in each 
   bag it is segmented into 'here.maxTaskPar' segments. Segments allow for actual
   parallelism while operating in that it enables us to manage 'best-case', 
@@ -43,6 +62,7 @@
   on communication.
 */
 
+
 /*
 
   Summary
@@ -51,37 +71,54 @@
   A parallel-safe distributed multiset implementation that scales in terms of
   nodes, processors per node (PPN), and workload; The more PPN, the more segments
   we allocate to increase raw parallelism, and the larger the workload the better
-  locality (see `distributedBagInitialBlockSize`). This data structure is unordered
-  and employs its own work-stealing algorithm to balance work across nodes.
+  locality (see :const:`distributedBagInitialBlockSize`). This data structure is unordered
+  and employs its own workstealing algorithm to balance work across nodes.
 
-  To use :record:`DistributedBag`, the constructor must be invoked explicitly to 
+  .. note::
+
+    The documentation for the Collection modules are being incrementally revised and improved.
+
+  Usage
+  _____
+
+  To use :record:`DistBag`, the constructor must be invoked explicitly to 
   properly initialize the structure. Using the default state without initializing
   will result in a halt.
 
   .. code-block:: chapel
 
-    var bag = new DistBag(int, targetLocales=Locales[0..1]);
+    var bag = new DistBag(int, targetLocales=ourTargetLocales);
 
-	While usage of the `bag` can be used safely across locales, each locale has its own
-	instance allocated in it's address space, a `privatized` copy. While this instance
-	is managed transparently from the user, its impact on performance is significant.
-	For example, if all elements are allocated on a single locale, then other locales
-	will need perform work-stealing to obtain items, which degrades performance. However,
-	because initializing the structure from one node is appealing, the user may use the
-	:proc:`balance` method to redistribute data.
-		
-	.. code-block:: chapel
-		
-    // All elements are added on this node...
-		forall elem in 1 .. 100 {
-			bag.add(elem);
-		}
-    // Elements redistributed across all nodes...
-		bag.balance();
+  
+  While the bag is safe to use in a distributed manner, each node always operates on it's privatized
+  instance. This means that it is easy to add data in bulk, expecting it to be distributed, when in
+  reality it is not; if another node needs data, it will steal work on-demand. This may not always be
+  desired, and likely will more memory consumption on a single node. We offer a way for the user to
+  invoke a more static load balancing approach, called :proc:`balance`, which will redistributed work.
 
+  .. code-block:: chapel
+
+    bag.addBulk(1..N);
+    bag.balance();
+
+  Planned Improvements
+  ____________________
+
+  1.  Dynamic work-stealing will require an overhaul to use a helper algorithm to keep down
+      the number of tasks spawned. Currently user tasks will wait on the current work-stealer
+      task, which will spawn is own helper tasks which act as shepards, which then spawns more
+      in a fork-join fashion. This leads to an excessive amount of tasks being spawned at once.
+      To make matters worse, the waiting tasks don't even get any elements, nor does the work
+      stealing task, which opens up the possibility of live-lock where nodes steal work back
+      and forth before either can process it.
+  2.  Static work-stealing (A.K.A :proc:`balance`) requires a rework that performs a more distributed
+      and fast way of distributing memory, as currently 'excess' elements are shifted to a single
+      node to be redistributed in the next pass. On the note, we need to collapse the pass for moving
+      excess elements into a single pass, hopefully with a zero-copy overhead.
 */
 
 module DistributedBag {
+
   use Collection;
   use BlockDist;
   use SharedObject;
@@ -130,8 +167,8 @@ module DistributedBag {
   /*
     To prevent stealing too many elements (horizontally) from another node's segment
     (hence creating an artifical load imbalance), if the other node's segment has
-    less than a certain threshold (see `distributedBagWorkStealingMemCap`) but above
-    another threshold (see `distributedBagWorkStealingMinElems`), we steal a percentage of their
+    less than a certain threshold (see :const:`distributedBagWorkStealingMemCap`) but above
+    another threshold (see :const:`distributedBagWorkStealingMinElems`), we steal a percentage of their
     elements, leaving them with majority of their elements. This way, the amount the
     other segment loses is proportional to how much it owns, ensuring a balance.
   */
@@ -140,7 +177,7 @@ module DistributedBag {
     The maximum amount of work to steal from a horizontal node's segment. This
     should be set to a value, in megabytes, that determines the maximum amount of
     data that should be sent in bulk at once. The maximum number of elements is
-    determined by: (distributedBagWorkStealingMemCap * 1024 * 1024) / sizeof(eltType).
+    determined by: (:const:`distributedBagWorkStealingMemCap` * 1024 * 1024) / sizeof(:type:`eltType`).
     For example, if we are storing 8-byte integers and have a 1MB limit, we would
     have a maximum of 125,000 elements stolen at once.
   */
@@ -176,12 +213,19 @@ module DistributedBag {
     A parallel-safe distributed multiset implementation that scales in terms of
     nodes, processors per node (PPN), and workload; The more PPN, the more segments
     we allocate to increase raw parallelism, and the larger the workload the better
-    locality (see `distributedBagInitialBlockSize`). This data structure is unordered and employs
+    locality (see :const:`distributedBagInitialBlockSize`). This data structure is unordered and employs
     its own work-stealing algorithm, and provides a means to obtain a privatized instance of
     the data structure for maximized performance.
   */
   record DistBag {
     type eltType;
+
+    /*
+      The implementation of the Bag is forwarded. See :class:`DistributedBagImpl` for
+      documentation.
+    */
+    // This is unused, and merely for documentation purposes. See '_value'.
+    var _impl : DistributedBagImpl(eltType);
 
     // Privatized id...
     pragma "no doc"
@@ -190,14 +234,14 @@ module DistributedBag {
     // Reference Counting...
     pragma "no doc"
     var _rc : Shared(DistributedBagRC(eltType));
-		
-		pragma "no doc"
+
+    pragma "no doc"
     proc DistBag(type eltType, targetLocales = Locales) {
       _pid = (new DistributedBagImpl(eltType, targetLocales = targetLocales)).pid;
       _rc = new Shared(new DistributedBagRC(eltType, _pid = _pid));
     }
-	
-		pragma "no doc"
+
+    pragma "no doc"
     inline proc _value {
       if _pid == -1 {
         halt("DistBag is uninitialized...");
@@ -211,14 +255,13 @@ module DistributedBag {
     }
 
     pragma "no doc"
-    inline proc these(param tag) where (tag == iterKind.leader || tag == iterKind.standalone) 
-      && __primitive("method call resolves", _value, "these", tag=tag)
+    inline proc these(param tag) where (tag == iterKind.leader || tag == iterKind.standalone) {
       return _value.these(tag=tag);
+    }
 
     forwarding _value;
   }
 
-  pragma "no doc"
   class DistributedBagImpl : CollectionImpl {
     pragma "no doc"
     var targetLocDom : domain(1);
@@ -360,20 +403,15 @@ module DistributedBag {
       Triggers a more static approach to load balancing, fairly redistributing all
       elements fairly for bags across nodes. The result will result in all segments
       having roughly the same amount of elements.
+      
+      .. note::
 
-      **Note:** This method is very heavy-weight in that it should not be called too
-      often. Dynamic work stealing handles cases where there is a relatively fair
-      distribution across majority of nodes, but this should be called when you have
-      a severe imbalance, or when you have a smaller number of elements to balance.
-      Furthermore, while this operation is parallel-safe, it should be called from at
-      most one task.
-
-      **FIXME:** This method is extremely memory inefficient, and needs to be improved
-      to use a more-efficient way to transfer memory between segments. In particular,
-      redistributing data at global level, followed by local level would be best (as
-      in, make sure all nodes have an equal number of elements, and then each node ensures
-      its segments have an equal number of elements). This has result of not shifting all
-      excess elements to a single node (as it does now) to move it over.
+        This method is very heavy-weight in that it should not be called too
+        often. Dynamic work stealing handles cases where there is a relatively fair
+        distribution across majority of nodes, but this should be called when you have
+        a severe imbalance, or when you have a smaller number of elements to balance.
+        Furthermore, while this operation is parallel-safe, it should be called from at
+        most one task.
     */
     proc balance() {
       var localThis = getPrivatizedThis;
@@ -476,14 +514,16 @@ module DistributedBag {
       but opens the possibility to iterating over duplicates or missing elements
       from concurrent operations.
 
-      **Note:** `zip` iteration is not yet supported with rectangular data structures.
+      .. note:: 
 
-      **Warning:** Breaking from an iterator will leak the snapshot due to issue #6912.
-      It will however leave all Bags in a safe state.
+        `zip` iteration is not yet supported with rectangular data structures.
 
-      **Warning:** Iteration takes a snapshot approach, and as such can easily result in a
-      Out-Of-Memory issue. If the data structure is large, the user is doubly advised to use
-      parallel iteration, for both performance and memory benefit.
+      .. warning::
+
+        Iteration takes a snapshot approach, and as such can easily result in a
+        Out-Of-Memory issue. If the data structure is large, the user is doubly advised to use
+        parallel iteration, for both performance and memory benefit.
+
     */
     iter these() : eltType {
       for loc in targetLocales {

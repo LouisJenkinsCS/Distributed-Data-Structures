@@ -131,7 +131,7 @@ ____________________
       documentation.
       
 
-   .. method:: proc forwarding_expr1__value()
+   .. method:: proc forwarding_expr3__value()
 
 .. class:: DistributedBagImpl : CollectionImpl
 

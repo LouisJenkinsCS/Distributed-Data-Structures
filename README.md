@@ -79,6 +79,8 @@ the user to reliably use any Collection, and it allows developers who do not to 
 [Pull Request](https://github.com/chapel-lang/chapel/pull/7062) - The initial PR that was merged upstream. Needed to perform nightly
 testing.
 
+[Pull Request (Improvements)](https://github.com/chapel-lang/chapel/pull/7136) - The next PR that contain multiple improvements to the data structures.
+
 ## Performance Testing
 
 All benchmarks performed on a Cray-XC40 cluster, at 64-nodes, with Intel Broadwell processors.

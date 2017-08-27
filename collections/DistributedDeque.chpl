@@ -1,4 +1,23 @@
 /*
+ * Copyright 2004-2017 Cray Inc.
+ * Other additional copyright holders may be indicated within.
+ *
+ * The entirety of this work is licensed under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
   A parallel-safe scalable distributed deque. A deque is a double-ended queue that supports
   insertion and removal from both ends of the queue, effectively supporting both
   FIFO, LIFO, and a Total ordering, where the order in which you add them will be
@@ -187,9 +206,10 @@ module DistributedDeque {
   record DistDeque {
     type eltType;
     /*
-      The implementation of the Deque, is forwarded. See :class:`DistributedDequeImpl` for
+      The implementation of the Deque is forwarded. See :class:`DistributedDequeImpl` for
       documentation.
     */
+    // This is unused, and merely for documentation purposes. See '_value'.
     var _impl : DistributedDequeImpl(eltType);
 
     // Privatization id
@@ -219,13 +239,10 @@ module DistributedDeque {
 
     pragma "no doc"
     inline proc these(param order : Ordering = Ordering.NONE, param tag) where
-        (tag == iterKind.leader || tag == iterKind.standalone) &&
-        __primitive("method call resolves", _value, "these", tag=tag)
+        (tag == iterKind.leader || tag == iterKind.standalone) {
       return _value.these(order, tag=tag);
+    }
 
-    /*
-      See :class:`DistributedDequeImpl`.
-    */
     forwarding _value;
   }
 
