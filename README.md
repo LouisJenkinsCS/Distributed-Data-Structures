@@ -5,6 +5,8 @@ Chapel programming language. Here we introduce a 'Collections' module, based on 
 Collections framework, as well as two scalable data structures (one ordered, one unordered). 
 Documentation can be seen [here](https://louisjenkinscs.github.io/Distributed-Data-Structures/).
 
+Changelog for Chapel version 1.16 can be found [here](https://chapel-lang.org/releaseNotes/1.16/03-library.pdf), slide 13 - 17 contains the highlights of the project.
+
 ## GSoC Information
 
 This project was made possible through the Google Summer of Code program, who provided me an ample
